@@ -1,0 +1,24 @@
+{
+    "progName" : "Подбор  Кандидата",
+    
+    //menu
+    "Languages": "Языки",
+    "Exit": "Выход",
+
+    //properties
+
+    //Views
+    "Country_Name": "Название страны",
+    "City_Name": "Название города",
+    "Enabled": "Доступность",
+    "Delete": "Удалить",
+    "Create": "Создать",
+    "Save": "Сохранить",
+    "Cancel": "Отмена",   
+    
+    //ViewModels
+    "Cities": "Города",
+    "City": "Город",
+    "Countries": "Страны",
+    "Country": "Страна"
+}

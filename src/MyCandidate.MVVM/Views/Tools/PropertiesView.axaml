@@ -1,0 +1,30 @@
+<UserControl x:Class="MyCandidate.MVVM.Views.Tools.PropertiesView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="using:MyCandidate.MVVM.ViewModels.Tools"
+             xmlns:pgc="clr-namespace:Avalonia.PropertyGrid.Controls;assembly=Avalonia.PropertyGrid"
+             xmlns:my="clr-namespace:MyCandidate.MVVM.Views.Tools"
+             mc:Ignorable="d"
+             d:DesignWidth="300" d:DesignHeight="400"
+             x:DataType="vm:PropertiesViewModel" x:CompileBindings="True">
+    <ScrollViewer>
+        <!-- <pgc:PropertyGrid 
+            x:Name="pgProperties"
+            Margin="4" 
+            SelectedObject="{Binding SelectedItem}"
+            ShowTitle="false"
+            AllowQuickFilter="false"
+            AllowFilter="false">                      
+        </pgc:PropertyGrid> -->
+        <my:ExtendedPropertyGrid 
+            x:Name="pgProperties"
+            Margin="4" 
+            SelectedObject="{Binding SelectedItem}"
+            ShowTitle="false"
+            AllowQuickFilter="false"
+            AllowFilter="false">                      
+        </my:ExtendedPropertyGrid>        
+    </ScrollViewer>    
+</UserControl>

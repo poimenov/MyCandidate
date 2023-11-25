@@ -1,0 +1,46 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MyCandidate.MVVM.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="MyCandidate.MVVM.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="{ll:Localize progName}">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+  <Grid RowDefinitions="Auto,*" Background="Transparent" DragDrop.AllowDrop="True">
+    <Menu>
+        <MenuItem Header="_File">
+            <MenuItem Header="_New" />
+            <Separator />
+            <MenuItem Header="E_xit" Command="{Binding FileExit}" />
+        </MenuItem>
+        <MenuItem Header="_Dictionary">
+            <MenuItem Header="Address">            
+                <MenuItem Header="_Countries" Command="{Binding OpenCountries}">               
+                </MenuItem>
+                <MenuItem Header="_Cities" Command="{Binding OpenCities}">              
+                </MenuItem>                
+            </MenuItem>
+        </MenuItem>
+        <MenuItem Header="Options">
+            <MenuItem Header="Themes" DataContext="{Binding MenuThemeViewModel}" ItemsSource="{Binding Items}" />
+            <MenuItem Header="{ll:Localize Languages}" DataContext="{Binding MenuLanguageViewModel}" ItemsSource="{Binding Items}" />
+        </MenuItem>
+        <MenuItem Header="_Help">
+            <MenuItem Header="Get _Help" />
+            <MenuItem Header="_About" />
+        </MenuItem>
+    </Menu>
+    <DockControl Layout="{Binding Layout}" Margin="4" Grid.Row="1" />
+  </Grid>    
+    
+</Window>
