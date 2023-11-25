@@ -1,8 +1,5 @@
 using Avalonia.Controls;
 using MyCandidate.Common;
-using System;
-using System.IO;
-using System.Text.Json;
 
 namespace MyCandidate.MVVM.ViewModels;
 

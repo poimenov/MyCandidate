@@ -18,8 +18,6 @@ using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.ViewModels.Dictionary;
 using log4net;
 using System.Reflection;
-using System.IO;
-using System.Diagnostics;
 
 namespace MyCandidate.MVVM;
 
