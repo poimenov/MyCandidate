@@ -58,7 +58,7 @@ namespace MyCandidate.MVVM.Views.Tools
 
             ComboBox control = new ComboBox();
             control.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
-            control.ItemsSource = _dataAccess.ItemsList;
+            control.ItemsSource = _dataAccess.ItemsList.Where(x => x.Enabled == true);
             
             control.ItemTemplate = new FuncDataTemplate<Country>((value, namescope) =>
             {

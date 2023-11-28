@@ -2,8 +2,18 @@
     "progName" : "Подбор  Кандидата",
     
     //menu
+    "File": "Файл",
+    "New": "Создать",
+    "Exit": "Выход",   
+    "Dictionary": "Справочники",
+    "Address": "Адрес",
+    "Options": "Настройки",
+    "Themes": "Темы",
+    "Light": "Светлая",
+    "Dark": "Тёмная",
     "Languages": "Языки",
-    "Exit": "Выход",
+    "Help": "Справка",
+    "About": "О программе",
 
     //properties
 

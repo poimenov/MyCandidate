@@ -9,8 +9,11 @@ using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
 using DynamicData.Binding;
 using log4net;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.Extensions;
+using MyCandidate.MVVM.Services;
 using MyCandidate.MVVM.ViewModels.Tools;
 using ReactiveUI;
 using ReactiveUI.Validation.Extensions;
@@ -20,22 +23,22 @@ namespace MyCandidate.MVVM.ViewModels.Dictionary;
 public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
 {
     protected readonly ILog _log;
-    protected readonly IDataAccess<T>? _dataAccess;
+    protected readonly IDictionaryService<T>? _service;
     protected List<int> _deletedIds;
     protected List<int> _updatedIds;
-    protected virtual IObservable<Func<T, bool>>? Filter => 
+    protected virtual IObservable<Func<T, bool>>? Filter =>
         this.WhenAnyValue(x => x.Enabled, x => x.Name)
-            .Select((x) => MakeFilter(x.Item1,x.Item2)); 
+            .Select((x) => MakeFilter(x.Item1, x.Item2));
 
-    public DictionaryViewModel(IDataAccess<T> dataAccess, ILog log)
+    public DictionaryViewModel(IDictionaryService<T> service, ILog log)
     {
-        _dataAccess = dataAccess;
+        _service = service;
         _log = log;
         SelectedTypeName = string.Empty;
         _deletedIds = new List<int>();
         _updatedIds = new List<int>();
 
-        Source = new ObservableCollectionExtended<T>(_dataAccess!.ItemsList);
+        Source = new ObservableCollectionExtended<T>(_service!.ItemsList);
         Source.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter)
@@ -99,11 +102,22 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
             {
                 if (IsValid)
                 {
-                    _dataAccess.Delete(_deletedIds);
-                    var newItems = ItemList.Where(x => x.Id == 0).ToList();
-                    _dataAccess.Create(newItems);
-                    var updatedItems = ItemList.Where(x => _updatedIds.Contains(x.Id)).ToList();
-                    _dataAccess.Update(updatedItems);
+                    try
+                    {
+                        _service.Delete(_deletedIds);
+                        var newItems = ItemList.Where(x => x.Id == 0).ToList();
+                        _service.Create(newItems);
+                        var updatedItems = ItemList.Where(x => _updatedIds.Contains(x.Id)).ToList();
+                        _service.Update(updatedItems);
+                        
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Error(ex);
+                        ShowErrorMessageBox(ex);
+                        throw;
+                    }
+
                     OnCancel();
                 }
 
@@ -176,8 +190,8 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
         get => _name;
         set => this.RaiseAndSetIfChanged(ref _name, value);
     }
-    #endregion      
-    
+    #endregion
+
     public IReactiveCommand SaveCmd { get; }
     public IReactiveCommand CancelCmd { get; }
     public IReactiveCommand CreateCmd { get; }
@@ -193,16 +207,16 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
                 byName = item.Name.StartsWith(name, true, CultureInfo.InvariantCulture);
             }
 
-            if(enabled.HasValue)
+            if (enabled.HasValue)
             {
                 return item.Enabled == enabled && byName;
             }
             else
             {
                 return byName;
-            }            
+            }
         };
-    }    
+    }
 
     private void ItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -219,7 +233,7 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
 
     private void OnCancel()
     {
-        Source.Load(_dataAccess!.ItemsList);
+        Source.Load(_service!.ItemsList);
         if (ItemList.Count() > 0)
         {
             _itemList.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
@@ -229,4 +243,11 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
         this._updatedIds = new List<int>();
         this.RaisePropertyChanged(nameof(IsValid));
     }
+
+    private void ShowErrorMessageBox(Exception ex)
+    {
+        var messageBoxStandardWindow = MessageBoxManager.GetMessageBoxStandard(
+            "Error", ex.Message, ButtonEnum.Ok, Icon.Error);       
+        messageBoxStandardWindow.ShowAsync();
+    }    
 }

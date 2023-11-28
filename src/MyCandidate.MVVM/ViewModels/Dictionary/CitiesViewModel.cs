@@ -7,13 +7,14 @@ using Avalonia.PropertyGrid.Services;
 using log4net;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
+using MyCandidate.MVVM.Services;
 using ReactiveUI;
 
 namespace MyCandidate.MVVM.ViewModels.Dictionary;
 
 public class CitiesViewModel : DictionaryViewModel<City>
 {
-    public CitiesViewModel(IDataAccess<City> dataAccess, ILog log) : base(dataAccess, log)
+    public CitiesViewModel(IDictionaryService<City> service, ILog log) : base(service, log)
     {
         Id = "Cities";
         LocalizationService.Default.OnCultureChanged += CultureChanged;

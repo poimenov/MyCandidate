@@ -18,26 +18,26 @@
 
   <Grid RowDefinitions="Auto,*" Background="Transparent" DragDrop.AllowDrop="True">
     <Menu>
-        <MenuItem Header="_File">
-            <MenuItem Header="_New" />
+        <MenuItem Header="{ll:Localize File}">
+            <MenuItem Header="{ll:Localize New}" />
             <Separator />
-            <MenuItem Header="E_xit" Command="{Binding FileExit}" />
+            <MenuItem Header="{ll:Localize Exit}" Command="{Binding FileExit}" />
         </MenuItem>
-        <MenuItem Header="_Dictionary">
-            <MenuItem Header="Address">            
-                <MenuItem Header="_Countries" Command="{Binding OpenCountries}">               
+        <MenuItem Header="{ll:Localize Dictionary}">
+            <MenuItem Header="{ll:Localize Address}">            
+                <MenuItem Header="{ll:Localize Countries}" Command="{Binding OpenCountries}">               
                 </MenuItem>
-                <MenuItem Header="_Cities" Command="{Binding OpenCities}">              
+                <MenuItem Header="{ll:Localize Cities}" Command="{Binding OpenCities}">              
                 </MenuItem>                
             </MenuItem>
         </MenuItem>
-        <MenuItem Header="Options">
-            <MenuItem Header="Themes" DataContext="{Binding MenuThemeViewModel}" ItemsSource="{Binding Items}" />
+        <MenuItem Header="{ll:Localize Options}">
+            <MenuItem Header="{ll:Localize Themes}" DataContext="{Binding MenuThemeViewModel}" ItemsSource="{Binding Items}" />
             <MenuItem Header="{ll:Localize Languages}" DataContext="{Binding MenuLanguageViewModel}" ItemsSource="{Binding Items}" />
         </MenuItem>
-        <MenuItem Header="_Help">
-            <MenuItem Header="Get _Help" />
-            <MenuItem Header="_About" />
+        <MenuItem Header="{ll:Localize Help}">
+
+            <MenuItem Header="{ll:Localize About}" />
         </MenuItem>
     </Menu>
     <DockControl Layout="{Binding Layout}" Margin="4" Grid.Row="1" />

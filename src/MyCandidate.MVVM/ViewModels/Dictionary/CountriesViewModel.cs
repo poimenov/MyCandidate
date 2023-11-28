@@ -1,14 +1,16 @@
 using System;
+using System.ComponentModel.Design;
 using Avalonia.PropertyGrid.Services;
 using log4net;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
+using MyCandidate.MVVM.Services;
 
 namespace MyCandidate.MVVM.ViewModels.Dictionary;
 
 public class CountriesViewModel : DictionaryViewModel<Country>
 {
-    public CountriesViewModel(IDataAccess<Country> dataAccess, ILog log) : base(dataAccess, log)
+    public CountriesViewModel(IDictionaryService<Country> service, ILog log) : base(service, log)
     {
         Id = "Countries";
         LocalizationService.Default.OnCultureChanged += CultureChanged;

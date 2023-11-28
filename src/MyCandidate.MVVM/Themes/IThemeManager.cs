@@ -1,5 +1,4 @@
 using Avalonia;
-using Avalonia.Styling;
 namespace MyCandidate.MVVM.Themes;
 
 public enum ThemeName

@@ -18,6 +18,7 @@ using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.ViewModels.Dictionary;
 using log4net;
 using System.Reflection;
+using MyCandidate.MVVM.Services;
 
 namespace MyCandidate.MVVM;
 
@@ -65,9 +66,14 @@ public partial class App : Application
                 .AddSingleton<MainWindow>(service => new MainWindow
                 {
                     DataContext = service.GetRequiredService<MainWindowViewModel>()
-                })             
+                }) 
+                //data access            
                 .AddTransient<IDataAccess<Country>, Countries>()
                 .AddTransient<IDataAccess<City>, Cities>()
+                //dictionary services
+                .AddTransient<IDictionaryService<Country>, CountryService>()
+                .AddTransient<IDictionaryService<City>, CityService>()
+                //dictionary ViewModels
                 .AddTransient<DictionaryViewModel<Country>, CountriesViewModel>()
                 .AddTransient<DictionaryViewModel<City>, CitiesViewModel>();
 

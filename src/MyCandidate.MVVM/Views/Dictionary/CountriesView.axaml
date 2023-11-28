@@ -11,9 +11,9 @@
 
     <Grid RowDefinitions="Auto, *, Auto">
         <StackPanel Margin="4" Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Right">
-            <Label Content="Name:" Margin="0,4,0,4" VerticalContentAlignment="Center"/>            
+            <Label Content="{ll:Localize Country_Name}" Margin="0,4,0,4" VerticalContentAlignment="Center"/>            
             <TextBox Text="{Binding Name}" Width="150" Margin="4,4,0,4"/>
-            <Label Content="Enabled:" Margin="4,4,0,4" VerticalContentAlignment="Center"/>
+            <Label Content="{ll:Localize Enabled}" Margin="4,4,0,4" VerticalContentAlignment="Center"/>
             <CheckBox IsChecked="{Binding Enabled}" IsThreeState="True" Margin="4,4,4,4" />
         </StackPanel>
         <DataGrid Grid.Row="1" 
