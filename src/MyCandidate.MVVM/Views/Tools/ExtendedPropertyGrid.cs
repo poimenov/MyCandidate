@@ -124,10 +124,7 @@ namespace MyCandidate.MVVM.Views.Tools
             && x.Enabled == y.Enabled;            
         }
 
-        public int GetHashCode([DisallowNull] Country obj)
-        {
-            throw new NotImplementedException();
-        }
+        public int GetHashCode([DisallowNull] Country obj) => HashCode.Combine(obj.Id.GetHashCode(), obj.Name.GetHashCode(), obj.Enabled.GetHashCode());
     }
 }
 

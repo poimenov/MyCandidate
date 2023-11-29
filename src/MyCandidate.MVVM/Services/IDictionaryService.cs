@@ -5,7 +5,7 @@ namespace MyCandidate.MVVM.Services;
 public interface IDictionaryService<T>
 {
     IEnumerable<T> ItemsList { get; }
-    void Create(IEnumerable<T> items);
-    void Update(IEnumerable<T> items);
-    void Delete(IEnumerable<int> itemIds);
+    bool Create(IEnumerable<T> items, out string message);
+    bool Update(IEnumerable<T> items, out string message);
+    bool Delete(IEnumerable<int> itemIds, out string message);
 }

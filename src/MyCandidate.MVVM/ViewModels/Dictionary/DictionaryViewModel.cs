@@ -98,24 +98,37 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
         );
 
         SaveCmd = ReactiveCommand.Create(
-            (object obj) =>
+            async (object obj) =>
             {
                 if (IsValid)
                 {
-                    try
+                    var dialog = MessageBoxManager.GetMessageBoxStandard("Dialog", "Are you sure you want to save the changes?"
+                                                                                , ButtonEnum.YesNo, Icon.Question);  
+                    var result = await dialog.ShowAsync();                
+                    if(result == ButtonResult.No)
                     {
-                        _service.Delete(_deletedIds);
-                        var newItems = ItemList.Where(x => x.Id == 0).ToList();
-                        _service.Create(newItems);
-                        var updatedItems = ItemList.Where(x => _updatedIds.Contains(x.Id)).ToList();
-                        _service.Update(updatedItems);
-                        
+                        return;
                     }
-                    catch (Exception ex)
+                    
+                    string message;
+                    if(!_service.Delete(_deletedIds, out message))
                     {
-                        _log.Error(ex);
-                        ShowErrorMessageBox(ex);
-                        throw;
+                        ShowErrorMessageBox(message);
+                        return;
+                    }
+
+                    var newItems = ItemList.Where(x => x.Id == 0).ToList();
+                    if(!_service.Create(newItems, out message))
+                    {
+                        ShowErrorMessageBox(message);
+                        return;
+                    }
+
+                    var updatedItems = ItemList.Where(x => _updatedIds.Contains(x.Id)).ToList();
+                    if(!_service.Update(updatedItems, out message))
+                    {
+                        ShowErrorMessageBox(message);
+                        return;                        
                     }
 
                     OnCancel();
@@ -244,10 +257,10 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
         this.RaisePropertyChanged(nameof(IsValid));
     }
 
-    private void ShowErrorMessageBox(Exception ex)
+    private void ShowErrorMessageBox(string message)
     {
         var messageBoxStandardWindow = MessageBoxManager.GetMessageBoxStandard(
-            "Error", ex.Message, ButtonEnum.Ok, Icon.Error);       
+            "Error", message, ButtonEnum.Ok, Icon.Error);
         messageBoxStandardWindow.ShowAsync();
-    }    
+    }
 }
