@@ -70,12 +70,18 @@ public partial class App : Application
                 //data access            
                 .AddTransient<IDataAccess<Country>, Countries>()
                 .AddTransient<IDataAccess<City>, Cities>()
+                .AddTransient<IDataAccess<Skill>, Skills>()
+                .AddTransient<IDataAccess<SkillCategory>, SkillCategories>()
                 //dictionary services
                 .AddTransient<IDictionaryService<Country>, CountryService>()
                 .AddTransient<IDictionaryService<City>, CityService>()
+                .AddTransient<IDictionaryService<Skill>, SkillService>()
+                .AddTransient<IDictionaryService<SkillCategory>, SkillCategoryService>()
                 //dictionary ViewModels
                 .AddTransient<DictionaryViewModel<Country>, CountriesViewModel>()
-                .AddTransient<DictionaryViewModel<City>, CitiesViewModel>();
+                .AddTransient<DictionaryViewModel<City>, CitiesViewModel>()
+                .AddTransient<DictionaryViewModel<Skill>, SkillsViewModel>()
+                .AddTransient<DictionaryViewModel<SkillCategory>, CategoriesViewModel>();
 
             _host = builder.Build();
             _cancellationTokenSource = new();
@@ -111,7 +117,9 @@ public partial class App : Application
     private CancellationTokenSource? _cancellationTokenSource;
     private ILogger<App>? _logger; 
     private DictionaryViewModel<Country>? _countriesViewModel;
-    private DictionaryViewModel<City>? _citiesViewModel;   
+    private DictionaryViewModel<City>? _citiesViewModel;  
+    private DictionaryViewModel<SkillCategory>? _categoriesViewModel; 
+    private DictionaryViewModel<Skill>? _skillsViewModel;
 
     #endregion 
 
@@ -127,7 +135,6 @@ public partial class App : Application
             return _logger;
         }
     } 
-
     
     public DictionaryViewModel<Country>? CountriesViewModel
     {
@@ -137,6 +144,7 @@ public partial class App : Application
             {
                 _countriesViewModel = _host!.Services.GetRequiredService<DictionaryViewModel<Country>>();
             }
+            
             return _countriesViewModel;
         }
     }
@@ -149,9 +157,36 @@ public partial class App : Application
             {
                 _citiesViewModel = _host!.Services.GetRequiredService<DictionaryViewModel<City>>();
             }
+            
             return _citiesViewModel;
         }
-    }    
+    } 
+
+    public DictionaryViewModel<SkillCategory> CategoriesViewModel
+    {
+        get
+        {
+            if(_categoriesViewModel == null)
+            {
+                _categoriesViewModel = _host!.Services.GetRequiredService<DictionaryViewModel<SkillCategory>>();
+            }
+            
+            return _categoriesViewModel;
+        }
+    } 
+    
+    public DictionaryViewModel<Skill> SkillsViewModel
+    {
+        get
+        {
+            if(_skillsViewModel == null)
+            {
+                _skillsViewModel = _host!.Services.GetRequiredService<DictionaryViewModel<Skill>>();
+            }
+            
+            return _skillsViewModel;
+        }
+    }      
 
     private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
         => _ = _host!.StopAsync(_cancellationTokenSource!.Token);      

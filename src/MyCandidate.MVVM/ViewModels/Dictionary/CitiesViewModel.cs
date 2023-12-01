@@ -6,7 +6,6 @@ using System.Reactive.Linq;
 using Avalonia.PropertyGrid.Services;
 using log4net;
 using MyCandidate.Common;
-using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.Services;
 using ReactiveUI;
 
@@ -23,7 +22,6 @@ public class CitiesViewModel : DictionaryViewModel<City>
         var countries = new List<Country>() { new Country() { Id = 0, Name = string.Empty } };
         countries.AddRange(ItemList.Select(x => x.Country).Distinct().ToList());
         Countries = countries;
-
     }
 
     protected override IObservable<Func<City, bool>>? Filter =>

@@ -1,9 +1,7 @@
 using System;
-using System.ComponentModel.Design;
 using Avalonia.PropertyGrid.Services;
 using log4net;
 using MyCandidate.Common;
-using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.Services;
 
 namespace MyCandidate.MVVM.ViewModels.Dictionary;

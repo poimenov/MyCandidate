@@ -7,6 +7,8 @@
     "Exit": "Выход",   
     "Dictionary": "Справочники",
     "Address": "Адрес",
+    "Skills": "Навыки",
+    "Categories": "Категории",
     "Options": "Настройки",
     "Themes": "Темы",
     "Light": "Светлая",
@@ -20,6 +22,8 @@
     //Views
     "Country_Name": "Название страны",
     "City_Name": "Название города",
+    "Category_Name": "Название категории",
+    "Skill_name": "Название навыка",
     "Enabled": "Доступность",
     "Delete": "Удалить",
     "Create": "Создать",
@@ -27,6 +31,9 @@
     "Cancel": "Отмена",   
     
     //ViewModels
+    "SkillCategories": "Категории навыков",
+    "SkillCategory": "Категория навыков",
+    "Skill": "Навык",
     "Cities": "Города",
     "City": "Город",
     "Countries": "Страны",

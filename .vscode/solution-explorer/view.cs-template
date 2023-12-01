@@ -1,0 +1,18 @@
+using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
+
+namespace {{namespace}};
+
+public partial class {{name}} : UserControl
+{
+    public {{name}}()
+    {
+        InitializeComponent();
+    }
+
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
+    }
+}
+

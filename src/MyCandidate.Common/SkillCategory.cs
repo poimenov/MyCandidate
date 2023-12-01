@@ -10,17 +10,16 @@ public class SkillCategory : Entity
     [Key]
     [ReadOnly(true)]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Display(Name = "Id", Order = 1)]
+    [Browsable(false)]
     public override int Id { get; set; }
 
     [Required]
-    [StringLength(250)]
-    [Display(Name = "Name", Order = 3)]
+    [StringLength(250, MinimumLength = 3)]
+    [DisplayName("Category_Name")]
     public override string Name { get; set; }
 
     [Required]
     [DefaultValue(true)]
-    [Display(Name = "Enabled", Order = 2)]
     public override bool Enabled { get; set; }
 
     [Browsable(false)]

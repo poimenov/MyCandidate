@@ -8,5 +8,11 @@
 
     //Views
     "Country_Name": "Country name",
-    "City_Name": "City name"    
+    "City_Name": "City name",
+    "Category_Name": "Category name",
+    "Skill_name": "Skill name",
+    
+    //ViewModels
+    "SkillCategories": "Skill categories",
+    "SkillCategory": "Skill category"   
 }

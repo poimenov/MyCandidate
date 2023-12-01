@@ -30,6 +30,12 @@
                 <MenuItem Header="{ll:Localize Cities}" Command="{Binding OpenCities}">              
                 </MenuItem>                
             </MenuItem>
+            <MenuItem Header="{ll:Localize Skills}">            
+                <MenuItem Header="{ll:Localize Categories}" Command="{Binding OpenSkillCategories}">               
+                </MenuItem>
+                <MenuItem Header="{ll:Localize Skills}" Command="{Binding OpenSkills}">              
+                </MenuItem>                
+            </MenuItem>            
         </MenuItem>
         <MenuItem Header="{ll:Localize Options}">
             <MenuItem Header="{ll:Localize Themes}" DataContext="{Binding MenuThemeViewModel}" ItemsSource="{Binding Items}" />

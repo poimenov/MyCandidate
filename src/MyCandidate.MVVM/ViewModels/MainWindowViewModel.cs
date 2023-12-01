@@ -52,38 +52,85 @@ public class MainWindowViewModel : ViewModelBase
 
     public void OpenCountries()
     {
-        var documents = _factory?.GetDockable<IDocumentDock>("Documents");
-        if (documents?.VisibleDockables != null)
+        if (Documents?.VisibleDockables != null)
         {
-            var doc = documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CountriesViewModel));
+            var doc = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CountriesViewModel));
             OpenViewModel(doc ?? CountriesViewModel, doc == null);
         }
     }
 
     public void OpenCities()
     {
-        var documents = _factory?.GetDockable<IDocumentDock>("Documents");
-        if (documents?.VisibleDockables != null)
+        if (Documents?.VisibleDockables != null)
         {
-            var doc = documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CitiesViewModel));
+            var doc = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CitiesViewModel));
             OpenViewModel(doc ?? CitiesViewModel, doc == null);
+        }
+    }
+
+    public void OpenSkillCategories()
+    {
+        if (Documents?.VisibleDockables != null)
+        {
+            var doc = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CategoriesViewModel));
+            OpenViewModel(doc ?? CategoriesViewModel, doc == null);
+        }
+    }
+
+    public void OpenSkills()
+    {
+        if (Documents?.VisibleDockables != null)
+        {
+            var doc = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(SkillsViewModel));
+            OpenViewModel(doc ?? SkillsViewModel, doc == null);
         }
     }
 
     private void OpenViewModel(IDockable dockable, bool addNew)
     {
-        var documents = _factory?.GetDockable<IDocumentDock>("Documents");
-        if (Layout is { } && documents is { })
+        if (Layout is { } && Documents is { })
         {
             if (addNew)
             {
-                _factory?.AddDockable(documents, dockable);
+                _factory?.AddDockable(Documents, dockable);
             }
 
             _factory?.SetActiveDockable(dockable);
             _factory?.SetFocusedDockable(Layout, dockable);
         }
     }
+
+    #region Documents
+    private IDocumentDock? _documents;
+    public IDocumentDock? Documents
+    {
+        get
+        {
+            if (_documents == null)
+            {
+                _documents = _factory?.GetDockable<IDocumentDock>("Documents");
+            }
+
+            return _documents;
+        }
+    }
+    #endregion
+
+    #region Properties
+    private IProperties? _properties;
+    public IProperties? Properties
+    {
+        get
+        {
+            if (_properties == null)
+            {
+                _properties = _factory?.GetDockable<PropertiesViewModel>("Properties") as IProperties;
+            }
+
+            return _properties;
+        }
+    }
+    #endregion
 
     #region CountriesViewModel
     private DictionaryViewModel<Country>? _countriesViewModel;
@@ -94,7 +141,7 @@ public class MainWindowViewModel : ViewModelBase
             if (_countriesViewModel == null)
             {
                 _countriesViewModel = ((App)Application.Current).CountriesViewModel;
-                _countriesViewModel!.Properties = _factory?.GetDockable<PropertiesViewModel>("Properties") as IProperties;
+                _countriesViewModel!.Properties = Properties;
             }
             return _countriesViewModel;
         }
@@ -114,7 +161,7 @@ public class MainWindowViewModel : ViewModelBase
             if (_citiesViewModel == null)
             {
                 _citiesViewModel = ((App)Application.Current).CitiesViewModel;
-                _citiesViewModel!.Properties = _factory?.GetDockable<PropertiesViewModel>("Properties") as IProperties;
+                _citiesViewModel!.Properties = Properties;
             }
             return _citiesViewModel;
         }
@@ -123,5 +170,45 @@ public class MainWindowViewModel : ViewModelBase
             _citiesViewModel = value;
         }
     }
-    #endregion    
+    #endregion  
+
+    #region CountriesViewModel
+    private DictionaryViewModel<SkillCategory>? _categoriesViewModel;
+    public DictionaryViewModel<SkillCategory>? CategoriesViewModel
+    {
+        get
+        {
+            if (_categoriesViewModel == null)
+            {
+                _categoriesViewModel = ((App)Application.Current).CategoriesViewModel;
+                _categoriesViewModel!.Properties = Properties;
+            }
+            return _categoriesViewModel;
+        }
+        set
+        {
+            _categoriesViewModel = value;
+        }
+    }
+    #endregion  
+
+    #region CitiesViewModel
+    private DictionaryViewModel<Skill>? _skillsViewModel;
+    public DictionaryViewModel<Skill>? SkillsViewModel
+    {
+        get
+        {
+            if (_skillsViewModel == null)
+            {
+                _skillsViewModel = ((App)Application.Current).SkillsViewModel;
+                _skillsViewModel!.Properties = Properties;
+            }
+            return _skillsViewModel;
+        }
+        set
+        {
+            _skillsViewModel = value;
+        }
+    }
+    #endregion          
 }
