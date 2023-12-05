@@ -3,6 +3,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MyCandidate.Common;
 
+namespace MyCandidate.Common;
+
 public class CandidateSkill
 {
     [Key]

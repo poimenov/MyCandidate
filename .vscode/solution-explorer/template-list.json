@@ -59,6 +59,12 @@
             "extension": "axaml",
             "file": "./view.axaml-template",
             "parameters": "./template-parameters.js"
-        }		
+        },
+        {
+            "name": "Resource",
+            "extension": "resx",
+            "file": "./resource.resx-template",
+            "parameters": "./template-parameters.js"
+        }	
     ]
 }

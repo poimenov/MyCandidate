@@ -3,6 +3,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MyCandidate.Common.Interfaces;
 
+namespace MyCandidate.Common;
+
 public class SelectionStatus : Entity
 {
     [Key]

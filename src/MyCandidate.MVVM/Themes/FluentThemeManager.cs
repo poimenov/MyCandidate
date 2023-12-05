@@ -8,7 +8,7 @@ namespace MyCandidate.MVVM.Themes;
 
 public class FluentThemeManager : IThemeManager
 {
-    private static readonly Uri BaseUri = new("avares://MyCandidate.MVVM/Styles");
+    private static readonly Uri BaseUri = new("avares://MyCandidate.MVVM/Themes");
 
     private static readonly FluentTheme Fluent = new()
     {
@@ -46,6 +46,11 @@ public class FluentThemeManager : IThemeManager
         }
     };
 
+    private static readonly MergeResourceInclude ResourceTheme = new(BaseUri)
+    {
+        Source = new Uri("avares://MyCandidate.MVVM/Themes/Themes.axaml")
+    };
+
     public void Switch(ThemeName themeName)
     {
         if (Application.Current is null)
@@ -78,6 +83,7 @@ public class FluentThemeManager : IThemeManager
 
     public void Initialize(Application application)
     {
+        application.Resources.MergedDictionaries.Insert(0,ResourceTheme);
         application.Styles.Insert(0, Fluent);
         application.Styles.Insert(1, DockFluent);
         application.Styles.Insert(2, DataGridFluent);
