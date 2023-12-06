@@ -16,11 +16,11 @@ namespace MyCandidate.MVVM.ViewModels;
 public class MainWindowViewModel : ViewModelBase
 {
     private readonly IOptions<AppSettings> _options;
-
     private readonly IFactory? _factory;
     private IRootDock? _layout;
-    public MenuThemeViewModel MenuThemeViewModel { get; private set; }
-    public MenuLanguageViewModel MenuLanguageViewModel { get; private set; }
+    private MenuThemeViewModel MenuThemeViewModel { get; set; }
+    private MenuLanguageViewModel MenuLanguageViewModel { get; set; }
+    private App CurrentApplication => (App)Application.Current;
 
     public IRootDock? Layout
     {
@@ -32,8 +32,8 @@ public class MainWindowViewModel : ViewModelBase
     {
         _options = options;
         LocalizationService.Default.AddExtraService(new AppLocalizationService());
-        this.MenuThemeViewModel = new MenuThemeViewModel(_options.Value);
-        this.MenuLanguageViewModel = new MenuLanguageViewModel(_options.Value);
+        MenuThemeViewModel = new MenuThemeViewModel(_options.Value);
+        MenuLanguageViewModel = new MenuLanguageViewModel(_options.Value);
         _factory = new DockFactory();
         Layout = _factory?.CreateLayout();
         if (Layout is { })
@@ -140,7 +140,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (_countriesViewModel == null)
             {
-                _countriesViewModel = ((App)Application.Current).CountriesViewModel;
+                _countriesViewModel = CurrentApplication.GetRequiredService<DictionaryViewModel<Country>>();
                 _countriesViewModel!.Properties = Properties;
             }
             return _countriesViewModel;
@@ -160,7 +160,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (_citiesViewModel == null)
             {
-                _citiesViewModel = ((App)Application.Current).CitiesViewModel;
+                _citiesViewModel = CurrentApplication.GetRequiredService<DictionaryViewModel<City>>();
                 _citiesViewModel!.Properties = Properties;
             }
             return _citiesViewModel;
@@ -180,7 +180,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (_categoriesViewModel == null)
             {
-                _categoriesViewModel = ((App)Application.Current).CategoriesViewModel;
+                _categoriesViewModel = CurrentApplication.GetRequiredService<DictionaryViewModel<SkillCategory>>();
                 _categoriesViewModel!.Properties = Properties;
             }
             return _categoriesViewModel;
@@ -200,7 +200,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (_skillsViewModel == null)
             {
-                _skillsViewModel = ((App)Application.Current).SkillsViewModel;
+                _skillsViewModel = CurrentApplication.GetRequiredService<DictionaryViewModel<Skill>>();
                 _skillsViewModel!.Properties = Properties;
             }
             return _skillsViewModel;
