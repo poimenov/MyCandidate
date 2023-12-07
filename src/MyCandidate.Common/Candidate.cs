@@ -52,6 +52,9 @@ public class Candidate : Entity
     public DateTime LastModificationDate { get; set; }   
 
     [Browsable(false)]
+    public virtual List<CandidateSkill> CandidateSkills { get; set; }     
+
+    [Browsable(false)]
     public virtual List<CandidateResource> CandidateResources { get; set; }  
 
     [Browsable(false)]

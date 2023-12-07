@@ -23,7 +23,10 @@
     "Country_Name": "Название страны",
     "City_Name": "Название города",
     "Category_Name": "Название категории",
-    "Skill_name": "Название навыка",
+    "Skill_Name": "Название навыка",
+    "Company_Name": "Название компании",
+    "Office_Name": "Название офиса",
+    "Full_Address": "Полный адрес",
     "Enabled": "Доступность",
     "Delete": "Удалить",
     "Create": "Создать",
@@ -37,5 +40,9 @@
     "Cities": "Города",
     "City": "Город",
     "Countries": "Страны",
-    "Country": "Страна"
+    "Country": "Страна",
+    "Companies": "Компании",
+    "Company": "Компания",
+    "Officies": "Офисы",
+    "Office": "Офис"
 }

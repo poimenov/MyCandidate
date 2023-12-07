@@ -69,22 +69,28 @@ public partial class App : Application
                 {
                     DataContext = service.GetRequiredService<MainWindowViewModel>()
                 })
-                //data access            
+                //data access 
+                .AddTransient<IDatabaseCreator, DatabaseCreator>()           
                 .AddTransient<IDataAccess<Country>, Countries>()
                 .AddTransient<IDataAccess<City>, Cities>()
                 .AddTransient<IDataAccess<Skill>, Skills>()
                 .AddTransient<IDataAccess<SkillCategory>, SkillCategories>()
-                .AddTransient<IDatabaseCreator, DatabaseCreator>()
+                .AddTransient<IDataAccess<Company>, Companies>()
+                .AddTransient<IDataAccess<Office>, Officies>()
                 //dictionary services
                 .AddTransient<IDictionaryService<Country>, CountryService>()
                 .AddTransient<IDictionaryService<City>, CityService>()
                 .AddTransient<IDictionaryService<Skill>, SkillService>()
                 .AddTransient<IDictionaryService<SkillCategory>, SkillCategoryService>()
+                .AddTransient<IDictionaryService<Company>, CompanyService>()
+                .AddTransient<IDictionaryService<Office>, OfficeService>()
                 //dictionary ViewModels
                 .AddTransient<DictionaryViewModel<Country>, CountriesViewModel>()
                 .AddTransient<DictionaryViewModel<City>, CitiesViewModel>()
                 .AddTransient<DictionaryViewModel<Skill>, SkillsViewModel>()
-                .AddTransient<DictionaryViewModel<SkillCategory>, CategoriesViewModel>();
+                .AddTransient<DictionaryViewModel<SkillCategory>, CategoriesViewModel>()
+                .AddTransient<DictionaryViewModel<Company>, CompaniesViewModel>()
+                .AddTransient<DictionaryViewModel<Office>, OfficiesViewModel>();
 
             _host = builder.Build();
             _cancellationTokenSource = new();

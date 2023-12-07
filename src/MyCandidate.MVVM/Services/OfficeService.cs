@@ -7,31 +7,31 @@ using MyCandidate.Common.Interfaces;
 
 namespace MyCandidate.MVVM.Services;
 
-public class CityService : IDictionaryService<City>
+public class OfficeService : IDictionaryService<Office>
 {
-    private readonly IDataAccess<City> _cities;
+    private readonly IDataAccess<Office> _officies;
     private readonly ILog _log;
-    public CityService(IDataAccess<City> cities, ILog log)
+    public OfficeService(IDataAccess<Office> officies, ILog log)
     {
-        _cities = cities;
+        _officies = officies;
         _log = log;
     }
+    
+    public IEnumerable<Office> ItemsList => _officies.ItemsList;
 
-    public IEnumerable<City> ItemsList => _cities.ItemsList;
-
-    public bool Create(IEnumerable<City> items, out string message)
+    public bool Create(IEnumerable<Office> items, out string message)
     {
         message = string.Empty;
         IEnumerable<string> names;
         if (CheckDuplicates(items, out names))
         {
-            message = $"It is impossible to add next cities: {string.Join(", ", names)} because they already exist";
+            message = $"It is impossible to add next officies: {string.Join(", ", names)} because they already exist";
             return false;
         }
 
         try
         {
-            _cities.Create(items);
+            _officies.Create(items);
             return true;
         }
         catch (Exception ex)
@@ -45,23 +45,23 @@ public class CityService : IDictionaryService<City>
     public bool Delete(IEnumerable<int> itemIds, out string message)
     {
         message = string.Empty;
-        _cities.Delete(itemIds);
+        _officies.Delete(itemIds);
         return true;
     }
 
-    public bool Update(IEnumerable<City> items, out string message)
+    public bool Update(IEnumerable<Office> items, out string message)
     {
         message = string.Empty;
         IEnumerable<string> names;
         if (CheckDuplicates(items, out names))
         {
-            message = $"It is impossible to update next cities: {string.Join(", ", names)} because they already exist";
+            message = $"It is impossible to add next officies: {string.Join(", ", names)} because they already exist";
             return false;
         }
 
         try
         {
-            _cities.Update(items);
+            _officies.Update(items);
             return true;
         }
         catch (Exception ex)
@@ -72,16 +72,16 @@ public class CityService : IDictionaryService<City>
         }
     }
 
-    private bool CheckDuplicates(IEnumerable<City> items, out IEnumerable<string> names)
+    private bool CheckDuplicates(IEnumerable<Office> items, out IEnumerable<string> names)
     {
         names = Enumerable.Empty<string>();
-        var existedItems = ItemsList.Select(x => new KeyValuePair<int, string>(x.CountryId, x.Name.Trim().ToLower()));
-        var newItems = items.Select(x => new KeyValuePair<int, string>(x.CountryId, x.Name.Trim().ToLower()));
+        var existedItems = ItemsList.Select(x => new KeyValuePair<int, string>(x.CompanyId, x.Name.Trim().ToLower()));
+        var newItems = items.Select(x => new KeyValuePair<int, string>(x.CompanyId, x.Name.Trim().ToLower()));
         var allItems = new List<KeyValuePair<int, string>>();
         allItems.AddRange(existedItems);
         allItems.AddRange(newItems);
-        var duplicates = allItems.Select(x => new { CountryId = x.Key, Name = x.Value })
-            .GroupBy(x => new { x.CountryId, x.Name }).Where(x => x.Count() > 1);
+        var duplicates = allItems.Select(x => new { CompanyId = x.Key, Name = x.Value })
+            .GroupBy(x => new { x.CompanyId, x.Name }).Where(x => x.Count() > 1);
         if(duplicates.Any())
         {
             names = duplicates.Select(x => x.Key.Name);
@@ -89,5 +89,5 @@ public class CityService : IDictionaryService<City>
         }
 
         return false;
-    }
+    }    
 }

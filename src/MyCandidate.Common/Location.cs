@@ -10,21 +10,16 @@ public class Location : Entity
     [Key]
     [ReadOnly(true)]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Display(Name = "Id", Order = 1/*, ResourceType = typeof(Properties.Resource)*/)]
+    [Browsable(false)]
     public override int Id { get; set; }
 
     [Required]
-    [StringLength(250)]
-    [Display(Name = "Address", Order = 3/*, ResourceType = typeof(Properties.Resource)*/)]
+    [StringLength(250, MinimumLength = 2)]
+    [DisplayName("Address")]
     public string Address { get; set; }
 
-    [Required]
-    [DefaultValue(true)]
-    [Display(Name = "Enabled", Order = 4/*, ResourceType = typeof(Properties.Resource)*/)]
-    public override bool Enabled { get; set; }
-
     [NotMapped]
-    [Display(Name = "FullAddress", Order = 5/*, ResourceType = typeof(Properties.Resource)*/)]
+    [DisplayName("Full_Address")]
     public override string Name
     {
         get
@@ -34,11 +29,15 @@ public class Location : Entity
     }
 
     [ForeignKey(nameof(CityId))]
-    [Display(Name = "City", Order = 2/*, ResourceType = typeof(Properties.Resource)*/)]
+    [Browsable(false)]
     public int CityId { get; set; }
 
-    [Browsable(false)]
+    [Required]
     public City City { get; set; }
+
+    [Required]
+    [DefaultValue(true)]
+    public override bool Enabled { get; set; }    
 
     [Browsable(false)]
     public virtual List<Office> Officies { get; set; }    

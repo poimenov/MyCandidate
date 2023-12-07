@@ -10,32 +10,31 @@ public class Office : Entity
     [Key]
     [ReadOnly(true)]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Display(Name = "Id", Order = 1)]
+    [Browsable(false)]
     public override int Id { get; set; }
 
     [Required]
-    [StringLength(250)]
-    [Display(Name = "Name", Order = 4)]
+    [StringLength(250, MinimumLength = 2)]
+    [DisplayName("Office")]
     public override string Name { get; set; }
 
-    [Required]
-    [DefaultValue(true)]
-    [Display(Name = "Enabled", Order = 2)]
-    public override bool Enabled { get; set; }
-
     [ForeignKey(nameof(CompanyId))]
-    [Display(Name = "Company", Order = 3)]
+    [Browsable(false)]
     public int CompanyId { get; set; }
 
-    [Browsable(false)]
+    [Required]
     public Company Company { get; set; }
 
     [ForeignKey(nameof(LocationId))]
-    [Display(Name = "Location", Order = 3)]
+    [Browsable(false)]
     public int LocationId { get; set; }
 
-    [Browsable(false)]
-    public Location Location { get; set; }    
+    [Required]
+    public Location Location { get; set; }  
+
+    [Required]
+    [DefaultValue(true)]
+    public override bool Enabled { get; set; }      
 
     [Browsable(false)]
     public virtual List<Vacancy> Vacancies { get; set; }    

@@ -18,8 +18,8 @@ public class MainWindowViewModel : ViewModelBase
     private readonly IOptions<AppSettings> _options;
     private readonly IFactory? _factory;
     private IRootDock? _layout;
-    private MenuThemeViewModel MenuThemeViewModel { get; set; }
-    private MenuLanguageViewModel MenuLanguageViewModel { get; set; }
+    public MenuThemeViewModel MenuThemeViewModel { get; private set; }
+    public MenuLanguageViewModel MenuLanguageViewModel { get; private set; }
     private App CurrentApplication => (App)Application.Current;
 
     public IRootDock? Layout
@@ -85,6 +85,24 @@ public class MainWindowViewModel : ViewModelBase
             OpenViewModel(doc ?? SkillsViewModel, doc == null);
         }
     }
+
+    public void OpenCompanies()
+    {
+        if (Documents?.VisibleDockables != null)
+        {
+            var doc = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CompaniesViewModel));
+            OpenViewModel(doc ?? CompaniesViewModel, doc == null);
+        }
+    } 
+    
+    public void OpenOfficies()
+    {
+        if (Documents?.VisibleDockables != null)
+        {
+            var doc = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(OfficiesViewModel));
+            OpenViewModel(doc ?? OfficiesViewModel, doc == null);
+        }
+    }        
 
     private void OpenViewModel(IDockable dockable, bool addNew)
     {
@@ -210,5 +228,45 @@ public class MainWindowViewModel : ViewModelBase
             _skillsViewModel = value;
         }
     }
-    #endregion          
+    #endregion  
+
+    #region CompaniesViewModel
+    private DictionaryViewModel<Company>? _companiesViewModel;
+    public DictionaryViewModel<Company>? CompaniesViewModel
+    {
+        get
+        {
+            if (_companiesViewModel == null)
+            {
+                _companiesViewModel = CurrentApplication.GetRequiredService<DictionaryViewModel<Company>>();
+                _companiesViewModel!.Properties = Properties;
+            }
+            return _companiesViewModel;
+        }
+        set
+        {
+            _companiesViewModel = value;
+        }
+    }
+    #endregion        
+
+    #region OfficiesViewModel
+    private DictionaryViewModel<Office>? _officiesViewModel;
+    public DictionaryViewModel<Office>? OfficiesViewModel
+    {
+        get
+        {
+            if (_officiesViewModel == null)
+            {
+                _officiesViewModel = CurrentApplication.GetRequiredService<DictionaryViewModel<Office>>();
+                _officiesViewModel!.Properties = Properties;
+            }
+            return _officiesViewModel;
+        }
+        set
+        {
+            _officiesViewModel = value;
+        }
+    }
+    #endregion           
 }

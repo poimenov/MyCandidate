@@ -10,7 +10,10 @@
     "Country_Name": "Country name",
     "City_Name": "City name",
     "Category_Name": "Category name",
-    "Skill_name": "Skill name",
+    "Skill_Name": "Skill name",
+    "Company_Name": "Company name",
+    "Office_Name": "Office name", 
+    "Full_Address": "Full address",   
     
     //ViewModels
     "SkillCategories": "Skill categories",

@@ -30,6 +30,12 @@
                 <MenuItem Header="{ll:Localize Cities}" Command="{Binding OpenCities}">              
                 </MenuItem>                
             </MenuItem>
+            <MenuItem Header="{ll:Localize Companies}">            
+                <MenuItem Header="{ll:Localize Companies}" Command="{Binding OpenCompanies}">               
+                </MenuItem>
+                <MenuItem Header="{ll:Localize Officies}" Command="{Binding OpenOfficies}">              
+                </MenuItem>                
+            </MenuItem>             
             <MenuItem Header="{ll:Localize Skills}">            
                 <MenuItem Header="{ll:Localize Categories}" Command="{Binding OpenSkillCategories}">               
                 </MenuItem>
