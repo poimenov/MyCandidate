@@ -1,0 +1,33 @@
+<UserControl x:Class="MyCandidate.MVVM.Views.Tools.LocationView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"
+             xmlns:vm="using:MyCandidate.MVVM.ViewModels.Tools"
+             xmlns:cm="using:MyCandidate.Common"
+             x:DataType="vm:LocationViewModel" x:CompileBindings="True">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="CountryTemplate" DataType="cm:Country">
+            <TextBlock Text="{Binding Name}" />
+        </DataTemplate>
+        <DataTemplate x:Key="CityTemplate" DataType="cm:City">
+            <TextBlock Text="{Binding Name}" />
+        </DataTemplate>        
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="Auto, *" HorizontalAlignment="Stretch">
+        <TextBlock Text="{ll:Localize Address}" VerticalAlignment="Center" Padding="4" Grid.Row="0" Grid.Column="0"></TextBlock>
+        <TextBox Text="{Binding Address}" Margin="4" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="1"></TextBox>
+        <TextBlock Text="{ll:Localize City}" VerticalAlignment="Center" Padding="4" Grid.Row="1" Grid.Column="0"></TextBlock>
+        <ComboBox ItemsSource="{Binding Cities}" Grid.Row="1" Grid.Column="1"
+                ItemTemplate="{DynamicResource CityTemplate}"
+                SelectedItem="{Binding City, Mode=TwoWay}" 
+                HorizontalAlignment="Stretch" Margin="4"></ComboBox>        
+        <TextBlock Text="{ll:Localize Country}" VerticalAlignment="Center" Padding="4" Grid.Row="2" Grid.Column="0"></TextBlock>
+        <ComboBox ItemsSource="{Binding Countries}" Grid.Row="2" Grid.Column="1"
+                ItemTemplate="{DynamicResource CountryTemplate}"
+                SelectedItem="{Binding Country, Mode=TwoWay}" 
+                HorizontalAlignment="Stretch" Margin="4"></ComboBox>        
+    </Grid>
+
+</UserControl>             

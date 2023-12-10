@@ -14,6 +14,7 @@ using DynamicData.Binding;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
 using MyCandidate.DataAccess;
+using MyCandidate.MVVM.ViewModels.Tools;
 using PropertyModels.Extensions;
 
 namespace MyCandidate.MVVM.Views.Tools
@@ -26,6 +27,7 @@ namespace MyCandidate.MVVM.Views.Tools
             CellEditFactoryService.Default.AddFactory(new CountryCellEditFactory(CurrentApplication.GetRequiredService<IDataAccess<Country>>()));
             CellEditFactoryService.Default.AddFactory(new SkillCategoryCellEditFactory(CurrentApplication.GetRequiredService<IDataAccess<SkillCategory>>()));
             CellEditFactoryService.Default.AddFactory(new CompanyCellEditFactory(CurrentApplication.GetRequiredService<IDataAccess<Company>>()));
+            CellEditFactoryService.Default.AddFactory(new LocationCellEditFactory(CurrentApplication.GetRequiredService<IDataAccess<Country>>(), CurrentApplication.GetRequiredService<IDataAccess<City>>()));
         }
     }
 
@@ -56,7 +58,7 @@ namespace MyCandidate.MVVM.Views.Tools
                 return null;
             }
 
-            ComboBox control = new ComboBox();
+            var control = new ComboBox();
             control.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
             control.ItemsSource = _dataAccess.ItemsList.Where(x => x.Enabled == true);
             
@@ -78,7 +80,6 @@ namespace MyCandidate.MVVM.Views.Tools
                     }
                 }
             );
-
 
             return control;
         }
@@ -261,6 +262,80 @@ namespace MyCandidate.MVVM.Views.Tools
 
             return false;
         }        
+    }
+
+    class LocationCellEditFactory : AbstractCellEditFactory
+    {
+        private readonly IDataAccess<Country> _countries;
+        private readonly IDataAccess<City> _cities;
+        
+        public LocationCellEditFactory()
+        {
+            _countries = ((App)Application.Current).GetRequiredService<IDataAccess<Country>>();
+            _cities = ((App)Application.Current).GetRequiredService<IDataAccess<City>>();
+        }
+
+        public LocationCellEditFactory(IDataAccess<Country> countries, IDataAccess<City> cities)
+        {
+            _countries = countries;
+            _cities = cities;
+        }
+
+        public override bool Accept(object accessToken)
+        {
+            return accessToken is ExtendedPropertyGrid;
+        }        
+
+        public override Control HandleNewProperty(PropertyCellContext context)
+        {
+            var propertyDescriptor = context.Property;
+            var target = context.Target;
+            if (propertyDescriptor.PropertyType != typeof(Common.Location))
+            {
+                return null;
+            }
+
+            var control = new LocationView();
+            control.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+            var vm = new LocationViewModel(_countries, _cities);
+            control.DataContext = vm;
+
+            return control;
+        }
+
+        public override bool HandlePropertyChanged(PropertyCellContext context)
+        {
+            var propertyDescriptor = context.Property;
+            var target = context.Target;
+            var control = context.CellEdit;
+
+            if (propertyDescriptor.PropertyType != typeof(Common.Location))
+            {
+                return false;
+            }   
+
+            ValidateProperty(control, propertyDescriptor, target);
+
+            if (control is LocationView vw 
+                    && vw.DataContext is LocationViewModel vm 
+                    && target is Office office)
+            {
+                if(office.Location == null)
+                {
+                    office.Location = new Common.Location
+                            {
+                                CityId = _cities.ItemsList.First().Id, 
+                                Name = string.Empty, 
+                                Enabled = true 
+                            };
+                }
+                vm.Location = office.Location; 
+
+                return true;
+            }
+
+            return false;                     
+        }
     }
 
     class CountryEqualityComparer : IEqualityComparer<Country>

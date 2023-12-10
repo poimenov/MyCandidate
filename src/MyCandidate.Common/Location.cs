@@ -24,7 +24,7 @@ public class Location : Entity
     {
         get
         {
-            return string.Format("{0}, {1}, {2}", City.Country?.Name, City.Name, Address);
+            return string.Format("{0}, {1}, {2}", City?.Country?.Name, City?.Name, Address);
         }
     }
 

@@ -17,7 +17,10 @@ public class Officies : IDataAccess<Office>
         {
             using (var db = new Database())
             {
-                return db.Offices.Include(x => x.Company).ToList();
+                return db.Offices.Include(x => x.Company)
+                    .Include(x => x.Location)
+                    //.ThenInclude(x => x.City)
+                    .ToList();
             }
         }        
     }
@@ -65,7 +68,10 @@ public class Officies : IDataAccess<Office>
     {
         using (var db = new Database())
         {
-            return db.Offices.Include(x => x.Company).FirstOrDefault(x => x.Id == itemId);
+            return db.Offices.Include(x => x.Company)
+                .Include(x => x.Location)
+                //.ThenInclude(x => x.City)               
+                .FirstOrDefault(x => x.Id == itemId);
         }
     }
 

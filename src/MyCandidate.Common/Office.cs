@@ -30,6 +30,7 @@ public class Office : Entity
     public int LocationId { get; set; }
 
     [Required]
+    [DisplayName("Address")]
     public Location Location { get; set; }  
 
     [Required]

@@ -30,8 +30,8 @@ public class OfficiesViewModel : DictionaryViewModel<Office>
 
     private void CultureChanged(object? sender, EventArgs e)
     {
-        Title = LocalizationService.Default["Cities"];
-        SelectedTypeName = LocalizationService.Default["City"];
+        Title = LocalizationService.Default["Officies"];
+        SelectedTypeName = LocalizationService.Default["Office"];
     }
 
     #region Companies
