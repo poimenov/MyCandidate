@@ -18,7 +18,7 @@ public class LocationViewModel : ViewModelBase
     public LocationViewModel(IDataAccess<Country> countries, IDataAccess<City> cities)
     {
         Countries = countries.ItemsList.Where(x => x.Enabled == true);
-        CitiesSource = new ObservableCollectionExtended<City>(cities!.ItemsList);
+        CitiesSource = new ObservableCollectionExtended<City>(cities!.ItemsList.Where(x => x.Enabled == true));
         CitiesSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter)
@@ -30,14 +30,14 @@ public class LocationViewModel : ViewModelBase
             (
                 x =>
                 {
-                    if(x != null)
+                    if (x != null && !_locationChanges)
                     {
                         _locationChanges = true;
                         var countryId = Cities.First(c => c.Id == x.CityId).CountryId;
                         Country = Countries.First(c => c.Id == countryId);
                         City = Cities.First(c => c.Id == x.CityId);
-                        Address = x.Address;   
-                        _locationChanges = false;                     
+                        Address = x.Address;
+                        _locationChanges = false;
                     }
                 }
             );
@@ -47,9 +47,10 @@ public class LocationViewModel : ViewModelBase
             (
                 x =>
                 {
-                    if (x != null)
+                    if (x != null && Location.Address != x)
                     {
                         Location.Address = x;
+                        this.RaisePropertyChanged(nameof(this.Location));
                     }
                 }
             );
@@ -59,9 +60,11 @@ public class LocationViewModel : ViewModelBase
             (
                 x =>
                 {
-                    if (x != null)
+                    if (x != null && Location.CityId != x.Id)
                     {
                         Location.CityId = x.Id;
+                        Location.City = x;
+                        this.RaisePropertyChanged(nameof(this.Location));
                     }
                 }
             );
@@ -80,7 +83,7 @@ public class LocationViewModel : ViewModelBase
     }
     public ObservableCollectionExtended<City> CitiesSource;
     private readonly ReadOnlyObservableCollection<City> _citiesList;
-    public ReadOnlyObservableCollection<City> Cities => _citiesList;   
+    public ReadOnlyObservableCollection<City> Cities => _citiesList;
 
     private IEnumerable<Country> _countriesList;
     public IEnumerable<Country> Countries
@@ -93,7 +96,7 @@ public class LocationViewModel : ViewModelBase
     public Location Location
     {
         get => _location;
-        set => this.RaiseAndSetIfChanged(ref _location, value); 
+        set => this.RaiseAndSetIfChanged(ref _location, value);
     }
 
     private Country _country;

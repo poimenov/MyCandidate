@@ -19,7 +19,8 @@ public class Officies : IDataAccess<Office>
             {
                 return db.Offices.Include(x => x.Company)
                     .Include(x => x.Location)
-                    //.ThenInclude(x => x.City)
+                    .ThenInclude(x => x.City)
+                    .ThenInclude(x => x.Country)
                     .ToList();
             }
         }        
@@ -37,6 +38,7 @@ public class Officies : IDataAccess<Office>
                 if (!db.Offices.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
                 {
                     item.Company = null;
+                    item.Location.City = null;
                     db.Offices.Add(item);
                 }
             }
@@ -70,7 +72,8 @@ public class Officies : IDataAccess<Office>
         {
             return db.Offices.Include(x => x.Company)
                 .Include(x => x.Location)
-                //.ThenInclude(x => x.City)               
+                .ThenInclude(x => x.City)  
+                .ThenInclude(x => x.Country)             
                 .FirstOrDefault(x => x.Id == itemId);
         }
     }

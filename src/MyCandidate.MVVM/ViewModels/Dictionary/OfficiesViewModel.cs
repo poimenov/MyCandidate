@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using Avalonia.PropertyGrid.Services;
 using log4net;
 using MyCandidate.Common;
+using MyCandidate.MVVM.Extensions;
 using MyCandidate.MVVM.Services;
 using ReactiveUI;
 
@@ -21,7 +22,22 @@ public class OfficiesViewModel : DictionaryViewModel<Office>
         SelectedTypeName = LocalizationService.Default["Office"];
         var companies = new List<Company>() { new Company() { Id = 0, Name = string.Empty } };
         companies.AddRange(ItemList.Select(x => x.Company).Distinct().ToList());
-        Companies = companies;        
+        Companies = companies;
+    }
+
+    public override bool IsValid
+    {
+        get
+        {
+            foreach (var item in ItemList)
+            {
+                if (!item.IsValid() || !item.Location.IsValid())
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 
     protected override IObservable<Func<Office, bool>>? Filter =>
@@ -57,7 +73,7 @@ public class OfficiesViewModel : DictionaryViewModel<Office>
         return item =>
         {
             var byCountry = true;
-            if(company != null && company.Id != 0)
+            if (company != null && company.Id != 0)
             {
                 byCountry = item.CompanyId == company.Id;
             }
@@ -76,5 +92,5 @@ public class OfficiesViewModel : DictionaryViewModel<Office>
                 return byName && byCountry;
             }
         };
-    }    
+    }
 }

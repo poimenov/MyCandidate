@@ -139,7 +139,7 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
         );
     }
 
-    public bool IsValid
+    public virtual bool IsValid
     {
         get
         {
