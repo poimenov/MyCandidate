@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia;
@@ -379,66 +377,6 @@ namespace MyCandidate.MVVM.Views.Tools
 
             return false;
         }
-    }
-
-    class CountryEqualityComparer : IEqualityComparer<Country>
-    {
-        public bool Equals(Country? x, Country? y)
-        {
-            if (ReferenceEquals(x, y))
-            {
-                return true;
-            }
-
-            if (x is null || y is null)
-                return false;
-
-            return x.Id == y.Id
-                && x.Name == y.Name
-                && x.Enabled == y.Enabled;
-        }
-
-        public int GetHashCode([DisallowNull] Country obj) => HashCode.Combine(obj.Id.GetHashCode(), obj.Name.GetHashCode(), obj.Enabled.GetHashCode());
-    }
-
-    class SkillCategoryEqualityComparer : IEqualityComparer<SkillCategory>
-    {
-        public bool Equals(SkillCategory? x, SkillCategory? y)
-        {
-            if (ReferenceEquals(x, y))
-            {
-                return true;
-            }
-
-            if (x is null || y is null)
-                return false;
-
-            return x.Id == y.Id
-                && x.Name == y.Name
-                && x.Enabled == y.Enabled;
-        }
-
-        public int GetHashCode([DisallowNull] SkillCategory obj) => HashCode.Combine(obj.Id.GetHashCode(), obj.Name.GetHashCode(), obj.Enabled.GetHashCode());
-    }
-
-    class CompanyEqualityComparer : IEqualityComparer<Company>
-    {
-        public bool Equals(Company? x, Company? y)
-        {
-            if (ReferenceEquals(x, y))
-            {
-                return true;
-            }
-
-            if (x is null || y is null)
-                return false;
-
-            return x.Id == y.Id
-                && x.Name == y.Name
-                && x.Enabled == y.Enabled;
-        }
-
-        public int GetHashCode([DisallowNull] Company obj) => HashCode.Combine(obj.Id.GetHashCode(), obj.Name.GetHashCode(), obj.Enabled.GetHashCode());
     }
 }
 

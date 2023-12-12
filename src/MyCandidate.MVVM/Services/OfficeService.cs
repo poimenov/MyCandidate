@@ -52,13 +52,6 @@ public class OfficeService : IDictionaryService<Office>
     public bool Update(IEnumerable<Office> items, out string message)
     {
         message = string.Empty;
-        IEnumerable<string> names;
-        if (CheckDuplicates(items, out names))
-        {
-            message = $"It is impossible to add next officies: {string.Join(", ", names)} because they already exist";
-            return false;
-        }
-
         try
         {
             _officies.Update(items);
