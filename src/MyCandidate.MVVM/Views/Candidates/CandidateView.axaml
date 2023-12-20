@@ -1,0 +1,52 @@
+<UserControl x:Class="MyCandidate.MVVM.Views.Candidates.CandidateView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"
+             xmlns:vm="using:MyCandidate.MVVM.ViewModels.Candidates"
+             xmlns:vw="using:MyCandidate.MVVM.Views.Tools"
+             mc:Ignorable="d"
+             d:DesignWidth="300" d:DesignHeight="400"
+             x:DataType="vm:CandidateViewModel" x:CompileBindings="True">
+
+    <Grid RowDefinitions="*,Auto">
+
+    <Grid Grid.Row="0" ColumnDefinitions="132,*" RowDefinitions="Auto,Auto,Auto,140,Auto,*">
+
+        <TextBlock Text="{ll:Localize First_Name}" Grid.Row="0" Grid.Column="0"
+            VerticalAlignment="Center" Padding="4"></TextBlock> 
+        <TextBox Text="{Binding FirstName}" Grid.Row="0" Grid.Column="1"
+            Margin="4" HorizontalAlignment="Stretch"></TextBox>
+        
+        <TextBlock Text="{ll:Localize Last_Name}" Grid.Row="1" Grid.Column="0"
+            VerticalAlignment="Center" Padding="4"></TextBlock> 
+        <TextBox Text="{Binding LastName}" Grid.Row="1" Grid.Column="1"
+            Margin="4" HorizontalAlignment="Stretch"></TextBox>
+        
+        <TextBlock Text="{ll:Localize Date_Birth}" Grid.Row="2" Grid.Column="0"
+            VerticalAlignment="Center" Padding="4"></TextBlock> 
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1">
+            <DatePicker SelectedDate="{Binding BirthDate}"></DatePicker>
+            <TextBlock Text="{Binding Age}" Margin="10,0,0,0"
+                        VerticalAlignment="Center" Padding="4"></TextBlock>            
+        </StackPanel>        
+        
+        <vw:LocationView DataContext="{Binding Location}" Grid.Row="3" Grid.Column="0" 
+        Grid.ColumnSpan="2" Margin="70,0,0,0"></vw:LocationView>
+        
+        <TextBlock Text="{ll:Localize Enabled}" Grid.Row="4" Grid.Column="0"
+            VerticalAlignment="Center" Padding="8"></TextBlock> 
+        <CheckBox IsChecked="{Binding Enabled}" Grid.Row="4" Grid.Column="1"></CheckBox>
+
+    </Grid>
+
+    <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+            <Button Content="{ll:Localize Delete}" Command="{Binding DeleteCmd}" Margin="0,4,0,4" Width="100" HorizontalContentAlignment="Center" />
+            <Button Content="{ll:Localize Save}" Command="{Binding SaveCmd}"  Margin="4,4,0,4" Width="100" HorizontalContentAlignment="Center" />
+            <Button Content="{ll:Localize Cancel}" Command="{Binding CancelCmd}" Margin="4,4,4,4" Width="100" HorizontalContentAlignment="Center" />
+    </StackPanel>
+
+    </Grid>    
+
+</UserControl>             

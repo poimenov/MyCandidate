@@ -32,24 +32,27 @@ public class Candidates : IDataAccess<Candidate>
             return;
         using (var db = new Database())
         {
-
-            foreach (var item in items)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (!db.Candidates.Any(x => Equals(x, item)))
+                foreach (var item in items)
                 {
-                    item.CreationDate = DateTime.Now;
-                    item.LastModificationDate = DateTime.Now;
-                    item.Location.City = null;
-                    item.CandidateResources.ForEach(x => x.ResourceType = null);
-                    item.CandidateSkills.ForEach(x =>
-                        {
-                            x.Skill = null;
-                            x.Seniority = null;
-                        });
-                    db.Candidates.Add(item);
+                    if (!db.Candidates.Any(x => Equals(x, item)))
+                    {
+                        item.CreationDate = DateTime.Now;
+                        item.LastModificationDate = DateTime.Now;
+                        item.Location.City = null;
+                        item.CandidateResources.ForEach(x => x.ResourceType = null);
+                        item.CandidateSkills.ForEach(x =>
+                            {
+                                x.Skill = null;
+                                x.Seniority = null;
+                            });
+                        db.Candidates.Add(item);
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 
@@ -64,15 +67,19 @@ public class Candidates : IDataAccess<Candidate>
             return;
         using (var db = new Database())
         {
-            foreach (var id in itemIds)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (db.Candidates.Any(x => x.Id == id))
+                foreach (var id in itemIds)
                 {
-                    var item = db.Candidates.First(x => x.Id == id);
-                    db.Candidates.Remove(item);
+                    if (db.Candidates.Any(x => x.Id == id))
+                    {
+                        var item = db.Candidates.First(x => x.Id == id);
+                        db.Candidates.Remove(item);
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 
@@ -108,14 +115,14 @@ public class Candidates : IDataAccess<Candidate>
                 foreach (var item in items)
                 {
                     if (db.Candidates.Any(x => x.Id == item.Id))
-                    {                        
-                        var resources = db.CandidateResources.Where(x => x.CandidateId == item.Id);
-                        db.CandidateResources.RemoveRange(resources);
-                        db.SaveChanges();
+                    {
+                        // var resources = db.CandidateResources.Where(x => x.CandidateId == item.Id);
+                        // db.CandidateResources.RemoveRange(resources);
+                        // db.SaveChanges();
 
-                        var skills = db.CandidateSkillies.Where(x => x.CandidateId == item.Id);
-                        db.CandidateSkillies.RemoveRange(skills);
-                        db.SaveChanges();
+                        // var skills = db.CandidateSkillies.Where(x => x.CandidateId == item.Id);
+                        // db.CandidateSkillies.RemoveRange(skills);
+                        // db.SaveChanges();
 
                         var entity = db.Candidates.First(x => x.Id == item.Id);
                         entity.LastModificationDate = DateTime.Now;

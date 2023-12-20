@@ -7,5 +7,6 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        //InitializeComponent(true, true);
     }
 }

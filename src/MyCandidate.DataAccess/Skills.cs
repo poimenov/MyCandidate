@@ -13,13 +13,13 @@ public class Skills : IDataAccess<Skill>
 
     public IEnumerable<Skill> ItemsList
     {
-         get
+        get
         {
             using (var db = new Database())
             {
                 return db.Skills.Include(x => x.SkillCategory).ToList();
             }
-        }       
+        }
     }
 
     public void Create(IEnumerable<Skill> items)
@@ -28,16 +28,19 @@ public class Skills : IDataAccess<Skill>
             return;
         using (var db = new Database())
         {
-
-            foreach (var item in items)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (!db.Skills.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
+                foreach (var item in items)
                 {
-                    item.SkillCategory = null;
-                    db.Skills.Add(item);
+                    if (!db.Skills.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
+                    {
+                        item.SkillCategory = null;
+                        db.Skills.Add(item);
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 
@@ -47,15 +50,19 @@ public class Skills : IDataAccess<Skill>
             return;
         using (var db = new Database())
         {
-            foreach (var id in itemIds)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (db.Skills.Any(x => x.Id == id))
+                foreach (var id in itemIds)
                 {
-                    var item = db.Skills.First(x => x.Id == id);
-                    db.Skills.Remove(item);
+                    if (db.Skills.Any(x => x.Id == id))
+                    {
+                        var item = db.Skills.First(x => x.Id == id);
+                        db.Skills.Remove(item);
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 
@@ -73,17 +80,21 @@ public class Skills : IDataAccess<Skill>
             return;
         using (var db = new Database())
         {
-            foreach (var item in items)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (db.Skills.Any(x => x.Id == item.Id))
+                foreach (var item in items)
                 {
-                    var entity = db.Skills.First(x => x.Id == item.Id);
-                    entity.SkillCategoryId = item.SkillCategoryId;
-                    entity.Name = item.Name;
-                    entity.Enabled = item.Enabled;
+                    if (db.Skills.Any(x => x.Id == item.Id))
+                    {
+                        var entity = db.Skills.First(x => x.Id == item.Id);
+                        entity.SkillCategoryId = item.SkillCategoryId;
+                        entity.Name = item.Name;
+                        entity.Enabled = item.Enabled;
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 }

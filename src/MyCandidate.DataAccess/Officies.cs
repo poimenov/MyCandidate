@@ -23,7 +23,7 @@ public class Officies : IDataAccess<Office>
                     .ThenInclude(x => x.Country)
                     .ToList();
             }
-        }        
+        }
     }
 
     public void Create(IEnumerable<Office> items)
@@ -32,17 +32,20 @@ public class Officies : IDataAccess<Office>
             return;
         using (var db = new Database())
         {
-
-            foreach (var item in items)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (!db.Offices.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
+                foreach (var item in items)
                 {
-                    item.Company = null;
-                    item.Location.City = null;
-                    db.Offices.Add(item);
+                    if (!db.Offices.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
+                    {
+                        item.Company = null;
+                        item.Location.City = null;
+                        db.Offices.Add(item);
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 
@@ -52,17 +55,21 @@ public class Officies : IDataAccess<Office>
             return;
         using (var db = new Database())
         {
-            foreach (var id in itemIds)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (db.Offices.Any(x => x.Id == id))
+                foreach (var id in itemIds)
                 {
-                    var item = db.Offices.First(x => x.Id == id);
-                    var itemLocation = db.Locations.First(x => x.Id == item.LocationId);                    
-                    db.Offices.Remove(item);
-                    db.Locations.Remove(itemLocation);
+                    if (db.Offices.Any(x => x.Id == id))
+                    {
+                        var item = db.Offices.First(x => x.Id == id);
+                        var itemLocation = db.Locations.First(x => x.Id == item.LocationId);
+                        db.Offices.Remove(item);
+                        db.Locations.Remove(itemLocation);
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 
@@ -72,8 +79,8 @@ public class Officies : IDataAccess<Office>
         {
             return db.Offices.Include(x => x.Company)
                 .Include(x => x.Location)
-                .ThenInclude(x => x.City)  
-                .ThenInclude(x => x.Country)             
+                .ThenInclude(x => x.City)
+                .ThenInclude(x => x.Country)
                 .FirstOrDefault(x => x.Id == itemId);
         }
     }
@@ -84,21 +91,25 @@ public class Officies : IDataAccess<Office>
             return;
         using (var db = new Database())
         {
-            foreach (var item in items)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (db.Offices.Any(x => x.Id == item.Id))
+                foreach (var item in items)
                 {
-                    var entity = db.Offices.First(x => x.Id == item.Id);                                        
-                    entity.CompanyId = item.CompanyId;
-                    entity.Name = item.Name;
-                    entity.Enabled = item.Enabled;
+                    if (db.Offices.Any(x => x.Id == item.Id))
+                    {
+                        var entity = db.Offices.First(x => x.Id == item.Id);
+                        entity.CompanyId = item.CompanyId;
+                        entity.Name = item.Name;
+                        entity.Enabled = item.Enabled;
 
-                    var entityLocation = db.Locations.First(x => x.Id == entity.LocationId);
-                    entityLocation.Address = item.Location.Address;
-                    entityLocation.CityId = item.Location.CityId;
+                        var entityLocation = db.Locations.First(x => x.Id == entity.LocationId);
+                        entityLocation.Address = item.Location.Address;
+                        entityLocation.CityId = item.Location.CityId;
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 }

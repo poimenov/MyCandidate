@@ -12,17 +12,21 @@ internal class DictionaryCreator
 
     public void Create()
     {
-        CreateCountries();
-        CreateCities();
-        CreateResourceTypes();
-        CreateCompanies();
-        CreateLocations();
-        CreateOffices();
-        CreateVacancyStatuses();
-        CreateSelectionStatuses();
-        CreateSkillCategories();
-        CreateSkills();
-        CreateSeniorities();
+        using (var transaction = _database.Database.BeginTransaction())
+        {
+            CreateCountries();
+            CreateCities();
+            CreateResourceTypes();
+            CreateCompanies();
+            CreateLocations();
+            CreateOffices();
+            CreateVacancyStatuses();
+            CreateSelectionStatuses();
+            CreateSkillCategories();
+            CreateSkills();
+            CreateSeniorities();
+            transaction.Commit();
+        }
     }
 
     private void CreateCountries()
@@ -69,7 +73,7 @@ internal class DictionaryCreator
         if (!_database.ResourceTypes.Any())
         {
             _database.ResourceTypes.AddRange(
-                new ResourceType { Name = "Phone", Enabled = true },
+                new ResourceType { Name = "Path", Enabled = true },
                 new ResourceType { Name = "Mobile", Enabled = true },
                 new ResourceType { Name = "Email", Enabled = true },
                 new ResourceType { Name = "Url", Enabled = true },

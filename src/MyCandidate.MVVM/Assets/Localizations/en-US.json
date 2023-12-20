@@ -13,7 +13,12 @@
     "Skill_Name": "Skill name",
     "Company_Name": "Company name",
     "Office_Name": "Office name", 
-    "Full_Address": "Full address",   
+    "Full_Address": "Full address",
+    "New_Candidate": "New candidate", 
+    "First_Name": "First name",
+    "Last_Name": "Last name",
+    "Date_Birth": "Date of birth",
+    "Age": "Age",      
     
     //ViewModels
     "SkillCategories": "Skill categories",

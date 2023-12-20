@@ -23,6 +23,10 @@
             <Separator />
             <MenuItem Header="{ll:Localize Exit}" Command="{Binding FileExit}" />
         </MenuItem>
+        <MenuItem Header="{ll:Localize Candidates}">
+            <MenuItem Header="{ll:Localize Create}" Command="{Binding OpenCreateCandidate}">
+            </MenuItem>
+        </MenuItem>
         <MenuItem Header="{ll:Localize Dictionary}">
             <MenuItem Header="{ll:Localize Address}">            
                 <MenuItem Header="{ll:Localize Countries}" Command="{Binding OpenCountries}">               

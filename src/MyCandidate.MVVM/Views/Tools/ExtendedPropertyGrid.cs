@@ -366,6 +366,7 @@ namespace MyCandidate.MVVM.Views.Tools
                     office.Location = new Common.Location
                     {
                         CityId = _cities.ItemsList.First().Id,
+                        City =_cities.ItemsList.First(),
                         Name = string.Empty,
                         Enabled = true
                     };

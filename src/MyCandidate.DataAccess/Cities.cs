@@ -28,16 +28,19 @@ public class Cities : IDataAccess<City>
             return;
         using (var db = new Database())
         {
-
-            foreach (var item in items)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (!db.Cities.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
+                foreach (var item in items)
                 {
-                    item.Country = null;
-                    db.Cities.Add(item);
+                    if (!db.Cities.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
+                    {
+                        item.Country = null;
+                        db.Cities.Add(item);
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 
@@ -47,15 +50,19 @@ public class Cities : IDataAccess<City>
             return;
         using (var db = new Database())
         {
-            foreach (var id in itemIds)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (db.Cities.Any(x => x.Id == id))
+                foreach (var id in itemIds)
                 {
-                    var item = db.Cities.First(x => x.Id == id);
-                    db.Cities.Remove(item);
+                    if (db.Cities.Any(x => x.Id == id))
+                    {
+                        var item = db.Cities.First(x => x.Id == id);
+                        db.Cities.Remove(item);
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 
@@ -73,17 +80,21 @@ public class Cities : IDataAccess<City>
             return;
         using (var db = new Database())
         {
-            foreach (var item in items)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (db.Cities.Any(x => x.Id == item.Id))
+                foreach (var item in items)
                 {
-                    var entity = db.Cities.First(x => x.Id == item.Id);
-                    entity.CountryId = item.CountryId;
-                    entity.Name = item.Name;
-                    entity.Enabled = item.Enabled;
+                    if (db.Cities.Any(x => x.Id == item.Id))
+                    {
+                        var entity = db.Cities.First(x => x.Id == item.Id);
+                        entity.CountryId = item.CountryId;
+                        entity.Name = item.Name;
+                        entity.Enabled = item.Enabled;
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 }

@@ -19,6 +19,7 @@ using MyCandidate.MVVM.ViewModels.Dictionary;
 using log4net;
 using System.Reflection;
 using MyCandidate.MVVM.Services;
+using MyCandidate.MVVM.ViewModels.Candidates;
 
 namespace MyCandidate.MVVM;
 
@@ -77,6 +78,7 @@ public partial class App : Application
                 .AddTransient<IDataAccess<SkillCategory>, SkillCategories>()
                 .AddTransient<IDataAccess<Company>, Companies>()
                 .AddTransient<IDataAccess<Office>, Officies>()
+                .AddTransient<IDataAccess<Candidate>, Candidates>()
                 //dictionary services
                 .AddTransient<IDictionaryService<Country>, CountryService>()
                 .AddTransient<IDictionaryService<City>, CityService>()
@@ -84,6 +86,7 @@ public partial class App : Application
                 .AddTransient<IDictionaryService<SkillCategory>, SkillCategoryService>()
                 .AddTransient<IDictionaryService<Company>, CompanyService>()
                 .AddTransient<IDictionaryService<Office>, OfficeService>()
+                .AddTransient<ICandidateService, CandidateService>()
                 //dictionary ViewModels
                 .AddTransient<DictionaryViewModel<Country>, CountriesViewModel>()
                 .AddTransient<DictionaryViewModel<City>, CitiesViewModel>()

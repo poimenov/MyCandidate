@@ -8,8 +8,8 @@ public class Companies : IDataAccess<Company>
     public Companies()
     {
         //
-    }  
-      
+    }
+
     public IEnumerable<Company> ItemsList
     {
         get
@@ -17,7 +17,7 @@ public class Companies : IDataAccess<Company>
             using (var db = new Database())
             {
                 return db.Companies.ToList();
-            }            
+            }
         }
     }
 
@@ -27,15 +27,18 @@ public class Companies : IDataAccess<Company>
             return;
         using (var db = new Database())
         {
-
-            foreach (var item in items)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (!db.Companies.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
+                foreach (var item in items)
                 {
-                    db.Companies.Add(item);
+                    if (!db.Companies.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
+                    {
+                        db.Companies.Add(item);
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 
@@ -45,15 +48,19 @@ public class Companies : IDataAccess<Company>
             return;
         using (var db = new Database())
         {
-            foreach (var id in itemIds)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (db.Companies.Any(x => x.Id == id))
+                foreach (var id in itemIds)
                 {
-                    var item = db.Companies.First(x => x.Id == id);
-                    db.Companies.Remove(item);
+                    if (db.Companies.Any(x => x.Id == id))
+                    {
+                        var item = db.Companies.First(x => x.Id == id);
+                        db.Companies.Remove(item);
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 
@@ -71,16 +78,20 @@ public class Companies : IDataAccess<Company>
             return;
         using (var db = new Database())
         {
-            foreach (var item in items)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                if (db.Companies.Any(x => x.Id == item.Id))
+                foreach (var item in items)
                 {
-                    var entity = db.Companies.First(x => x.Id == item.Id);
-                    entity.Name = item.Name;
-                    entity.Enabled = item.Enabled;
+                    if (db.Companies.Any(x => x.Id == item.Id))
+                    {
+                        var entity = db.Companies.First(x => x.Id == item.Id);
+                        entity.Name = item.Name;
+                        entity.Enabled = item.Enabled;
+                    }
                 }
+                db.SaveChanges();
+                transaction.Commit();
             }
-            db.SaveChanges();
         }
     }
 }

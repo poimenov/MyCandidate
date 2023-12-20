@@ -7,6 +7,8 @@ using Dock.Model.Core;
 using Microsoft.Extensions.Options;
 using MyCandidate.Common;
 using MyCandidate.MVVM.Localizations;
+using MyCandidate.MVVM.Services;
+using MyCandidate.MVVM.ViewModels.Candidates;
 using MyCandidate.MVVM.ViewModels.Dictionary;
 using MyCandidate.MVVM.ViewModels.Tools;
 using ReactiveUI;
@@ -102,7 +104,16 @@ public class MainWindowViewModel : ViewModelBase
             var doc = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(OfficiesViewModel));
             OpenViewModel(doc ?? OfficiesViewModel, doc == null);
         }
-    }        
+    }   
+
+    public void OpenCreateCandidate()
+    {
+        if (Documents?.VisibleDockables != null)
+        {
+            var service = CurrentApplication.GetRequiredService<ICandidateService>();
+            _factory?.AddDockable(Documents, new CandidateViewModel(service));
+        }
+    }     
 
     private void OpenViewModel(IDockable dockable, bool addNew)
     {

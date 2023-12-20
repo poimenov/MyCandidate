@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reactive.Linq;
 using DynamicData;
@@ -114,6 +115,8 @@ public class LocationViewModel : ViewModelBase
     }
 
     private String _address;
+    [Required]
+    [StringLength(250, MinimumLength = 2)]
     public String Address
     {
         get => _address;

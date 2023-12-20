@@ -27,11 +27,16 @@
     "Company_Name": "Название компании",
     "Office_Name": "Название офиса",
     "Full_Address": "Полный адрес",
+    "New_Candidate": "Новый кандидат",
     "Enabled": "Доступность",
     "Delete": "Удалить",
     "Create": "Создать",
     "Save": "Сохранить",
-    "Cancel": "Отмена",   
+    "Cancel": "Отмена", 
+    "First_Name": "Имя",
+    "Last_Name": "Фамилия",
+    "Date_Birth": "Дата рождения",
+    "Age": "Возраст",
     
     //ViewModels
     "SkillCategories": "Категории навыков",
@@ -44,5 +49,6 @@
     "Companies": "Компании",
     "Company": "Компания",
     "Officies": "Офисы",
-    "Office": "Офис"
+    "Office": "Офис",
+    "Candidates": "Кандидаты"
 }
