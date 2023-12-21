@@ -28,6 +28,8 @@
     "Office_Name": "Название офиса",
     "Full_Address": "Полный адрес",
     "New_Candidate": "Новый кандидат",
+    "Location": "Расположение",
+    "Links": "Ссылки",
     "Enabled": "Доступность",
     "Delete": "Удалить",
     "Create": "Создать",

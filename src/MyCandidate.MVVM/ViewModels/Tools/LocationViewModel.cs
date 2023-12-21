@@ -115,8 +115,8 @@ public class LocationViewModel : ViewModelBase
     }
 
     private String _address;
-    [Required]
-    [StringLength(250, MinimumLength = 2)]
+    //[Required]
+    [StringLength(250)]
     public String Address
     {
         get => _address;

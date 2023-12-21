@@ -13,8 +13,8 @@ public class Location : Entity
     [Browsable(false)]
     public override int Id { get; set; }
 
-    [Required]
-    [StringLength(250, MinimumLength = 2)]
+    //[Required]
+    [StringLength(250)]
     [DisplayName("Address")]
     public string Address { get; set; }
 

@@ -12,7 +12,7 @@
 
     <Grid RowDefinitions="*,Auto">
 
-    <Grid Grid.Row="0" ColumnDefinitions="132,*" RowDefinitions="Auto,Auto,Auto,140,Auto,*">
+    <Grid Grid.Row="0" ColumnDefinitions="132,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*">
 
         <TextBlock Text="{ll:Localize First_Name}" Grid.Row="0" Grid.Column="0"
             VerticalAlignment="Center" Padding="4"></TextBlock> 
@@ -30,15 +30,25 @@
             <DatePicker SelectedDate="{Binding BirthDate}"></DatePicker>
             <TextBlock Text="{Binding Age}" Margin="10,0,0,0"
                         VerticalAlignment="Center" Padding="4"></TextBlock>            
-        </StackPanel>        
-        
-        <vw:LocationView DataContext="{Binding Location}" Grid.Row="3" Grid.Column="0" 
-        Grid.ColumnSpan="2" Margin="70,0,0,0"></vw:LocationView>
-        
-        <TextBlock Text="{ll:Localize Enabled}" Grid.Row="4" Grid.Column="0"
-            VerticalAlignment="Center" Padding="8"></TextBlock> 
-        <CheckBox IsChecked="{Binding Enabled}" Grid.Row="4" Grid.Column="1"></CheckBox>
+        </StackPanel>  
 
+        <TextBlock Text="{ll:Localize Enabled}" Grid.Row="3" Grid.Column="0"
+            VerticalAlignment="Center" Padding="4"></TextBlock> 
+        <CheckBox IsChecked="{Binding Enabled}" Grid.Row="3" Grid.Column="1"></CheckBox>
+
+        <HeaderedContentControl Header="{ll:Localize Location}" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="5,5,5,0">
+            <vw:LocationView DataContext="{Binding Location}" Margin="0,5,0,0"></vw:LocationView>
+        </HeaderedContentControl>
+
+        <Grid ColumnDefinitions="Auto, Auto" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
+            <HeaderedContentControl Header="{ll:Localize Links}" Grid.Row="0" Grid.Column="0" Margin="5,5,5,0">
+                <TextBlock Text="content"></TextBlock>
+            </HeaderedContentControl>
+            <HeaderedContentControl Header="{ll:Localize Skills}" Grid.Row="0" Grid.Column="1" Margin="5,5,5,0">
+                <TextBlock Text="content"></TextBlock>
+            </HeaderedContentControl>
+        </Grid>
+        
     </Grid>
 
     <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
