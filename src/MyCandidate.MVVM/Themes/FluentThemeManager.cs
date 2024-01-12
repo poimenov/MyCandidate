@@ -54,6 +54,14 @@ public class FluentThemeManager : IThemeManager
         }
     };    
 
+    private static readonly Styles Hyperlink = new()
+    {
+        new StyleInclude(BaseUri)
+        {
+            Source = new Uri("avares://MyCandidate.MVVM/Themes/Hyperlink.axaml")
+        }
+    };      
+
     private static readonly MergeResourceInclude ResourceTheme = new(BaseUri)
     {
         Source = new Uri("avares://MyCandidate.MVVM/Themes/Themes.axaml")
@@ -97,6 +105,7 @@ public class FluentThemeManager : IThemeManager
         application.Styles.Insert(2, DataGridFluent);
         application.Styles.Insert(3, FluentLight);
         application.Styles.Insert(4, GroupBoxClassic);
+        application.Styles.Insert(5, Hyperlink);
     }
 }
 

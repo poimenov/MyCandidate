@@ -18,6 +18,8 @@
     "About": "О программе",
 
     //properties
+    "Value": "Значение",
+    "Resource_Type": "Тип ресурса",
 
     //Views
     "Country_Name": "Название страны",
@@ -52,5 +54,6 @@
     "Company": "Компания",
     "Officies": "Офисы",
     "Office": "Офис",
-    "Candidates": "Кандидаты"
+    "Candidates": "Кандидаты",
+    "CandidateResource": "Доп.информация"
 }

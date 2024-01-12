@@ -111,7 +111,7 @@ public class MainWindowViewModel : ViewModelBase
         if (Documents?.VisibleDockables != null)
         {
             var service = CurrentApplication.GetRequiredService<ICandidateService>();
-            _factory?.AddDockable(Documents, new CandidateViewModel(service));
+            _factory?.AddDockable(Documents, new CandidateViewModel(service, Properties));
         }
     }     
 

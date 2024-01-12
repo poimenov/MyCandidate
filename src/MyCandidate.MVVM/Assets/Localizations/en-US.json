@@ -5,6 +5,7 @@
 
 
     //properties
+    "Resource_Type": "Resource type",
 
     //Views
     "Country_Name": "Country name",
@@ -22,5 +23,6 @@
     
     //ViewModels
     "SkillCategories": "Skill categories",
-    "SkillCategory": "Skill category"  
+    "SkillCategory": "Skill category",
+    "CandidateResource": "Info"
 }

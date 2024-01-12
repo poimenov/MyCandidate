@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.PropertyGrid.Services;
 using Dock.Model.ReactiveUI.Controls;
@@ -21,10 +23,10 @@ public class CandidateViewModel : Document
     private IDataAccess<City> Cities => CurrentApplication.GetRequiredService<IDataAccess<City>>();
     private Candidate _candidate;
 
-    public CandidateViewModel(ICandidateService candidateService)
+    public CandidateViewModel(ICandidateService candidateService, IProperties properties)
     {
         _candidateService = candidateService;
-        var cities = Cities; 
+        var cities = Cities;
         var defaultCity = cities.ItemsList.First();
         _candidate = new Candidate
         {
@@ -34,24 +36,98 @@ public class CandidateViewModel : Document
                 Enabled = true,
                 CityId = defaultCity.CountryId,
                 City = defaultCity
-            }
+            },
+            CandidateResources = new List<CandidateResource>(),
+            CandidateSkills = new List<CandidateSkill>()
         };
         Title = LocalizationService.Default["New_Candidate"];
         FirstName = string.Empty;
-        LastName = string.Empty;   
-        Enabled = _candidate.Enabled; 
+        LastName = string.Empty;
+        Enabled = _candidate.Enabled;
         Location = new LocationViewModel(Countries, cities)
         {
             Location = _candidate.Location
         };
+        //test
+        _candidate.CandidateResources.Add(new CandidateResource
+            {
+                Id=0,
+                Value = "poimenov",
+                ResourceTypeId = 5,
+                ResourceType = new ResourceType
+                {
+                    Id = 5,
+                    Name = "Skype",
+                    Enabled = true
+                }
+            }
+        );
+
+        _candidate.CandidateResources.Add(new CandidateResource
+            {
+                Id=0,
+                Value = "http://www.spez.com.ua/",
+                ResourceTypeId = 4,
+                ResourceType = new ResourceType
+                {
+                    Id = 4,
+                    Name = "Url",
+                    Enabled = true
+                }
+            }
+        );    
+
+        _candidate.CandidateResources.Add(new CandidateResource
+            {
+                Id=0,
+                Value = "poimenov@gmail.com",
+                ResourceTypeId = 3,
+                ResourceType = new ResourceType
+                {
+                    Id = 3,
+                    Name = "Email",
+                    Enabled = true
+                }
+            }
+        ); 
+
+        _candidate.CandidateResources.Add(new CandidateResource
+            {
+                Id=0,
+                Value = "+380-96-827-60-38",
+                ResourceTypeId = 2,
+                ResourceType = new ResourceType
+                {
+                    Id = 2,
+                    Name = "Mobile",
+                    Enabled = true
+                }
+            }
+        );      
+
+        _candidate.CandidateResources.Add(new CandidateResource
+            {
+                Id=0,
+                Value = "/home/poimenov/Документы/Расписание уроков.ods",
+                ResourceTypeId = 1,
+                ResourceType = new ResourceType
+                {
+                    Id = 1,
+                    Name = "Path",
+                    Enabled = true
+                }
+            }
+        );                        
+        
+        CandidateResources = new CandidateResourcesViewModel(_candidate, properties);
 
         LocalizationService.Default.OnCultureChanged += CultureChanged;
-        CancelCmd = ReactiveCommand.Create(() => { OnCancel(); });   
+        CancelCmd = ReactiveCommand.Create(() => { OnCancel(); });
         SaveCmd = ReactiveCommand.Create(() => { OnSave(); });
-        DeleteCmd = ReactiveCommand.Create(() => { OnDelete(); }); 
+        DeleteCmd = ReactiveCommand.Create(() => { OnDelete(); });
     }
 
-    public CandidateViewModel(ICandidateService candidateService, int candidateId)
+    public CandidateViewModel(ICandidateService candidateService, IProperties properties, int candidateId)
     {
         _candidateService = candidateService;
         _candidate = _candidateService.Get(candidateId);
@@ -63,40 +139,47 @@ public class CandidateViewModel : Document
         {
             Location = _candidate.Location
         };
+        CandidateResources = new CandidateResourcesViewModel(_candidate, properties);        
 
         LocalizationService.Default.OnCultureChanged += CultureChanged;
-        CancelCmd = ReactiveCommand.Create(() => { OnCancel(); });   
+        CancelCmd = ReactiveCommand.Create(() => { OnCancel(); });
         SaveCmd = ReactiveCommand.Create(() => { OnSave(); });
-        DeleteCmd = ReactiveCommand.Create(() => { OnDelete(); }); 
-    }  
+        DeleteCmd = ReactiveCommand.Create(() => { OnDelete(); });
+    }
 
     private void CultureChanged(object? sender, EventArgs e)
     {
         Title = LocalizationService.Default["New_Candidate"];
-    }  
+    }
 
     public IReactiveCommand SaveCmd { get; }
     public IReactiveCommand CancelCmd { get; }
-    public IReactiveCommand DeleteCmd { get; }     
+    public IReactiveCommand DeleteCmd { get; }
 
+
+    #region FirstName
     private string _firstName;
     [Required]
-    [StringLength(250, MinimumLength = 2)]    
+    [StringLength(250, MinimumLength = 2)]
     public string FirstName
     {
         get => _firstName;
         set => this.RaiseAndSetIfChanged(ref _firstName, value);
-    }   
+    }
+    #endregion
 
+    #region LastName
     private string _lastName;
     [Required]
-    [StringLength(250, MinimumLength = 2)]    
+    [StringLength(250, MinimumLength = 2)]
     public string LastName
     {
         get => _lastName;
         set => this.RaiseAndSetIfChanged(ref _lastName, value);
-    }    
+    }
+    #endregion
 
+    #region BirthDate
     private DateTimeOffset? _birthDate;
     [Required]
     public DateTimeOffset? BirthDate
@@ -106,26 +189,38 @@ public class CandidateViewModel : Document
         {
             this.RaiseAndSetIfChanged(ref _birthDate, value);
             this.RaisePropertyChanged(nameof(this.Age));
-        }        
-    }  
+        }
+    }
+    #endregion
 
     public string Age
     {
         get => _birthDate.HasValue ? $"{LocalizationService.Default["Age"]} {_birthDate.Value.DateTime.GetAge()}" : string.Empty;
-    }  
+    }
 
+    #region Location
     private LocationViewModel _location;
-    public  LocationViewModel Location
+    public LocationViewModel Location
     {
         get => _location;
         set => this.RaiseAndSetIfChanged(ref _location, value);
     }
+    #endregion
 
+    #region Enabled
     private bool _enabled;
     public bool Enabled
     {
         get => _enabled;
         set => this.RaiseAndSetIfChanged(ref _enabled, value);
+    }
+    #endregion   
+
+    private CandidateResourcesViewModel _candidateResources;
+    public CandidateResourcesViewModel CandidateResources 
+    {
+        get => _candidateResources;
+        set => this.RaiseAndSetIfChanged(ref _candidateResources, value);
     }
 
     private void OnCancel()
@@ -136,10 +231,10 @@ public class CandidateViewModel : Document
     private void OnSave()
     {
         //
-    }  
+    }
 
     private void OnDelete()
     {
         //
-    }      
+    }
 }

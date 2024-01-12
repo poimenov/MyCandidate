@@ -3,9 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"
-             xmlns:vm="using:MyCandidate.MVVM.ViewModels.Candidates"
-             xmlns:vw="using:MyCandidate.MVVM.Views.Tools"
+             xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"             
+             xmlns:vm="using:MyCandidate.MVVM.ViewModels.Candidates" 
+             xmlns:v="using:MyCandidate.MVVM.Views.Candidates"            
+             xmlns:vw="using:MyCandidate.MVVM.Views.Tools"             
              mc:Ignorable="d"
              d:DesignWidth="300" d:DesignHeight="400"
              x:DataType="vm:CandidateViewModel" x:CompileBindings="True">
@@ -42,7 +43,7 @@
 
         <Grid ColumnDefinitions="Auto, Auto" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
             <HeaderedContentControl Header="{ll:Localize Links}" Grid.Row="0" Grid.Column="0" Margin="5,5,5,0">
-                <TextBlock Text="content"></TextBlock>
+                <v:CandidateResourcesView DataContext="{Binding CandidateResources}" Margin="0,5,0,0" />
             </HeaderedContentControl>
             <HeaderedContentControl Header="{ll:Localize Skills}" Grid.Row="0" Grid.Column="1" Margin="5,5,5,0">
                 <TextBlock Text="content"></TextBlock>
