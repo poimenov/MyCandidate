@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.PropertyGrid.Services;
 using DynamicData;
@@ -20,7 +21,7 @@ public class CandidateResourcesViewModel : ViewModelBase
         _candidate = candidate;
         Properties = properties;
         LocalizationService.Default.OnCultureChanged += CultureChanged;
-        SourceCandidateResources = new ObservableCollectionExtended<CandidateResource>(_candidate.CandidateResources);
+        SourceCandidateResources = new ObservableCollectionExtended<CandidateResourceExt>(_candidate.CandidateResources.Select(x => new CandidateResourceExt(x)).ToList());
         SourceCandidateResources.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _candidateResources)
@@ -32,7 +33,7 @@ public class CandidateResourcesViewModel : ViewModelBase
                 {
                     if (Properties != null)
                     {
-                        Properties.SelectedItem = x;//new CandidateResourceExt(x);
+                        Properties.SelectedItem = x;
                         Properties.SelectedTypeName = LocalizationService.Default["CandidateResource"]; ;
                     }
                 }
@@ -41,22 +42,15 @@ public class CandidateResourcesViewModel : ViewModelBase
         DeleteCandidateResourceCmd = ReactiveCommand.Create(
             (object obj) =>
             {
-                SourceCandidateResources.Remove((CandidateResource)obj);
+                SourceCandidateResources.Remove((CandidateResourceExt)obj);
             }
         );
 
         CreateCandidateResourceCmd = ReactiveCommand.Create(
             () =>
             {
-                var _newCandidateResource = new CandidateResource
+                var _newCandidateResource = new CandidateResourceExt()
                 {
-                    ResourceType = new ResourceType
-                    {
-                        Id = 1,
-                        Name = "Path",
-                        Enabled = true
-                    },
-                    Value = string.Empty,
                     Candidate = _candidate,
                     CandidateId = _candidate.Id
                 };
@@ -77,14 +71,14 @@ public class CandidateResourcesViewModel : ViewModelBase
     public IProperties? Properties { get; set; }
 
     #region CandidateResources
-    public ObservableCollectionExtended<CandidateResource> SourceCandidateResources;
-    private readonly ReadOnlyObservableCollection<CandidateResource> _candidateResources;
-    public ReadOnlyObservableCollection<CandidateResource> CandidateResources => _candidateResources;
+    public ObservableCollectionExtended<CandidateResourceExt> SourceCandidateResources;
+    private readonly ReadOnlyObservableCollection<CandidateResourceExt> _candidateResources;
+    public ReadOnlyObservableCollection<CandidateResourceExt> CandidateResources => _candidateResources;
     #endregion
 
     #region SelectedCandidateResource
-    private CandidateResource? _selectedCandidateResource;
-    public CandidateResource? SelectedCandidateResource
+    private CandidateResourceExt? _selectedCandidateResource;
+    public CandidateResourceExt? SelectedCandidateResource
     {
         get => _selectedCandidateResource;
         set => this.RaiseAndSetIfChanged(ref _selectedCandidateResource, value);

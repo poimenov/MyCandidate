@@ -9,6 +9,7 @@ using Avalonia.Data;
 using Avalonia.Media;
 using MyCandidate.Common;
 using MyCandidate.MVVM.Converters;
+using MyCandidate.MVVM.Models;
 using ReactiveUI;
 
 namespace MyCandidate.MVVM.DataTemplates;
@@ -36,26 +37,25 @@ public static class DataTemplateProvider
         };        
     }
 
-    public static FuncDataTemplate<CandidateResource> CandidateResourceLink { get; }
-            = new FuncDataTemplate<CandidateResource>(
+    public static FuncDataTemplate<CandidateResourceExt> CandidateResourceLink { get; }
+            = new FuncDataTemplate<CandidateResourceExt>(
                 (resource) => resource is not null,
                 BuildCandidateResourceLink);
 
-    private static Control BuildCandidateResourceLink(CandidateResource resource)
+    private static Control BuildCandidateResourceLink(CandidateResourceExt resource)
     {
         ICommand? command = null;
-        var commandParameter = resource.Value;
         var content = new Binding(nameof(resource.Value));
 
         switch (resource.ResourceType.Name)
         {
             case "Path":
                 command = ReactiveCommand.Create(
-                    (object obj) =>
+                    () =>
                     {
-                        if (obj is string path && File.Exists(path))
+                        if (File.Exists(resource.PathValue))
                         {
-                            Open(path);
+                            Open(resource.PathValue);
                         }
                     }
                 ); 
@@ -63,11 +63,11 @@ public static class DataTemplateProvider
                 break;
             case "Url":
                 command = ReactiveCommand.Create(
-                    (object obj) =>
+                    () =>
                     {
-                        if (obj is string url && Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                        if (Uri.IsWellFormedUriString(resource.UrlValue, UriKind.Absolute))
                         {
-                            Open(url);
+                            Open(resource.UrlValue);
                         }
                     }
                 );
@@ -86,11 +86,9 @@ public static class DataTemplateProvider
         {
             [!Button.ContentProperty] = content,
             Command = command,
-            CommandParameter = commandParameter,
             [!ToolTip.TipProperty] = new Binding(nameof(resource.Value))
         };
         retVal.Classes.Add("link");
-
 
         return retVal;
     }

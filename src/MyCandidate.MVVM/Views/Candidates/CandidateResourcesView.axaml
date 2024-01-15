@@ -6,7 +6,7 @@
              xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"             
              xmlns:vm="using:MyCandidate.MVVM.ViewModels.Candidates"
              xmlns:dt="using:MyCandidate.MVVM.DataTemplates"
-             xmlns:cm="using:MyCandidate.Common"
+             xmlns:m="using:MyCandidate.MVVM.Models"
              mc:Ignorable="d"
              d:DesignWidth="300" d:DesignHeight="400"
              x:DataType="vm:CandidateResourcesViewModel" x:CompileBindings="True">
@@ -14,7 +14,7 @@
             <StackPanel>
                 <ListBox ItemsSource="{Binding CandidateResources}" SelectedItem="{Binding SelectedCandidateResource, Mode=TwoWay}" Width="300" Height="180">
                     <ListBox.ItemTemplate>
-                        <DataTemplate DataType="cm:CandidateResource">
+                        <DataTemplate DataType="m:CandidateResourceExt">
                             <StackPanel Orientation="Horizontal">
                                 <ContentControl Content="{Binding ResourceType}" ContentTemplate="{x:Static dt:DataTemplateProvider.ResourceTypeImage}" />
                                 <ContentControl Content="{Binding}" ContentTemplate="{x:Static dt:DataTemplateProvider.CandidateResourceLink}" Margin="4,0,0,0" />

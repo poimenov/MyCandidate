@@ -6,6 +6,10 @@
 
     //properties
     "Resource_Type": "Resource type",
+    "Target_Path": "Target Path",
+    "Phone_Number": "Phone Number",
+    "Email_Address": "Email Address",
+    "Web_Address": "Web Address",    
 
     //Views
     "Country_Name": "Country name",

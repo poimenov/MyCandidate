@@ -20,6 +20,11 @@
     //properties
     "Value": "Значение",
     "Resource_Type": "Тип ресурса",
+    "Target_Path": "Документ",
+    "Phone_Number": "Номер телефона",
+    "Email_Address": "Электронная почта",
+    "Web_Address": "Веб-адрес",
+    "Skype": "Логин в скайпе",
 
     //Views
     "Country_Name": "Название страны",
