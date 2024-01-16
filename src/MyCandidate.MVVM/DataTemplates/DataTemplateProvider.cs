@@ -3,10 +3,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Media;
+using Avalonia.PropertyGrid.Services;
 using MyCandidate.Common;
 using MyCandidate.MVVM.Converters;
 using MyCandidate.MVVM.Models;
@@ -16,6 +18,20 @@ namespace MyCandidate.MVVM.DataTemplates;
 
 public static class DataTemplateProvider
 {
+    public static FuncDataTemplate<ResourceType> ResourceTypeName { get; }
+        = new FuncDataTemplate<ResourceType>(
+            (resourceType) => resourceType is not null, BuildResourceTypeName);
+
+    private static Control BuildResourceTypeName(ResourceType resourceType)
+    {
+        return new TextBlock
+                {
+                    Text = GetComboBoxItemText(resourceType?.Name),
+                    Margin = new Thickness(4, 0),
+                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+                };
+    }            
+
     public static FuncDataTemplate<ResourceType> ResourceTypeImage { get; }
         = new FuncDataTemplate<ResourceType>(
             (resourceType) => resourceType is not null, BuildResourceTypeImage);
@@ -80,14 +96,13 @@ public static class DataTemplateProvider
                     };
         }
 
-
-
         var retVal = new Button()
         {
             [!Button.ContentProperty] = content,
             Command = command,
             [!ToolTip.TipProperty] = new Binding(nameof(resource.Value))
         };
+        
         retVal.Classes.Add("link");
 
         return retVal;
@@ -109,4 +124,29 @@ public static class DataTemplateProvider
             Process.Start("open", path);
         }
     }
+
+    private static string GetComboBoxItemText(string itemName)
+    {
+        string retVal = "Unknown Resource type";
+        switch(itemName)
+        {
+            case "Path":
+                retVal = LocalizationService.Default["Target_Path"];
+                break;
+            case "Mobile":
+                retVal = LocalizationService.Default["Phone_Number"];
+                break;
+            case "Email":
+                retVal = LocalizationService.Default["Email_Address"];
+                break;
+            case "Url":
+                retVal = LocalizationService.Default["Web_Address"];
+                break;
+            case "Skype":
+                retVal = LocalizationService.Default["Skype"];
+                break;                                                
+        }
+
+        return retVal;
+    }    
 }

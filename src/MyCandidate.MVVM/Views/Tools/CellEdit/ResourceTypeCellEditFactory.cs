@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.PropertyGrid.Controls;
 using Avalonia.PropertyGrid.Controls.Factories;
+using Avalonia.PropertyGrid.Services;
 using DynamicData;
 using DynamicData.Binding;
 using MyCandidate.Common;
@@ -62,12 +63,7 @@ class ResourceTypeCellEditFactory : AbstractCellEditFactory
                     Margin = new Thickness(4, 0)
                 });
 
-                retVal.Children.Add(new TextBlock
-                {
-                    Text = value?.Name,
-                    Margin = new Thickness(4, 0),
-                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
-                });
+                retVal.Children.Add(DataTemplateProvider.ResourceTypeName.Build(value));
 
                 return retVal;
             })

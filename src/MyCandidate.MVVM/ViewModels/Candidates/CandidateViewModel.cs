@@ -47,77 +47,7 @@ public class CandidateViewModel : Document
         Location = new LocationViewModel(Countries, cities)
         {
             Location = _candidate.Location
-        };
-        //test
-        _candidate.CandidateResources.Add(new CandidateResource
-            {
-                Id=0,
-                Value = "poimenov",
-                ResourceTypeId = 5,
-                ResourceType = new ResourceType
-                {
-                    Id = 5,
-                    Name = "Skype",
-                    Enabled = true
-                }
-            }
-        );
-
-        _candidate.CandidateResources.Add(new CandidateResource
-            {
-                Id=0,
-                Value = "http://www.spez.com.ua/",
-                ResourceTypeId = 4,
-                ResourceType = new ResourceType
-                {
-                    Id = 4,
-                    Name = "Url",
-                    Enabled = true
-                }
-            }
-        );    
-
-        _candidate.CandidateResources.Add(new CandidateResource
-            {
-                Id=0,
-                Value = "poimenov@gmail.com",
-                ResourceTypeId = 3,
-                ResourceType = new ResourceType
-                {
-                    Id = 3,
-                    Name = "Email",
-                    Enabled = true
-                }
-            }
-        ); 
-
-        _candidate.CandidateResources.Add(new CandidateResource
-            {
-                Id=0,
-                Value = "+380-96-827-60-38",
-                ResourceTypeId = 2,
-                ResourceType = new ResourceType
-                {
-                    Id = 2,
-                    Name = "Mobile",
-                    Enabled = true
-                }
-            }
-        );      
-
-        _candidate.CandidateResources.Add(new CandidateResource
-            {
-                Id=0,
-                Value = "/home/poimenov/Документы/Расписание уроков.ods",
-                ResourceTypeId = 1,
-                ResourceType = new ResourceType
-                {
-                    Id = 1,
-                    Name = "Path",
-                    Enabled = true
-                }
-            }
-        );                        
+        };                       
         
         CandidateResources = new CandidateResourcesViewModel(_candidate, properties);
 
