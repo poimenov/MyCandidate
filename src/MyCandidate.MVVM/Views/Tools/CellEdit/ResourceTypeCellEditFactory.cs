@@ -6,7 +6,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.PropertyGrid.Controls;
 using Avalonia.PropertyGrid.Controls.Factories;
-using Avalonia.PropertyGrid.Services;
 using DynamicData;
 using DynamicData.Binding;
 using MyCandidate.Common;

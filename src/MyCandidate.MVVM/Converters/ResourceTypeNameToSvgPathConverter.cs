@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using Avalonia.Data.Converters;
+using MyCandidate.Common.Interfaces;
 
 namespace MyCandidate.MVVM.Converters;
 
@@ -14,16 +15,16 @@ public class ResourceTypeNameToSvgPathConverter : IValueConverter
         
         switch ((string)value)
         {
-            case "Mobile":
+            case ResourceTypeNames.Mobile:
                 path = "mobile-phone-app-svgrepo-com.svg";
                 break;
-            case "Email":
+            case ResourceTypeNames.Email:
                 path = "mail-part-2-svgrepo-com.svg";
                 break;
-            case "Url":
+            case ResourceTypeNames.Url:
                 path = "url-internet-svgrepo-com.svg";
                 break;
-            case "Skype":
+            case ResourceTypeNames.Skype:
                 path = "skype-svgrepo-com.svg";
                 break;
             default://"Path"
@@ -40,19 +41,19 @@ public class ResourceTypeNameToSvgPathConverter : IValueConverter
         switch (fileName)
         {
             case "mobile-phone-app-svgrepo-com.svg":
-                resourceTypeName = "Mobile";
+                resourceTypeName = ResourceTypeNames.Mobile;
                 break;
             case "mail-part-2-svgrepo-com.svg":
-                resourceTypeName = "Email";
+                resourceTypeName = ResourceTypeNames.Email;
                 break;
             case "url-internet-svgrepo-com.svg":
-                resourceTypeName = "Url";
+                resourceTypeName = ResourceTypeNames.Url;
                 break;
             case "skype-svgrepo-com.svg":
-                resourceTypeName = "Skype";
+                resourceTypeName = ResourceTypeNames.Skype;
                 break;
             default://"fine-print-svgrepo-com.svg"
-                resourceTypeName = "Path";
+                resourceTypeName = ResourceTypeNames.Path;
                 break;
         }
 

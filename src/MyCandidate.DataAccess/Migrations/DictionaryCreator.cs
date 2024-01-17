@@ -1,4 +1,5 @@
 using MyCandidate.Common;
+using MyCandidate.Common.Interfaces;
 
 namespace MyCandidate.DataAccess.Migrations;
 
@@ -73,11 +74,11 @@ internal class DictionaryCreator
         if (!_database.ResourceTypes.Any())
         {
             _database.ResourceTypes.AddRange(
-                new ResourceType { Name = "Path", Enabled = true },
-                new ResourceType { Name = "Mobile", Enabled = true },
-                new ResourceType { Name = "Email", Enabled = true },
-                new ResourceType { Name = "Url", Enabled = true },
-                new ResourceType { Name = "Skype", Enabled = true }
+                new ResourceType { Name = ResourceTypeNames.Path, Enabled = true },
+                new ResourceType { Name = ResourceTypeNames.Mobile, Enabled = true },
+                new ResourceType { Name = ResourceTypeNames.Email, Enabled = true },
+                new ResourceType { Name = ResourceTypeNames.Url, Enabled = true },
+                new ResourceType { Name = ResourceTypeNames.Skype, Enabled = true }
                 );
             _database.SaveChanges();
         }

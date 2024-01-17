@@ -10,6 +10,7 @@ using Avalonia.Data;
 using Avalonia.Media;
 using Avalonia.PropertyGrid.Services;
 using MyCandidate.Common;
+using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.Converters;
 using MyCandidate.MVVM.Models;
 using ReactiveUI;
@@ -130,19 +131,19 @@ public static class DataTemplateProvider
         string retVal = "Unknown Resource type";
         switch(itemName)
         {
-            case "Path":
+            case ResourceTypeNames.Path:
                 retVal = LocalizationService.Default["Target_Path"];
                 break;
-            case "Mobile":
+            case ResourceTypeNames.Mobile:
                 retVal = LocalizationService.Default["Phone_Number"];
                 break;
-            case "Email":
+            case ResourceTypeNames.Email:
                 retVal = LocalizationService.Default["Email_Address"];
                 break;
-            case "Url":
+            case ResourceTypeNames.Url:
                 retVal = LocalizationService.Default["Web_Address"];
                 break;
-            case "Skype":
+            case ResourceTypeNames.Skype:
                 retVal = LocalizationService.Default["Skype"];
                 break;                                                
         }
