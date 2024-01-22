@@ -242,10 +242,11 @@ internal class DictionaryCreator
         if (!_database.Seniorities.Any())
         {
             _database.Seniorities.AddRange(
-                new Seniority { Name = "Intern", Enabled = true },
-                new Seniority { Name = "Junior", Enabled = true },
-                new Seniority { Name = "Middle", Enabled = true },
-                new Seniority { Name = "Senior", Enabled = true }
+                new Seniority { Name = SeniorityNames.Unknown, Enabled = true },
+                new Seniority { Name = SeniorityNames.Intern, Enabled = true },
+                new Seniority { Name = SeniorityNames.Junior, Enabled = true },
+                new Seniority { Name = SeniorityNames.Middle, Enabled = true },
+                new Seniority { Name = SeniorityNames.Senior, Enabled = true }
                 );
             _database.SaveChanges();
         }

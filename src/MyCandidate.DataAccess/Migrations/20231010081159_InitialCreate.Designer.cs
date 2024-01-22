@@ -43,7 +43,7 @@ namespace MyCandidate.DataAccess.Migrations
 
                     b.HasIndex("SkillId");
 
-                    b.ToTable("CandidateSkillies");
+                    b.ToTable("CandidateSkills");
                 });
 
             modelBuilder.Entity("MyCandidate.Common.Candidate", b =>

@@ -29,7 +29,7 @@ internal class Database : DbContext
     public virtual DbSet<SelectionStatus> SelectionStatuses { get; set; }
     public virtual DbSet<Candidate> Candidates { get; set; }
     public virtual DbSet<CandidateResource> CandidateResources { get; set; }
-    public virtual DbSet<CandidateSkill> CandidateSkillies { get; set; }
+    public virtual DbSet<CandidateSkill> CandidateSkills { get; set; }
     public virtual DbSet<Vacancy> Vacancies { get; set; }
     public virtual DbSet<VacancySkill> VacancySkills { get; set; }
     public virtual DbSet<CandidateOnVacancy> CandidateOnVacancies { get; set; }

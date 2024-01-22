@@ -46,7 +46,7 @@
                 <v:CandidateResourcesView DataContext="{Binding CandidateResources}" Margin="0,5,0,0" />
             </HeaderedContentControl>
             <HeaderedContentControl Header="{ll:Localize Skills}" Grid.Row="0" Grid.Column="1" Margin="5,5,5,0">
-                <TextBlock Text="content"></TextBlock>
+                <v:CandidateSkillsView DataContext="{Binding CandidateSkills}" Margin="0,5,0,0" />
             </HeaderedContentControl>
         </Grid>
         

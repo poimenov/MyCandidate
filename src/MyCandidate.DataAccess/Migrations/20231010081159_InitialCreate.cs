@@ -253,7 +253,7 @@ namespace MyCandidate.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CandidateSkillies",
+                name: "CandidateSkills",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -264,21 +264,21 @@ namespace MyCandidate.DataAccess.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CandidateSkillies", x => x.Id);
+                    table.PrimaryKey("PK_CandidateSkills", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CandidateSkillies_Candidates_CandidateId",
+                        name: "FK_CandidateSkills_Candidates_CandidateId",
                         column: x => x.CandidateId,
                         principalTable: "Candidates",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CandidateSkillies_Seniorities_SeniorityId",
+                        name: "FK_CandidateSkills_Seniorities_SeniorityId",
                         column: x => x.SeniorityId,
                         principalTable: "Seniorities",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CandidateSkillies_Skills_SkillId",
+                        name: "FK_CandidateSkills_Skills_SkillId",
                         column: x => x.SkillId,
                         principalTable: "Skills",
                         principalColumn: "Id",
@@ -437,18 +437,18 @@ namespace MyCandidate.DataAccess.Migrations
                 column: "LocationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CandidateSkillies_CandidateId",
-                table: "CandidateSkillies",
+                name: "IX_CandidateSkills_CandidateId",
+                table: "CandidateSkills",
                 column: "CandidateId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CandidateSkillies_SeniorityId",
-                table: "CandidateSkillies",
+                name: "IX_CandidateSkills_SeniorityId",
+                table: "CandidateSkills",
                 column: "SeniorityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CandidateSkillies_SkillId",
-                table: "CandidateSkillies",
+                name: "IX_CandidateSkills_SkillId",
+                table: "CandidateSkills",
                 column: "SkillId");
 
             migrationBuilder.CreateIndex(
@@ -514,7 +514,7 @@ namespace MyCandidate.DataAccess.Migrations
                 name: "CandidateResources");
 
             migrationBuilder.DropTable(
-                name: "CandidateSkillies");
+                name: "CandidateSkills");
 
             migrationBuilder.DropTable(
                 name: "Comments");

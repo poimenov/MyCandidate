@@ -47,9 +47,10 @@ public class CandidateViewModel : Document
         Location = new LocationViewModel(Countries, cities)
         {
             Location = _candidate.Location
-        };                       
-        
+        };                     
+                                     
         CandidateResources = new CandidateResourcesViewModel(_candidate, properties);
+        CandidateSkills = new CandidateSkillsViewModel(_candidate, properties);
 
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = ReactiveCommand.Create(() => { OnCancel(); });
@@ -69,7 +70,8 @@ public class CandidateViewModel : Document
         {
             Location = _candidate.Location
         };
-        CandidateResources = new CandidateResourcesViewModel(_candidate, properties);        
+        CandidateResources = new CandidateResourcesViewModel(_candidate, properties); 
+        CandidateSkills = new CandidateSkillsViewModel(_candidate, properties);       
 
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = ReactiveCommand.Create(() => { OnCancel(); });
@@ -152,6 +154,13 @@ public class CandidateViewModel : Document
         get => _candidateResources;
         set => this.RaiseAndSetIfChanged(ref _candidateResources, value);
     }
+
+    private CandidateSkillsViewModel _candidateSkills;
+    public CandidateSkillsViewModel CandidateSkills 
+    {
+        get => _candidateSkills;
+        set => this.RaiseAndSetIfChanged(ref _candidateSkills, value);
+    }    
 
     private void OnCancel()
     {

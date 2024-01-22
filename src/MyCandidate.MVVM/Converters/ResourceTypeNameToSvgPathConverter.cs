@@ -8,7 +8,7 @@ namespace MyCandidate.MVVM.Converters;
 
 public class ResourceTypeNameToSvgPathConverter : IValueConverter
 {
-    const string basePath = "avares://MyCandidate.MVVM/Assets";
+    public const string BASE_PATH = "avares://MyCandidate.MVVM/Assets";
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         var path = string.Empty;
@@ -31,7 +31,7 @@ public class ResourceTypeNameToSvgPathConverter : IValueConverter
                 path = "fine-print-svgrepo-com.svg";
                 break;
         }
-        return Path.Combine(basePath, path);
+        return Path.Combine(BASE_PATH, path);
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

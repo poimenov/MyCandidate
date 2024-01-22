@@ -79,6 +79,9 @@ public partial class App : Application
                 .AddTransient<IDataAccess<Office>, Officies>()
                 .AddTransient<IDataAccess<Candidate>, Candidates>()
                 .AddTransient<IDictionariesDataAccess, Dictionaries>()
+                .AddTransient<IDataAccess<Vacancy>, Vacancies>()
+                .AddTransient<ICandidateSkills, CandidateSkills>()
+                .AddTransient<IVacancySkills, VacancySkills>()
                 //dictionary services
                 .AddTransient<IDictionaryService<Country>, CountryService>()
                 .AddTransient<IDictionaryService<City>, CityService>()

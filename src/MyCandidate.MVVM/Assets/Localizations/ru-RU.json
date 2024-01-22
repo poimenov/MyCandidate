@@ -50,6 +50,7 @@
     //ViewModels
     "SkillCategories": "Категории навыков",
     "SkillCategory": "Категория навыков",
+    "Category": "Категория",
     "Skill": "Навык",
     "Cities": "Города",
     "City": "Город",

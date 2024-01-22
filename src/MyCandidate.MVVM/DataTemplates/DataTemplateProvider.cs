@@ -18,7 +18,7 @@ using ReactiveUI;
 namespace MyCandidate.MVVM.DataTemplates;
 
 public static class DataTemplateProvider
-{
+{                
     public static FuncDataTemplate<ResourceType> ResourceTypeName { get; }
         = new FuncDataTemplate<ResourceType>(
             (resourceType) => resourceType is not null, BuildResourceTypeName);
@@ -39,9 +39,7 @@ public static class DataTemplateProvider
 
     private static Control BuildResourceTypeImage(ResourceType resourceType)
     {
-        var basePath = "avares://MyCandidate.MVVM/Assets";
-
-        return new Avalonia.Svg.Svg(new System.Uri(basePath))
+        return new Avalonia.Svg.Svg(new Uri(ResourceTypeNameToSvgPathConverter.BASE_PATH))
         {
             Width = 24,
             Height = 24,

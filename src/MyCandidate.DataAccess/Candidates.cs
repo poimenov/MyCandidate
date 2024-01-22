@@ -120,8 +120,8 @@ public class Candidates : IDataAccess<Candidate>
                         // db.CandidateResources.RemoveRange(resources);
                         // db.SaveChanges();
 
-                        // var skills = db.CandidateSkillies.Where(x => x.CandidateId == item.Id);
-                        // db.CandidateSkillies.RemoveRange(skills);
+                        // var skills = db.CandidateSkills.Where(x => x.CandidateId == item.Id);
+                        // db.CandidateSkills.RemoveRange(skills);
                         // db.SaveChanges();
 
                         var entity = db.Candidates.First(x => x.Id == item.Id);
