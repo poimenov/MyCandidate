@@ -12,14 +12,18 @@
              x:DataType="vm:CandidateResourcesViewModel" x:CompileBindings="True">
 
             <StackPanel>
-                <ListBox ItemsSource="{Binding CandidateResources}" 
-                    SelectedItem="{Binding SelectedCandidateResource, Mode=TwoWay}" 
-                    Width="300" Height="180">
+                <ListBox ItemsSource="{Binding CandidateResources}" Height="60"
+                    SelectedItem="{Binding SelectedCandidateResource, Mode=TwoWay}" >
                     <ListBox.Styles>
                         <Style Selector="ListBoxItem">
                             <Setter Property="Padding" Value="4"/>
                         </Style>
-                    </ListBox.Styles>                     
+                    </ListBox.Styles>   
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>                    
+                    </ListBox.ItemsPanel>                                        
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="m:CandidateResourceExt">
                             <StackPanel Orientation="Horizontal">

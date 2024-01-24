@@ -61,29 +61,15 @@ public static class DataTemplateProvider
     {
         ICommand? command = null;
         var content = new Binding(nameof(resource.Value));
-
+        content.Converter = new CandidateResourceExtValueConverter();
         switch (resource.ResourceType.Name)
         {
             case "Path":
-                command = ReactiveCommand.Create(
-                    () =>
-                    {
-                        if (File.Exists(resource.PathValue))
-                        {
-                            Open(resource.PathValue);
-                        }
-                    }
-                ); 
-                content.Converter = new PathToFileNameConverter();
-                break;
             case "Url":
                 command = ReactiveCommand.Create(
                     () =>
                     {
-                        if (Uri.IsWellFormedUriString(resource.UrlValue, UriKind.Absolute))
-                        {
-                            Open(resource.UrlValue);
-                        }
+                        Open(resource.Value);
                     }
                 );
                 break;
@@ -99,7 +85,7 @@ public static class DataTemplateProvider
         {
             [!Button.ContentProperty] = content,
             Command = command,
-            [!ToolTip.TipProperty] = new Binding(nameof(resource.Value))
+            [!ToolTip.TipProperty] = new Binding(nameof(resource.Value)) 
         };
         
         retVal.Classes.Add("link");
@@ -109,18 +95,21 @@ public static class DataTemplateProvider
 
     private static void Open(string path)
     {
-        path = $"\"{path}\"";
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if (File.Exists(path) || Uri.IsWellFormedUriString(path, UriKind.Absolute))
         {
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {path}"));
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            Process.Start("xdg-open", path);
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            Process.Start("open", path);
+            path = $"\"{path}\"";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Process.Start(new ProcessStartInfo("cmd", $"/c start {path}"));
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Process.Start("xdg-open", path);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Process.Start("open", path);
+            }
         }
     }
 

@@ -64,6 +64,7 @@ public class CandidateSkillsViewModel : ViewModelBase
                     }                                        
                 };
                 SourceCandidateSkills.Add(_newCandidateSkill);
+                _newCandidateSkill.PropertyChanged += ItemPropertyChanged;
                 SelectedCandidateSkill = _newCandidateSkill;
             }
         );            

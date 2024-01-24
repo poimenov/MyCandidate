@@ -12,8 +12,8 @@
              x:DataType="vm:CandidateSkillsViewModel" x:CompileBindings="True">
 
             <StackPanel>
-                <ListBox ItemsSource="{Binding CandidateSkills}"
-                    SelectedItem="{Binding SelectedCandidateSkill, Mode=TwoWay}" Width="300" Height="180"> 
+                <ListBox ItemsSource="{Binding CandidateSkills}" Height="60"
+                    SelectedItem="{Binding SelectedCandidateSkill, Mode=TwoWay}"> 
                     <ListBox.Styles>
                         <Style Selector="ListBoxItem">
                             <Setter Property="Padding" Value="2"/>

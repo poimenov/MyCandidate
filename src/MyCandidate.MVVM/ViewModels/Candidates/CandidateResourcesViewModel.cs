@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.PropertyGrid.Services;
@@ -26,6 +27,8 @@ public class CandidateResourcesViewModel : ViewModelBase
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _candidateResources)
             .Subscribe();
+
+        _candidateResources.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
 
         this.WhenAnyValue(x => x.SelectedCandidateResource)
             .Subscribe(
@@ -55,10 +58,29 @@ public class CandidateResourcesViewModel : ViewModelBase
                     CandidateId = _candidate.Id
                 };
                 SourceCandidateResources.Add(_newCandidateResource);
+                _newCandidateResource.PropertyChanged += ItemPropertyChanged;
                 SelectedCandidateResource = _newCandidateResource;
             }
         );
     }
+
+    private void ItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if(sender is CandidateResourceExt candidateResource)
+        {
+            this.RaisePropertyChanged(nameof(CandidateResources));
+        }
+        this.RaisePropertyChanged(nameof(IsValid));
+    }
+
+    public bool IsValid
+    {
+        get
+        {
+            //TODO: implement
+            return true;
+        }
+    }     
 
     private void CultureChanged(object? sender, EventArgs e)
     {
