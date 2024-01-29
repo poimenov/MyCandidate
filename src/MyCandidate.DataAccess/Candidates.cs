@@ -4,86 +4,231 @@ using MyCandidate.Common.Interfaces;
 
 namespace MyCandidate.DataAccess;
 
-public class Candidates : IDataAccess<Candidate>
+public class Candidates : ICandidates
 {
     public Candidates()
     {
         //
     }
 
-    public IEnumerable<Candidate> ItemsList
+    public bool Exist(string lastName, string firstName, DateTime birthdate)
     {
-        get
+        using (var db = new Database())
         {
-            using (var db = new Database())
-            {
-                return db.Candidates
-                    .Include(x => x.Location)
-                    .Include(x => x.CandidateSkills)
-                    .Include(x => x.CandidateOnVacancies)
-                    .ToList();
-            }
+            return db.Candidates.Any(x => x.LastName.Trim().ToLower() == lastName.Trim().ToLower()
+                                            && x.FirstName.Trim().ToLower() == firstName.Trim().ToLower()
+                                            && x.BirthDate == birthdate);
         }
     }
 
-    public void Create(IEnumerable<Candidate> items)
+    public void Delete(int id)
     {
-        if (null == items || items.Count() == 0)
-            return;
         using (var db = new Database())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
-                foreach (var item in items)
+                if (db.Candidates.Any(x => x.Id == id))
                 {
-                    if (!db.Candidates.Any(x => Equals(x, item)))
+                    try
                     {
-                        item.CreationDate = DateTime.Now;
-                        item.LastModificationDate = DateTime.Now;
-                        item.Location.City = null;
-                        item.CandidateResources.ForEach(x => x.ResourceType = null);
-                        item.CandidateSkills.ForEach(x =>
-                            {
-                                x.Skill = null;
-                                x.Seniority = null;
-                            });
-                        db.Candidates.Add(item);
-                    }
-                }
-                db.SaveChanges();
-                transaction.Commit();
-            }
-        }
-    }
+                        if (db.CandidateResources.Any(x => x.CandidateId == id))
+                        {
+                            db.CandidateResources.RemoveRange(db.CandidateResources.Where(x => x.CandidateId == id));
+                        }
 
-    private bool Equals(Candidate x, Candidate y) =>
-            x.FirstName.Equals(y.FirstName, StringComparison.InvariantCultureIgnoreCase)
-            && x.LastName.Equals(y.LastName, StringComparison.InvariantCultureIgnoreCase)
-            && x.BirthDate.Equals(y.BirthDate);
+                        if (db.CandidateSkills.Any(x => x.CandidateId == id))
+                        {
+                            db.CandidateSkills.RemoveRange(db.CandidateSkills.Where(x => x.CandidateId == id));
+                        }
 
-    public void Delete(IEnumerable<int> itemIds)
-    {
-        if (null == itemIds || itemIds.Count() == 0)
-            return;
-        using (var db = new Database())
-        {
-            using (var transaction = db.Database.BeginTransaction())
-            {
-                foreach (var id in itemIds)
-                {
-                    if (db.Candidates.Any(x => x.Id == id))
-                    {
                         var item = db.Candidates.First(x => x.Id == id);
+                        db.Locations.Remove(db.Locations.First(x => x.Id == item.LocationId));
                         db.Candidates.Remove(item);
+
+                        db.SaveChanges();
+                        transaction.Commit();
+                    }
+                    catch (System.Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
                     }
                 }
-                db.SaveChanges();
-                transaction.Commit();
+
             }
         }
     }
 
-    public Candidate? Get(int itemId)
+    public bool Create(Candidate candidate, out int id)
+    {
+        bool retVal = false;
+        id = 0;
+
+        if (Exist(candidate.LastName, candidate.FirstName, candidate.BirthDate))
+        {
+            return retVal;
+        }
+
+        using (var db = new Database())
+        {
+            using (var transaction = db.Database.BeginTransaction())
+            {
+                try
+                {
+                    var newLocation = new Location
+                    {
+                        Address = candidate.Location.Address ?? string.Empty,
+                        CityId = candidate.Location.CityId
+                    };
+                    db.Locations.Add(newLocation);
+                    db.SaveChanges();
+
+                    var newCandidate = new Candidate
+                    {
+                        LastName = candidate.LastName,
+                        FirstName = candidate.FirstName,
+                        BirthDate = candidate.BirthDate,
+                        LocationId = newLocation.Id,
+                        CreationDate = DateTime.Now,
+                        LastModificationDate = DateTime.Now
+                    };
+                    db.Candidates.Add(newCandidate);
+                    db.SaveChanges();
+                    id = newCandidate.Id;
+
+                    foreach (var candidateResource in candidate.CandidateResources)
+                    {
+                        var newCandidateResource = new CandidateResource
+                        {
+                            CandidateId = id,
+                            Value = candidateResource.Value,
+                            ResourceTypeId = candidateResource.ResourceTypeId
+                        };
+                        db.CandidateResources.Add(newCandidateResource);
+                    }
+
+                    foreach (var candidateSkill in candidate.CandidateSkills)
+                    {
+                        var newCandidateSkill = new CandidateSkill
+                        {
+                            CandidateId = id,
+                            SeniorityId = candidateSkill.SeniorityId,
+                            SkillId = candidateSkill.SkillId
+                        };
+                        db.CandidateSkills.Add(newCandidateSkill);
+                    }
+
+                    db.SaveChanges();
+                    transaction.Commit();
+                    retVal = true;
+                }
+                catch (System.Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+        return retVal;
+    }
+
+    public void Update(Candidate candidate)
+    {
+        using (var db = new Database())
+        {
+            using (var transaction = db.Database.BeginTransaction())
+            {
+                if (db.Candidates.Any(x => x.Id == candidate.Id))
+                {
+                    var entity = db.Candidates.First(x => x.Id == candidate.Id);
+                    entity.LastModificationDate = DateTime.Now;
+                    entity.FirstName = candidate.FirstName;
+                    entity.LastName = candidate.LastName;
+                    entity.BirthDate = candidate.BirthDate;
+                    entity.Enabled = candidate.Enabled;
+
+                    var location = db.Locations.First(x => x.Id == entity.LocationId);
+                    location.Address = candidate.Location.Address;
+                    location.CityId = candidate.Location.CityId;
+
+                    //update existed resources
+                    var idsToUpdate = candidate.CandidateResources.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
+                    foreach (var idToUpdate in idsToUpdate)
+                    {
+                        if (db.CandidateResources.Any(x => x.Id == idToUpdate))
+                        {
+                            var resourceToUpdate = candidate.CandidateResources.First(x => x.Id == idToUpdate);
+                            var resource = db.CandidateResources.First(x => x.Id == idToUpdate);
+                            resource.Value = resourceToUpdate.Value;
+                            resource.ResourceTypeId = resourceToUpdate.ResourceTypeId;
+                        }
+                    }
+                    //delete existed resources
+                    var idsToDelete = db.CandidateResources.Where(x => x.CandidateId == candidate.Id && !idsToUpdate.Contains(x.Id))
+                                                                   .Select(x => x.Id).ToArray();
+                    foreach (var idToDelete in idsToDelete)
+                    {
+                        if (db.CandidateResources.Any(x => x.Id == idToDelete))
+                        {
+                            var resource = db.CandidateResources.First(x => x.Id == idToDelete);
+                            db.CandidateResources.Remove(resource);
+                        }
+                    }
+                    //add new resources
+                    foreach (var resourceToAdd in candidate.CandidateResources.Where(x => x.Id == 0))
+                    {
+                        var newResource = new CandidateResource
+                        {
+                            CandidateId = candidate.Id,
+                            Value = resourceToAdd.Value,
+                            ResourceTypeId = resourceToAdd.ResourceTypeId
+                        };
+                        db.CandidateResources.Add(newResource);
+                    }
+
+                    //update existed skills
+                    idsToUpdate = candidate.CandidateSkills.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
+                    foreach (var idToUpdate in idsToUpdate)
+                    {
+                        if (db.CandidateSkills.Any(x => x.Id == idToUpdate))
+                        {
+                            var skillToUpdate = candidate.CandidateSkills.First(x => x.Id == idToUpdate);
+                            var skill = db.CandidateSkills.First(x => x.Id == idToUpdate);
+                            skill.SeniorityId = skillToUpdate.SeniorityId;
+                            skill.SkillId = skillToUpdate.SkillId;
+                        }
+                    }
+                    //delete existed skills
+                    idsToDelete = db.CandidateSkills.Where(x => x.CandidateId == candidate.Id && !idsToUpdate.Contains(x.Id))
+                                                                   .Select(x => x.Id).ToArray();
+                    foreach (var idToDelete in idsToDelete)
+                    {
+                        if (db.CandidateSkills.Any(x => x.Id == idToDelete))
+                        {
+                            var skill = db.CandidateSkills.First(x => x.Id == idToDelete);
+                            db.CandidateSkills.Remove(skill);
+                        }
+                    }
+                    //add new skills
+                    foreach (var skillToAdd in candidate.CandidateSkills.Where(x => x.Id == 0))
+                    {
+                        var newSkill = new CandidateSkill
+                        {
+                            CandidateId = candidate.Id,
+                            SeniorityId = skillToAdd.SeniorityId,
+                            SkillId = skillToAdd.SkillId
+                        };
+                        db.CandidateSkills.Add(newSkill);
+                    }
+
+                    db.SaveChanges();
+                    transaction.Commit();
+                }
+            }
+        }
+    }
+
+    public Candidate Get(int id)
     {
         using (var db = new Database())
         {
@@ -100,50 +245,7 @@ public class Candidates : IDataAccess<Candidate>
                 .ThenInclude(x => x.ResourceType)
                 .Include(x => x.CandidateOnVacancies)
                 .ThenInclude(x => x.Vacancy)
-                .FirstOrDefault(x => x.Id == itemId);
-        }
-    }
-
-    public void Update(IEnumerable<Candidate> items)
-    {
-        if (null == items || items.Count() == 0)
-            return;
-        using (var db = new Database())
-        {
-            using (var transaction = db.Database.BeginTransaction())
-            {
-                foreach (var item in items)
-                {
-                    if (db.Candidates.Any(x => x.Id == item.Id))
-                    {
-                        // var resources = db.CandidateResources.Where(x => x.CandidateId == item.Id);
-                        // db.CandidateResources.RemoveRange(resources);
-                        // db.SaveChanges();
-
-                        // var skills = db.CandidateSkills.Where(x => x.CandidateId == item.Id);
-                        // db.CandidateSkills.RemoveRange(skills);
-                        // db.SaveChanges();
-
-                        var entity = db.Candidates.First(x => x.Id == item.Id);
-                        entity.LastModificationDate = DateTime.Now;
-                        entity.CandidateResources = item.CandidateResources;
-                        entity.CandidateResources.ForEach(x => x.ResourceType = null);
-                        entity.CandidateSkills = item.CandidateSkills;
-                        entity.CandidateSkills.ForEach(x =>
-                            {
-                                x.Skill = null;
-                                x.Seniority = null;
-                            });
-                        entity.Location.Address = item.Location.Address;
-                        entity.Location.CityId = item.Location.CityId;
-                        entity.FirstName = item.FirstName;
-                        entity.LastName = item.LastName;
-                        entity.Enabled = item.Enabled;
-                    }
-                }
-                db.SaveChanges();
-                transaction.Commit();
-            }
+                .First(x => x.Id == id);
         }
     }
 }

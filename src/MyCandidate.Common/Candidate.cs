@@ -16,15 +16,15 @@ namespace MyCandidate.Common
 
         [NotMapped]
         [DisplayName("Name")]
-        public override string Name => string.Format("{0}: {1}", this.LastName, this.FirstName);
+        public override string Name => string.Format("{0} {1}", this.LastName, this.FirstName);
 
         [Required]
-        [StringLength(250)]
+        [StringLength(250, MinimumLength = 2)]
         [DisplayName("FirstName")]
         public string FirstName { get; set; }
 
         [Required]
-        [StringLength(250)]
+        [StringLength(250, MinimumLength = 2)]
         [DisplayName("LastName")]
         public string LastName { get; set; }
 
@@ -43,7 +43,6 @@ namespace MyCandidate.Common
         [DisplayName("CreationDate")]
         public DateTime CreationDate { get; set; }
 
-        [Required]
         [DisplayName("LastModificationDate")]
         public DateTime LastModificationDate { get; set; }
 

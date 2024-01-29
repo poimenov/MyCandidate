@@ -79,7 +79,7 @@ public class CandidateSkillsViewModel : ViewModelBase
     {
         get
         {
-            if(CandidateSkills.Select(x => x.Skill).Distinct().Count() != CandidateSkills.Count())
+            if(CandidateSkills.Select(x => x.Skill.Name).Distinct().Count() != CandidateSkills.Count())
             {
                 return false;
             }

@@ -1,7 +1,9 @@
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using MyCandidate.Common;
+using MyCandidate.Common.Interfaces;
 using PropertyModels.ComponentModel;
 using PropertyModels.ComponentModel.DataAnnotations;
 using ReactiveUI;
@@ -125,5 +127,49 @@ public class CandidateResourceExt : CandidateResource
         {
             this.RaiseAndSetIfChanged(ref _resourceType, value);
         }
-    }    
+    } 
+
+    public bool IsValid()
+    {
+        if(string.IsNullOrWhiteSpace(Value))
+        {
+            return false;
+        }
+
+        var retVal = true;
+        var context = new ValidationContext(this);
+        
+        switch(ResourceType.Name)
+        {
+            case ResourceTypeNames.Path:
+                retVal = File.Exists(PathValue);
+                break;
+            case ResourceTypeNames.Url:
+                retVal = Uri.IsWellFormedUriString(UrlValue, UriKind.Absolute);
+                break;  
+             case ResourceTypeNames.Mobile:
+                context.MemberName = nameof(MobileValue);             
+                retVal = Validator.TryValidateProperty(MobileValue, context, null);
+                break;   
+             case ResourceTypeNames.Email:
+                context.MemberName = nameof(EmailValue);             
+                retVal = Validator.TryValidateProperty(EmailValue, context, null);
+                break;                                        
+        }
+
+        return retVal;
+    }  
+
+    public CandidateResource ToCandidateResource()
+    {
+        return new CandidateResource
+        {
+            Id = this.Id,
+            Candidate = this.Candidate,
+            CandidateId = this.CandidateId,
+            ResourceType = this.ResourceType,
+            ResourceTypeId = this.ResourceTypeId,
+            Value = this.Value            
+        };
+    } 
 }

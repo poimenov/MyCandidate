@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Reactive.Linq;
+using Avalonia.PropertyGrid.Services;
 using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
 using DynamicData.Binding;
@@ -102,7 +103,7 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
             {
                 if (IsValid)
                 {
-                    var dialog = MessageBoxManager.GetMessageBoxStandard("Dialog", "Are you sure you want to save the changes?"
+                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"], LocalizationService.Default["Save_Text"]
                                                                                 , ButtonEnum.YesNo, Icon.Question);  
                     var result = await dialog.ShowAsync();                
                     if(result == ButtonResult.No)

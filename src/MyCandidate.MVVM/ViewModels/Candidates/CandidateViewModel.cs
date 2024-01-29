@@ -6,8 +6,11 @@ using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.PropertyGrid.Services;
 using Dock.Model.ReactiveUI.Controls;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
+using MyCandidate.MVVM.DataAnnotations;
 using MyCandidate.MVVM.Extensions;
 using MyCandidate.MVVM.Services;
 using MyCandidate.MVVM.ViewModels.Tools;
@@ -18,6 +21,7 @@ namespace MyCandidate.MVVM.ViewModels.Candidates;
 public class CandidateViewModel : Document
 {
     private readonly ICandidateService _candidateService;
+    private readonly IProperties _properties;
     private App CurrentApplication => (App)Application.Current;
     private IDataAccess<Country> Countries => CurrentApplication.GetRequiredService<IDataAccess<Country>>();
     private IDataAccess<City> Cities => CurrentApplication.GetRequiredService<IDataAccess<City>>();
@@ -26,43 +30,63 @@ public class CandidateViewModel : Document
     public CandidateViewModel(ICandidateService candidateService, IProperties properties)
     {
         _candidateService = candidateService;
-        var cities = Cities;
-        var defaultCity = cities.ItemsList.First();
-        _candidate = new Candidate
-        {
-            Enabled = true,
-            Location = new Location
-            {
-                Enabled = true,
-                CityId = defaultCity.CountryId,
-                City = defaultCity
-            },
-            CandidateResources = new List<CandidateResource>(),
-            CandidateSkills = new List<CandidateSkill>()
-        };
-        Title = LocalizationService.Default["New_Candidate"];
-        FirstName = string.Empty;
-        LastName = string.Empty;
-        Enabled = _candidate.Enabled;
-        Location = new LocationViewModel(Countries, cities)
-        {
-            Location = _candidate.Location
-        };                     
-                                     
-        CandidateResources = new CandidateResourcesViewModel(_candidate, properties);
-        CandidateSkills = new CandidateSkillsViewModel(_candidate, properties);
-
+        _properties = properties;
+        _candidate = NewCandidate;
+        LoadCandidate();
         LocalizationService.Default.OnCultureChanged += CultureChanged;
-        CancelCmd = ReactiveCommand.Create(() => { OnCancel(); });
-        SaveCmd = ReactiveCommand.Create(() => { OnSave(); });
-        DeleteCmd = ReactiveCommand.Create(() => { OnDelete(); });
+        CancelCmd = CreateCancelCmd();
+        SaveCmd = CreateSaveCmd();
+        DeleteCmd = CreateDeleteCmd();
     }
 
     public CandidateViewModel(ICandidateService candidateService, IProperties properties, int candidateId)
     {
         _candidateService = candidateService;
+        _properties = properties;
         _candidate = _candidateService.Get(candidateId);
-        Title = _candidate.Name;
+        LoadCandidate();
+        LocalizationService.Default.OnCultureChanged += CultureChanged;
+        CancelCmd = CreateCancelCmd();
+        SaveCmd = CreateSaveCmd();
+        DeleteCmd = CreateDeleteCmd();
+    }
+
+    private Candidate NewCandidate
+    {
+        get
+        {
+            var defaultCity = Cities.ItemsList.First();
+            return new Candidate
+            {
+                Id = 0,
+                FirstName = string.Empty,
+                LastName = string.Empty,
+                Enabled = true,
+                Location = new Location
+                {
+                    Enabled = true,
+                    CityId = defaultCity.CountryId,
+                    City = defaultCity
+                },
+                CandidateResources = new List<CandidateResource>(),
+                CandidateSkills = new List<CandidateSkill>()
+            };
+        }
+    }
+
+    private void LoadCandidate()
+    {
+        if(_candidate.Id == 0)
+        {
+            Title = LocalizationService.Default["New_Candidate"];
+            BirthDate = null;
+        }
+        else
+        {
+            Title = _candidate.Name;
+            BirthDate = _candidate.BirthDate;
+        } 
+        
         FirstName = _candidate.FirstName;
         LastName = _candidate.LastName;
         Enabled = _candidate.Enabled;
@@ -70,13 +94,12 @@ public class CandidateViewModel : Document
         {
             Location = _candidate.Location
         };
-        CandidateResources = new CandidateResourcesViewModel(_candidate, properties); 
-        CandidateSkills = new CandidateSkillsViewModel(_candidate, properties);       
 
-        LocalizationService.Default.OnCultureChanged += CultureChanged;
-        CancelCmd = ReactiveCommand.Create(() => { OnCancel(); });
-        SaveCmd = ReactiveCommand.Create(() => { OnSave(); });
-        DeleteCmd = ReactiveCommand.Create(() => { OnDelete(); });
+        CandidateResources = new CandidateResourcesViewModel(_candidate, _properties);
+        CandidateResources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
+        CandidateSkills = new CandidateSkillsViewModel(_candidate, _properties);
+        CandidateSkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });  
+        this.RaisePropertyChanged(nameof(CandidateId));      
     }
 
     private void CultureChanged(object? sender, EventArgs e)
@@ -84,9 +107,124 @@ public class CandidateViewModel : Document
         Title = LocalizationService.Default["New_Candidate"];
     }
 
+    public bool IsValid
+    {
+        get
+        {
+            var retVal = Validator.TryValidateObject(this, new ValidationContext(this), null, true)
+                && CandidateResources.IsValid
+                && CandidateSkills.IsValid;
+            return retVal;
+        }
+    }
+
+    public int CandidateId
+    {
+        get
+        {
+            return _candidate.Id;
+        }
+    }
+
     public IReactiveCommand SaveCmd { get; }
+
+    private IReactiveCommand CreateSaveCmd()
+    {
+        return ReactiveCommand.Create(
+                    async () =>
+                        {
+                            var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
+                                                                                    LocalizationService.Default["Save_Text"],
+                                                                                    ButtonEnum.YesNo, Icon.Question);
+                            var result = await dialog.ShowAsync();
+                            if (result == ButtonResult.No)
+                            {
+                                return;
+                            }
+
+                            _candidate.CandidateResources = CandidateResources.CandidateResources.Select(x => x.ToCandidateResource()).ToList();
+                            _candidate.CandidateSkills = CandidateSkills.CandidateSkills.ToList();
+                            string message;
+                            int id;
+                            bool success;
+
+                            if (_candidate.Id == 0)
+                            {
+                                success = _candidateService.Create(_candidate, out id, out message);
+                            }
+                            else
+                            {
+                                success = _candidateService.Update(_candidate, out message);
+                                id = _candidate.Id;
+                            }
+
+                            if (success)
+                            {
+                                _candidate = _candidateService.Get(id);
+                                LoadCandidate();                                
+                            }
+                            else
+                            {
+                                dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
+                                                                                    message, ButtonEnum.Ok, Icon.Error);
+                                await dialog.ShowAsync();
+                            }
+
+                        }, this.WhenAnyValue(x => x.IsValid, v => v == true)
+                    );
+    }
     public IReactiveCommand CancelCmd { get; }
+
+    private IReactiveCommand CreateCancelCmd()
+    {
+        return ReactiveCommand.Create(
+                    async () =>
+                        {
+                            var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Cancel"],
+                                                                                    LocalizationService.Default["Cancel_Text"],
+                                                                                    ButtonEnum.YesNo, Icon.Question);
+                            var result = await dialog.ShowAsync();
+                            if (result == ButtonResult.No)
+                            {
+                                return;
+                            }
+                            _candidate = _candidate.Id == 0 ? NewCandidate : _candidateService.Get(_candidate.Id);
+                            LoadCandidate();
+                        }
+                    );
+    }
+
     public IReactiveCommand DeleteCmd { get; }
+
+    private IReactiveCommand CreateDeleteCmd()
+    {
+        return ReactiveCommand.Create(
+                    async () =>
+                        {
+                            var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
+                                                                                    LocalizationService.Default["DeleteCandidate_Text"],
+                                                                                    ButtonEnum.YesNo, Icon.Question);
+                            var result = await dialog.ShowAsync();
+                            if (result == ButtonResult.No)
+                            {
+                                return;
+                            }
+
+                            string message;
+                            if (_candidateService.Delete(CandidateId, out message))
+                            {
+                                this.Factory.CloseDockable(this);
+                            }
+                            else
+                            {
+                                dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
+                                                                                    message, ButtonEnum.Ok, Icon.Error);
+                                await dialog.ShowAsync();
+                            }
+
+                        }, this.WhenAnyValue(x => x.CandidateId, y => y != 0)
+                    );
+    }
 
 
     #region FirstName
@@ -96,7 +234,12 @@ public class CandidateViewModel : Document
     public string FirstName
     {
         get => _firstName;
-        set => this.RaiseAndSetIfChanged(ref _firstName, value);
+        set
+        {
+            _candidate.FirstName = value;
+            this.RaiseAndSetIfChanged(ref _firstName, value);
+            this.RaisePropertyChanged(nameof(IsValid));
+        }
     }
     #endregion
 
@@ -107,27 +250,44 @@ public class CandidateViewModel : Document
     public string LastName
     {
         get => _lastName;
-        set => this.RaiseAndSetIfChanged(ref _lastName, value);
+        set
+        {
+            _candidate.LastName = value;
+            this.RaiseAndSetIfChanged(ref _lastName, value);
+            this.RaisePropertyChanged(nameof(IsValid));
+        }
     }
     #endregion
 
     #region BirthDate
-    private DateTimeOffset? _birthDate;
+    private DateTime? _birthDate;
+
     [Required]
-    public DateTimeOffset? BirthDate
+    [BirthDate]
+    public DateTime? BirthDate
     {
         get => _birthDate;
         set
         {
+            if (value.HasValue)
+            {
+                _candidate.BirthDate = value!.Value;
+            }
             this.RaiseAndSetIfChanged(ref _birthDate, value);
             this.RaisePropertyChanged(nameof(this.Age));
+            this.RaisePropertyChanged(nameof(IsValid));
         }
+    }
+
+    public DateTime MaxDateEnd
+    {
+        get => DateTime.Today.AddYears(-18);
     }
     #endregion
 
     public string Age
     {
-        get => _birthDate.HasValue ? $"{LocalizationService.Default["Age"]} {_birthDate.Value.DateTime.GetAge()}" : string.Empty;
+        get => _birthDate.HasValue ? $"{LocalizationService.Default["Age"]} {_birthDate.Value.GetAge()}" : string.Empty;
     }
 
     #region Location
@@ -135,7 +295,12 @@ public class CandidateViewModel : Document
     public LocationViewModel Location
     {
         get => _location;
-        set => this.RaiseAndSetIfChanged(ref _location, value);
+        set
+        {
+            _candidate.Location = value.Location;
+            this.RaiseAndSetIfChanged(ref _location, value);
+            this.RaisePropertyChanged(nameof(IsValid));
+        }
     }
     #endregion
 
@@ -144,36 +309,26 @@ public class CandidateViewModel : Document
     public bool Enabled
     {
         get => _enabled;
-        set => this.RaiseAndSetIfChanged(ref _enabled, value);
+        set
+        {
+            _candidate.Enabled = value;
+            this.RaiseAndSetIfChanged(ref _enabled, value);
+            this.RaisePropertyChanged(nameof(IsValid));
+        }
     }
     #endregion   
 
     private CandidateResourcesViewModel _candidateResources;
-    public CandidateResourcesViewModel CandidateResources 
+    public CandidateResourcesViewModel CandidateResources
     {
         get => _candidateResources;
         set => this.RaiseAndSetIfChanged(ref _candidateResources, value);
     }
 
     private CandidateSkillsViewModel _candidateSkills;
-    public CandidateSkillsViewModel CandidateSkills 
+    public CandidateSkillsViewModel CandidateSkills
     {
         get => _candidateSkills;
         set => this.RaiseAndSetIfChanged(ref _candidateSkills, value);
-    }    
-
-    private void OnCancel()
-    {
-        //
-    }
-
-    private void OnSave()
-    {
-        //
-    }
-
-    private void OnDelete()
-    {
-        //
     }
 }

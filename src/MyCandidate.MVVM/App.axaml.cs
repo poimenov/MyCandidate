@@ -77,7 +77,7 @@ public partial class App : Application
                 .AddTransient<IDataAccess<SkillCategory>, SkillCategories>()
                 .AddTransient<IDataAccess<Company>, Companies>()
                 .AddTransient<IDataAccess<Office>, Officies>()
-                .AddTransient<IDataAccess<Candidate>, Candidates>()
+                .AddTransient<ICandidates, Candidates>()
                 .AddTransient<IDictionariesDataAccess, Dictionaries>()
                 .AddTransient<IDataAccess<Vacancy>, Vacancies>()
                 .AddTransient<ICandidateSkills, CandidateSkills>()

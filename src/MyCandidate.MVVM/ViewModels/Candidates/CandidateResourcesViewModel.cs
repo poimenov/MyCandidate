@@ -77,7 +77,13 @@ public class CandidateResourcesViewModel : ViewModelBase
     {
         get
         {
-            //TODO: implement
+            foreach(var item in _candidateResources)
+            {
+                if (!item.IsValid())
+                {
+                    return false;
+                }                
+            }
             return true;
         }
     }     

@@ -15,22 +15,22 @@
 
     <Grid Grid.Row="0" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,5,*">
 
-            <Grid Grid.Row="0" Grid.Column="0" ColumnDefinitions="132,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="5,15,5,5">
+            <Grid Grid.Row="0" Grid.Column="0" ColumnDefinitions="132,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="5,15,5,5">                
+                <TextBlock Text="{ll:Localize Last_Name}" Grid.Row="0" Grid.Column="0"
+                    VerticalAlignment="Center" Padding="4"></TextBlock> 
+                <TextBox Text="{Binding LastName}" Grid.Row="0" Grid.Column="1"
+                    Margin="4" HorizontalAlignment="Stretch"></TextBox>
 
-                <TextBlock Text="{ll:Localize First_Name}" Grid.Row="0" Grid.Column="0"
+                <TextBlock Text="{ll:Localize First_Name}" Grid.Row="1" Grid.Column="0"
                     VerticalAlignment="Center" Padding="4"></TextBlock> 
-                <TextBox Text="{Binding FirstName}" Grid.Row="0" Grid.Column="1"
-                    Margin="4" HorizontalAlignment="Stretch"></TextBox>
-                
-                <TextBlock Text="{ll:Localize Last_Name}" Grid.Row="1" Grid.Column="0"
-                    VerticalAlignment="Center" Padding="4"></TextBlock> 
-                <TextBox Text="{Binding LastName}" Grid.Row="1" Grid.Column="1"
-                    Margin="4" HorizontalAlignment="Stretch"></TextBox>
+                <TextBox Text="{Binding FirstName}" Grid.Row="1" Grid.Column="1"
+                    Margin="4" HorizontalAlignment="Stretch"></TextBox>                    
                 
                 <TextBlock Text="{ll:Localize Date_Birth}" Grid.Row="2" Grid.Column="0"
                     VerticalAlignment="Center" Padding="4"></TextBlock> 
                 <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1">
-                    <DatePicker SelectedDate="{Binding BirthDate}" HorizontalAlignment="Stretch"></DatePicker>
+                     <CalendarDatePicker SelectedDate="{Binding BirthDate}" SelectedDateFormat="Custom" DisplayDateEnd="{Binding MaxDateEnd}"
+                     CustomDateFormatString="d MMMM yyyy" Width="200" Watermark="d MMMM yyyy"></CalendarDatePicker>
                     <TextBlock Text="{Binding Age}" Margin="10,0,0,0"
                                 VerticalAlignment="Center" Padding="4"></TextBlock>            
                 </StackPanel>  

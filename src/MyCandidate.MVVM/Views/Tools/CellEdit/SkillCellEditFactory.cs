@@ -70,7 +70,7 @@ public class SkillCellEditFactory : AbstractCellEditFactory
                         {
                             var originalCandidateSkill = _candidateSkills.Get(candidateSkill.Id);
                             if(originalCandidateSkill.SkillId != skill.Id)
-                            {
+                            {                                
                                 candidateSkill.RaisePropertyChanged(nameof(CandidateSkill.Skill));
                             }
                         }
@@ -78,7 +78,8 @@ public class SkillCellEditFactory : AbstractCellEditFactory
                         {
                             candidateSkill.RaisePropertyChanged(nameof(CandidateSkill.Skill));
                             candidateSkill.Skill.RaisePropertyChanged(nameof(CandidateSkill.Skill.Name));
-                        }                        
+                        } 
+                        candidateSkill.SkillId = skill.Id;                       
                     }
                     else if(target is VacancySkill vacancySkill)
                     {
@@ -95,6 +96,7 @@ public class SkillCellEditFactory : AbstractCellEditFactory
                             vacancySkill.RaisePropertyChanged(nameof(VacancySkill.Skill));
                             vacancySkill.Skill.RaisePropertyChanged(nameof(VacancySkill.Skill.Name));
                         }
+                        vacancySkill.SkillId = skill.Id;
                     }
                     SetAndRaise(context, context.CellEdit, skill);
                 }
@@ -125,6 +127,7 @@ public class SkillCellEditFactory : AbstractCellEditFactory
                 if(candidateSkill.Skill == null)
                 {
                     candidateSkill.Skill = _skills.ItemsList.First();
+                    candidateSkill.SkillId = candidateSkill.SkillId;
                 }
 
                 vm.Skill = candidateSkill.Skill;
@@ -135,6 +138,7 @@ public class SkillCellEditFactory : AbstractCellEditFactory
                 if(vacancySkill.Skill == null)
                 {
                     vacancySkill.Skill = _skills.ItemsList.First();
+                    vacancySkill.SkillId = vacancySkill.SkillId;
                 }
 
                 vm.Skill = vacancySkill.Skill;

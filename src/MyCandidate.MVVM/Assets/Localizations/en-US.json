@@ -28,5 +28,13 @@
     //ViewModels
     "SkillCategories": "Skill categories",
     "SkillCategory": "Skill category",
-    "CandidateResource": "Info"
+    "CandidateResource": "Info",
+
+    //Dialog messages
+    "Save_Text": "Are you sure you want to save the changes?",
+    "Cancel_Text": "Are you sure you want to cancel the changes?",
+    "DeleteCandidate_Text": "Are you sure you want to Delete this Candidate?",
+    
+    //validation messages
+    "BirthdateValidationMessage": "Minimum age must be {0} years"    
 }

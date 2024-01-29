@@ -61,5 +61,13 @@
     "Officies": "Офисы",
     "Office": "Офис",
     "Candidates": "Кандидаты",
-    "CandidateResource": "Доп.информация"
+    "CandidateResource": "Доп.информация",
+
+    //Dialog messages
+    "Save_Text": "Сохранить изменения?",
+    "Cancel_Text": "Отменить изменения?",
+    "DeleteCandidate_Text": "Удалить этого кандидата?",
+
+    //validation messages
+    "BirthdateValidationMessage": "Минимальный возраст должен быть {0} лет"
 }
