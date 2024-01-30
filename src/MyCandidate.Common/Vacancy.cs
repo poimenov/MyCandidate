@@ -52,5 +52,8 @@ public class Vacancy : Entity
     public virtual List<VacancySkill> VacancySkills { get; set; } 
 
     [Browsable(false)]
+    public virtual List<VacancyResource> VacancyResources { get; set; }    
+
+    [Browsable(false)]
     public virtual List<CandidateOnVacancy> CandidateOnVacancies { get; set; }                 
 }

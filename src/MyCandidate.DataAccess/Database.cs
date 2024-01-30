@@ -31,6 +31,7 @@ internal class Database : DbContext
     public virtual DbSet<CandidateResource> CandidateResources { get; set; }
     public virtual DbSet<CandidateSkill> CandidateSkills { get; set; }
     public virtual DbSet<Vacancy> Vacancies { get; set; }
+    public virtual DbSet<VacancyResource> VacancyResources { get; set; }
     public virtual DbSet<VacancySkill> VacancySkills { get; set; }
     public virtual DbSet<CandidateOnVacancy> CandidateOnVacancies { get; set; }
     public virtual DbSet<Comment> Comments { get; set; }

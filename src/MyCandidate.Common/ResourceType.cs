@@ -26,6 +26,9 @@ namespace MyCandidate.Common
 
         [Browsable(false)]
         public virtual List<CandidateResource> CandidateResources { get; set; }
+
+        [Browsable(false)]
+        public virtual List<VacancyResource> VacancyResources { get; set; }        
     }
 
     public class ResourceTypeEqualityComparer : IEqualityComparer<ResourceType>
