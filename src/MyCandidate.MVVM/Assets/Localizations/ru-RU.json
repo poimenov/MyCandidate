@@ -20,6 +20,7 @@
     //properties
     "Value": "Значение",
     "Resource_Type": "Тип ресурса",
+    "Vacancy_Status": "Статус вакансии",
     "Target_Path": "Документ",
     "Phone_Number": "Номер телефона",
     "Email_Address": "Электронная почта",
@@ -35,6 +36,7 @@
     "Office_Name": "Название офиса",
     "Full_Address": "Полный адрес",
     "New_Candidate": "Новый кандидат",
+    "New_Vacancy":"Новая вакансия",
     "Location": "Расположение",
     "Links": "Ссылки",
     "Enabled": "Доступность",
@@ -61,6 +63,7 @@
     "Officies": "Офисы",
     "Office": "Офис",
     "Candidates": "Кандидаты",
+    "Vacancies": "Вакансии",
     "CandidateResource": "Доп.информация",
 
     //Dialog messages

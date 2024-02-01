@@ -17,5 +17,22 @@ namespace MyCandidate.Common.Interfaces
         public const string Middle = "Middle";
         public const string Senior = "Senior";
     }
+
+    public static class VacancyStatusNames
+    {
+        public const string New = "New";
+        public const string InProgress = "InProgress";
+        public const string Closed = "Closed";
+    }
+
+    public static class SelectionStatusNames
+    {
+        public const string SetContact = "SetContact";
+        public const string PreScreen = "PreScreen";
+        public const string TechnicalInterview = "Technical interview";
+        public const string FinalInterview = "Final inerview";
+        public const string Rejected = "Rejected";
+        public const string Accepted = "Accepted";
+    }
 }
 

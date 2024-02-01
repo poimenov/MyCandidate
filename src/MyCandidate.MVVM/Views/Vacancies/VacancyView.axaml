@@ -1,0 +1,88 @@
+<UserControl x:Class="MyCandidate.MVVM.Views.Vacancies.VacancyView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid" 
+             xmlns:vm="using:MyCandidate.MVVM.ViewModels.Vacancies"
+             xmlns:vw="using:MyCandidate.MVVM.Views.Tools" 
+             xmlns:cm="using:MyCandidate.Common" mc:Ignorable="d"
+             d:DesignWidth="300" d:DesignHeight="400"
+             x:DataType="vm:VacancyViewModel" x:CompileBindings="True">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="CompanyTemplate" DataType="cm:Company">
+            <TextBlock Text="{Binding Name}" />
+        </DataTemplate>
+        <DataTemplate x:Key="OfficeTemplate" DataType="cm:Office">
+            <TextBlock Text="{Binding Name}" />
+        </DataTemplate>   
+        <DataTemplate x:Key="VacancyStatusTemplate" DataType="cm:VacancyStatus">
+            <TextBlock Text="{Binding Name}" />
+        </DataTemplate>              
+    </UserControl.Resources>             
+    
+    <Grid RowDefinitions="*,Auto">
+
+        <Grid Grid.Row="0" RowDefinitions="Auto,Auto" ColumnDefinitions="*,5,*">
+            <Grid Grid.Row="0" Grid.Column="0" ColumnDefinitions="132,*" RowDefinitions="Auto,Auto,Auto" Margin="5,15,5,5">
+                <Label Content="{ll:Localize Name}" Grid.Row="0" Grid.Column="0"
+                    VerticalAlignment="Center" Padding="4" />
+                <TextBox Text="{Binding Name}" Grid.Row="0" Grid.Column="1"
+                    Margin="4" HorizontalAlignment="Stretch"></TextBox>
+
+                <Label Content="{ll:Localize Description}" Grid.Row="1" Grid.Column="0"
+                    VerticalAlignment="Center" Padding="4" /> 
+                <TextBox Text="{Binding Description}" Grid.Row="1" Grid.Column="1"
+                    Height="100" AcceptsReturn="True" TextWrapping="Wrap"
+                    Margin="4" HorizontalAlignment="Stretch"></TextBox>                                
+            </Grid>
+
+            <HeaderedContentControl Grid.Row="1" Grid.Column="0" Header="{ll:Localize Links}" Margin="5,5,5,0">
+                <!-- <v:CandidateResourcesView DataContext="{Binding CandidateResources}" Margin="0,5,0,0" /> -->
+            </HeaderedContentControl>  
+
+            <GridSplitter Grid.Column="1" Grid.RowSpan="2" Width="5" HorizontalAlignment="Stretch" />
+
+            <Grid Grid.Row="0" Grid.Column="2" ColumnDefinitions="145,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="5,15,5,5">
+                <Label Grid.Row="0" Grid.Column="0" Content="{ll:Localize Company_Name}" Margin="0,4,0,4" 
+                    VerticalContentAlignment="Center"/>            
+                <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Companies}" 
+                        ItemTemplate="{DynamicResource CompanyTemplate}"
+                        SelectedItem="{Binding SelectedCompany}" 
+                        HorizontalAlignment="Stretch" Margin="4,4,0,4">
+                </ComboBox> 
+                <Label Grid.Row="1" Grid.Column="0" Content="{ll:Localize Office_Name}" Margin="0,4,0,4" 
+                    VerticalContentAlignment="Center"/>            
+                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Offices}" 
+                        ItemTemplate="{DynamicResource OfficeTemplate}"
+                        SelectedItem="{Binding SelectedOffice}" 
+                        HorizontalAlignment="Stretch" Margin="4,4,0,4">
+                </ComboBox>     
+                <Label Grid.Row="2" Grid.Column="0" Content="{ll:Localize Vacancy_Status}" Margin="0,4,0,4" 
+                    VerticalContentAlignment="Center"/>            
+                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding VacancyStatuses}" 
+                        ItemTemplate="{DynamicResource VacancyStatusTemplate}"
+                        SelectedItem="{Binding SelectedVacancyStatus}" 
+                        HorizontalAlignment="Stretch" Margin="4,4,0,4">
+                </ComboBox>  
+                <Label Content="{ll:Localize Enabled}" Grid.Row="3" Grid.Column="0" 
+                    VerticalAlignment="Center" Padding="4" />
+                <CheckBox IsChecked="{Binding Enabled}" Grid.Row="3" Grid.Column="1"></CheckBox>                                            
+            </Grid>
+
+            <HeaderedContentControl Grid.Row="1" Grid.Column="2" Header="{ll:Localize Skills}" Margin="5,5,5,0">
+                <!-- <v:CandidateSkillsView DataContext="{Binding CandidateSkills}" Margin="0,5,0,0" /> -->
+            </HeaderedContentControl>            
+
+        </Grid>
+
+        <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                <Button Content="{ll:Localize Delete}" Command="{Binding DeleteCmd}" Margin="0,4,0,4" Width="100" HorizontalContentAlignment="Center" />
+                <Button Content="{ll:Localize Save}" Command="{Binding SaveCmd}"  Margin="4,4,0,4" Width="100" HorizontalContentAlignment="Center" />
+                <Button Content="{ll:Localize Cancel}" Command="{Binding CancelCmd}" Margin="4,4,4,4" Width="100" HorizontalContentAlignment="Center" />
+        </StackPanel>
+
+    </Grid>     
+             
+</UserControl>             

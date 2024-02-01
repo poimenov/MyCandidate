@@ -6,11 +6,13 @@ using Dock.Model.Controls;
 using Dock.Model.Core;
 using Microsoft.Extensions.Options;
 using MyCandidate.Common;
+using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.Localizations;
 using MyCandidate.MVVM.Services;
 using MyCandidate.MVVM.ViewModels.Candidates;
 using MyCandidate.MVVM.ViewModels.Dictionary;
 using MyCandidate.MVVM.ViewModels.Tools;
+using MyCandidate.MVVM.ViewModels.Vacancies;
 using ReactiveUI;
 
 namespace MyCandidate.MVVM.ViewModels;
@@ -111,9 +113,23 @@ public class MainWindowViewModel : ViewModelBase
         if (Documents?.VisibleDockables != null)
         {
             var service = CurrentApplication.GetRequiredService<ICandidateService>();
-            _factory?.AddDockable(Documents, new CandidateViewModel(service, Properties) { Factory = _factory });
+            var countries = CurrentApplication.GetRequiredService<IDataAccess<Country>>();
+            var cities = CurrentApplication.GetRequiredService<IDataAccess<City>>();
+            _factory?.AddDockable(Documents, new CandidateViewModel(service, countries, cities, Properties) { Factory = _factory });
         }
-    }     
+    } 
+    
+    public void OpenCreateVacancy()
+    {
+        if (Documents?.VisibleDockables != null)
+        {
+            var service = CurrentApplication.GetRequiredService<IVacancyService>();
+            var dictionariesData = CurrentApplication.GetRequiredService<IDictionariesDataAccess>();
+            var companies = CurrentApplication.GetRequiredService<IDataAccess<Company>>();
+            var offices = CurrentApplication.GetRequiredService<IDataAccess<Office>>();
+            _factory?.AddDockable(Documents, new VacancyViewModel(service, dictionariesData, companies, offices, Properties) { Factory = _factory });
+        }
+    }         
 
     private void OpenViewModel(IDockable dockable, bool addNew)
     {

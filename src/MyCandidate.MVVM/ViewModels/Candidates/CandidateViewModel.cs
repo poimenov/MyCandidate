@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reactive.Linq;
-using Avalonia;
 using Avalonia.PropertyGrid.Services;
 using Dock.Model.ReactiveUI.Controls;
 using MsBox.Avalonia;
@@ -22,14 +21,15 @@ public class CandidateViewModel : Document
 {
     private readonly ICandidateService _candidateService;
     private readonly IProperties _properties;
-    private App CurrentApplication => (App)Application.Current;
-    private IDataAccess<Country> Countries => CurrentApplication.GetRequiredService<IDataAccess<Country>>();
-    private IDataAccess<City> Cities => CurrentApplication.GetRequiredService<IDataAccess<City>>();
+    private readonly IDataAccess<Country> _countries;
+    private readonly IDataAccess<City> _cities;
     private Candidate _candidate;
 
-    public CandidateViewModel(ICandidateService candidateService, IProperties properties)
+    public CandidateViewModel(ICandidateService candidateService, IDataAccess<Country> countries, IDataAccess<City> cities, IProperties properties)
     {
         _candidateService = candidateService;
+         _countries = countries;
+        _cities = cities;       
         _properties = properties;
         _candidate = NewCandidate;
         LoadCandidate();
@@ -39,9 +39,11 @@ public class CandidateViewModel : Document
         DeleteCmd = CreateDeleteCmd();
     }
 
-    public CandidateViewModel(ICandidateService candidateService, IProperties properties, int candidateId)
+    public CandidateViewModel(ICandidateService candidateService, IDataAccess<Country> countries, IDataAccess<City> cities, IProperties properties, int candidateId)
     {
         _candidateService = candidateService;
+        _countries = countries;
+        _cities = cities;        
         _properties = properties;
         _candidate = _candidateService.Get(candidateId);
         LoadCandidate();
@@ -55,7 +57,7 @@ public class CandidateViewModel : Document
     {
         get
         {
-            var defaultCity = Cities.ItemsList.First();
+            var defaultCity = _cities.ItemsList.First();
             return new Candidate
             {
                 Id = 0,
@@ -90,7 +92,7 @@ public class CandidateViewModel : Document
         FirstName = _candidate.FirstName;
         LastName = _candidate.LastName;
         Enabled = _candidate.Enabled;
-        Location = new LocationViewModel(Countries, Cities)
+        Location = new LocationViewModel(_countries, _cities)
         {
             Location = _candidate.Location
         };

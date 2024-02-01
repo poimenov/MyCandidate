@@ -6,6 +6,7 @@
 
     //properties
     "Resource_Type": "Resource type",
+    "Vacancy_Status": "Vacancy status",
     "Target_Path": "Target Path",
     "Phone_Number": "Phone Number",
     "Email_Address": "Email Address",

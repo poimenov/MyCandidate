@@ -172,9 +172,9 @@ internal class DictionaryCreator
         if (!_database.VacancyStatuses.Any())
         {
             _database.VacancyStatuses.AddRange(
-                new VacancyStatus { Name = "New", Enabled = true },
-                new VacancyStatus { Name = "InProgress", Enabled = true },
-                new VacancyStatus { Name = "Closed", Enabled = true }
+                new VacancyStatus { Name = VacancyStatusNames.New, Enabled = true },
+                new VacancyStatus { Name = VacancyStatusNames.InProgress, Enabled = true },
+                new VacancyStatus { Name = VacancyStatusNames.Closed, Enabled = true }
                 );
             _database.SaveChanges();
         }
@@ -185,12 +185,12 @@ internal class DictionaryCreator
         if (!_database.SelectionStatuses.Any())
         {
             _database.SelectionStatuses.AddRange(
-                new SelectionStatus { Name = "SetContact", Enabled = true },
-                new SelectionStatus { Name = "PreScreen", Enabled = true },
-                new SelectionStatus { Name = "Technical interview", Enabled = true },
-                new SelectionStatus { Name = "Final inerview", Enabled = true },
-                new SelectionStatus { Name = "Rejected", Enabled = true },
-                new SelectionStatus { Name = "Accepted", Enabled = true }
+                new SelectionStatus { Name = SelectionStatusNames.SetContact, Enabled = true },
+                new SelectionStatus { Name = SelectionStatusNames.PreScreen, Enabled = true },
+                new SelectionStatus { Name = SelectionStatusNames.TechnicalInterview, Enabled = true },
+                new SelectionStatus { Name = SelectionStatusNames.FinalInterview, Enabled = true },
+                new SelectionStatus { Name = SelectionStatusNames.Rejected, Enabled = true },
+                new SelectionStatus { Name = SelectionStatusNames.Accepted, Enabled = true }
                 );
             _database.SaveChanges();
         }
