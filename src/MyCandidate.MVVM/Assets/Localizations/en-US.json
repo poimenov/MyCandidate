@@ -29,7 +29,7 @@
     //ViewModels
     "SkillCategories": "Skill categories",
     "SkillCategory": "Skill category",
-    "CandidateResource": "Info",
+    "Resource": "Info",
 
     //Dialog messages
     "Save_Text": "Are you sure you want to save the changes?",

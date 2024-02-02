@@ -93,7 +93,9 @@ public class VacancyViewModel : Document
                 VacancyStatusId = vacancyStatus.Id,
                 VacancyStatus = vacancyStatus,
                 Office = office,
-                OfficeId = office.Id
+                OfficeId = office.Id,
+                VacancyResources = new List<VacancyResource>(),
+                VacancySkills = new List<VacancySkill>()
             };
         }
     }
@@ -127,6 +129,9 @@ public class VacancyViewModel : Document
         SelectedVacancyStatus = _vacancy.VacancyStatus;
         SelectedCompany = Companies.First(x => x.Id == _vacancy.Office.CompanyId);
         SelectedOffice = Offices.First(x => x.Id == _vacancy.OfficeId);
+
+        VacancyResources = new VacancyResourcesViewModel(_vacancy, _properties);
+        VacancyResources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });        
     }
 
     public IReactiveCommand SaveCmd { get; }
@@ -249,4 +254,11 @@ public class VacancyViewModel : Document
         }
     }
     #endregion
+
+    private VacancyResourcesViewModel _vacancyResources;
+    public VacancyResourcesViewModel VacancyResources
+    {
+        get => _vacancyResources;
+        set => this.RaiseAndSetIfChanged(ref _vacancyResources, value);
+    }    
 }

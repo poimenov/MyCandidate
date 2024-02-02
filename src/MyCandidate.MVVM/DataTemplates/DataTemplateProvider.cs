@@ -52,6 +52,35 @@ public static class DataTemplateProvider
         };        
     }
 
+    public static FuncDataTemplate<VacancyResourceExt> VacancyResourceLink { get; }
+            = new FuncDataTemplate<VacancyResourceExt>(
+                (resource) => resource is not null,
+                BuildVacancyResourceLink);   
+
+    private static Control BuildVacancyResourceLink(VacancyResourceExt resource)
+    {
+        ICommand? command = null;
+        var content = new Binding(nameof(resource.Value));
+        content.Converter = new CandidateResourceExtValueConverter();
+                command = ReactiveCommand.Create(
+                    () =>
+                    {
+                        Open(resource.Value);
+                    }
+                );
+
+        var retVal = new Button()
+        {
+            [!Button.ContentProperty] = content,
+            Command = command,
+            [!ToolTip.TipProperty] = new Binding(nameof(resource.Value)) 
+        };
+        
+        retVal.Classes.Add("link");
+
+        return retVal;
+    }                 
+
     public static FuncDataTemplate<CandidateResourceExt> CandidateResourceLink { get; }
             = new FuncDataTemplate<CandidateResourceExt>(
                 (resource) => resource is not null,

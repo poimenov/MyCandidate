@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -37,7 +36,7 @@ public class CandidateResourcesViewModel : ViewModelBase
                     if (Properties != null)
                     {
                         Properties.SelectedItem = x;
-                        Properties.SelectedTypeName = LocalizationService.Default["CandidateResource"]; ;
+                        Properties.SelectedTypeName = LocalizationService.Default["Resource"]; ;
                     }
                 }
             );
@@ -92,7 +91,7 @@ public class CandidateResourcesViewModel : ViewModelBase
     {
         if (Properties != null)
         {
-            Properties.SelectedTypeName = LocalizationService.Default["CandidateResource"];
+            Properties.SelectedTypeName = LocalizationService.Default["Resource"];
         }
     }
 

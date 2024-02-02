@@ -1,0 +1,42 @@
+<UserControl x:Class="MyCandidate.MVVM.Views.Vacancies.VacancyResourcesView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"             
+             xmlns:vm="using:MyCandidate.MVVM.ViewModels.Vacancies"
+             xmlns:dt="using:MyCandidate.MVVM.DataTemplates"
+             xmlns:m="using:MyCandidate.MVVM.Models"             
+             mc:Ignorable="d"
+             d:DesignWidth="300" d:DesignHeight="400"
+             x:DataType="vm:VacancyResourcesViewModel" x:CompileBindings="True">
+
+            <StackPanel>
+                <ListBox ItemsSource="{Binding VacancyResources}" Height="60"
+                    SelectedItem="{Binding SelectedVacancyResource, Mode=TwoWay}" >
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="4"/>
+                        </Style>
+                    </ListBox.Styles>   
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>                    
+                    </ListBox.ItemsPanel>                                        
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="m:VacancyResourceExt">
+                            <StackPanel Orientation="Horizontal">
+                                <ContentControl Content="{Binding ResourceType}" ContentTemplate="{x:Static dt:DataTemplateProvider.ResourceTypeImage}" />
+                                <ContentControl Content="{Binding}" ContentTemplate="{x:Static dt:DataTemplateProvider.VacancyResourceLink}" Margin="4,0,0,0" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="{ll:Localize Create}" Command="{Binding CreateVacancyResourceCmd}" Margin="0,4,0,4" />
+                    <Button Content="{ll:Localize Delete}" Command="{Binding DeleteVacancyResourceCmd}" CommandParameter="{Binding SelectedVacancyResource}" Margin="4" />
+                </StackPanel>
+            </StackPanel>  
+
+</UserControl>             

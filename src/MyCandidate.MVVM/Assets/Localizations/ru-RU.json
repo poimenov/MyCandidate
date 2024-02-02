@@ -64,7 +64,7 @@
     "Office": "Офис",
     "Candidates": "Кандидаты",
     "Vacancies": "Вакансии",
-    "CandidateResource": "Доп.информация",
+    "Resource": "Доп.информация",
 
     //Dialog messages
     "Save_Text": "Сохранить изменения?",

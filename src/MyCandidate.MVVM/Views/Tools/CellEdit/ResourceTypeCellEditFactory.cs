@@ -11,6 +11,7 @@ using DynamicData.Binding;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.DataTemplates;
+using MyCandidate.MVVM.Models;
 using PropertyModels.Extensions;
 
 namespace MyCandidate.MVVM.Views.Tools.CellEdit;
@@ -43,10 +44,17 @@ class ResourceTypeCellEditFactory : AbstractCellEditFactory
             return null;
         }
 
+        var itemSource = _dataAccess.GetResourceTypes().Where(x => x.Enabled == true).ToList();
+        if(target is VacancyResourceExt)
+        {
+            itemSource = itemSource.Where(x => x.Name == ResourceTypeNames.Path 
+                        || x.Name == ResourceTypeNames.Url).ToList();
+        }
+
         var control = new ComboBox
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            ItemsSource = _dataAccess.GetResourceTypes().Where(x => x.Enabled == true),
+            ItemsSource = itemSource,
 
             ItemTemplate = new FuncDataTemplate<ResourceType>((value, namescope) =>
             {
@@ -72,13 +80,23 @@ class ResourceTypeCellEditFactory : AbstractCellEditFactory
         .Subscribe(
             x =>
             {
-                if (x.Value is ResourceType resourceType
-                    && target is CandidateResource candidateResource)
+                if (x.Value is ResourceType resourceType)
                 {
-                    candidateResource.ResourceTypeId = resourceType.Id;
-                    candidateResource.RaisePropertyChanged(nameof(CandidateResource.ResourceTypeId));
-                    candidateResource.ResourceType = resourceType;
-                    candidateResource.RaisePropertyChanged(nameof(CandidateResource.ResourceType));
+                    if(target is VacancyResource vacancyResource)
+                    {
+                        vacancyResource.ResourceTypeId = resourceType.Id;
+                        vacancyResource.RaisePropertyChanged(nameof(VacancyResource.ResourceTypeId));
+                        vacancyResource.ResourceType = resourceType;
+                        vacancyResource.RaisePropertyChanged(nameof(VacancyResource.ResourceType));                        
+                    }
+                    else if(target is CandidateResource candidateResource)
+                    {
+                        candidateResource.ResourceTypeId = resourceType.Id;
+                        candidateResource.RaisePropertyChanged(nameof(CandidateResource.ResourceTypeId));
+                        candidateResource.ResourceType = resourceType;
+                        candidateResource.RaisePropertyChanged(nameof(CandidateResource.ResourceType));                        
+                    }
+
                 }
             }
         );
@@ -99,10 +117,19 @@ class ResourceTypeCellEditFactory : AbstractCellEditFactory
 
         ValidateProperty(control, propertyDescriptor, target);
 
-        if (control is ComboBox cb && target is CandidateResource candidateResource)
+        if (control is ComboBox cb)
         {
-            cb.SelectedItem = candidateResource.ResourceType;
-            cb.SelectedIndex = cb.ItemsSource!.OfType<ResourceType>().IndexOf(candidateResource.ResourceType, new ResourceTypeEqualityComparer());
+            if(target is CandidateResource candidateResource)
+            {
+                cb.SelectedItem = candidateResource.ResourceType;
+                cb.SelectedIndex = cb.ItemsSource!.OfType<ResourceType>().IndexOf(candidateResource.ResourceType, new ResourceTypeEqualityComparer());
+            }
+            else if(target is VacancyResource vacancyResource)
+            {
+                cb.SelectedItem = vacancyResource.ResourceType;
+                cb.SelectedIndex = cb.ItemsSource!.OfType<ResourceType>().IndexOf(vacancyResource.ResourceType, new ResourceTypeEqualityComparer());                
+            }
+
             return true;
         }
 

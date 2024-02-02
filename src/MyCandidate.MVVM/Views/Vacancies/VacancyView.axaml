@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid" 
              xmlns:vm="using:MyCandidate.MVVM.ViewModels.Vacancies"
+             xmlns:v="using:MyCandidate.MVVM.Views.Vacancies" 
              xmlns:vw="using:MyCandidate.MVVM.Views.Tools" 
              xmlns:cm="using:MyCandidate.Common" mc:Ignorable="d"
              d:DesignWidth="300" d:DesignHeight="400"
@@ -39,7 +40,7 @@
             </Grid>
 
             <HeaderedContentControl Grid.Row="1" Grid.Column="0" Header="{ll:Localize Links}" Margin="5,5,5,0">
-                <!-- <v:CandidateResourcesView DataContext="{Binding CandidateResources}" Margin="0,5,0,0" /> -->
+                <v:VacancyResourcesView DataContext="{Binding VacancyResources}" Margin="0,5,0,0" />
             </HeaderedContentControl>  
 
             <GridSplitter Grid.Column="1" Grid.RowSpan="2" Width="5" HorizontalAlignment="Stretch" />
@@ -72,7 +73,7 @@
             </Grid>
 
             <HeaderedContentControl Grid.Row="1" Grid.Column="2" Header="{ll:Localize Skills}" Margin="5,5,5,0">
-                <!-- <v:CandidateSkillsView DataContext="{Binding CandidateSkills}" Margin="0,5,0,0" /> -->
+                <!-- <v:VacancySkillsView DataContext="{Binding VacancySkills}" Margin="0,5,0,0" /> -->
             </HeaderedContentControl>            
 
         </Grid>

@@ -10,32 +10,32 @@ using ReactiveUI;
 
 namespace MyCandidate.MVVM.Models;
 
-public class CandidateResourceExt : CandidateResource
+public class VacancyResourceExt : VacancyResource
 {
-    public CandidateResourceExt()
+    public VacancyResourceExt()
     {
         ResourceTypeId = 1;
         ResourceType = new ResourceType { Id = 1, Name = ResourceTypeNames.Path, Enabled = true };
-        Value = string.Empty;
+        Value = string.Empty;        
     }
 
-    public CandidateResourceExt(CandidateResource candidateResource)
+    public VacancyResourceExt(VacancyResource vacancyResource)
     {
-        if (candidateResource != null)
+        if (vacancyResource != null)
         {
-            CandidateId = candidateResource.CandidateId;
-            Candidate = candidateResource.Candidate;
-            Id = candidateResource.Id;
-            ResourceTypeId = candidateResource.ResourceTypeId;
-            ResourceType = candidateResource.ResourceType;
-            Value = candidateResource.Value;
+            VacancyId = vacancyResource.VacancyId;
+            Vacancy = vacancyResource.Vacancy;
+            Id = vacancyResource.Id;
+            ResourceTypeId = vacancyResource.ResourceTypeId;
+            ResourceType = vacancyResource.ResourceType;
+            Value = vacancyResource.Value;
         }
         else
         {
             ResourceTypeId = 1;
             ResourceType = new ResourceType { Id = 1, Name = ResourceTypeNames.Path, Enabled = true };
             Value = string.Empty;
-        }
+        }        
     }
 
     private string _value;
@@ -59,35 +59,7 @@ public class CandidateResourceExt : CandidateResource
             this.RaiseAndSetIfChanged(ref _value, value);
             RaisePropertyChanged(nameof(Value));
         }        
-    }
-
-    [StringLength(500, MinimumLength = 2)]
-    [DisplayName("Phone_Number")]
-    [Phone]
-    [VisibilityPropertyCondition(nameof(ResourceTypeId), 2)]
-    public string MobileValue
-    {
-        get => _value;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _value, value);
-            RaisePropertyChanged(nameof(Value));
-        }  
-    }
-
-    [StringLength(500, MinimumLength = 2)]
-    [DisplayName("Email_Address")]
-    [EmailAddress]
-    [VisibilityPropertyCondition(nameof(ResourceTypeId), 3)]
-    public string EmailValue
-    {
-        get => _value;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _value, value);
-            RaisePropertyChanged(nameof(Value));
-        }  
-    }
+    } 
 
     [StringLength(500, MinimumLength = 2)]
     [DisplayName("Web_Address")]
@@ -101,20 +73,7 @@ public class CandidateResourceExt : CandidateResource
             this.RaiseAndSetIfChanged(ref _value, value);
             RaisePropertyChanged(nameof(Value));
         }  
-    }
-
-    [StringLength(500, MinimumLength = 2)]
-    [DisplayName("Skype")]
-    [VisibilityPropertyCondition(nameof(ResourceTypeId), 5)]
-    public string SkypeValue
-    {
-        get => _value;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _value, value);
-            RaisePropertyChanged(nameof(Value));
-        }  
-    }
+    }  
 
     private ResourceType _resourceType;
     [Required]
@@ -137,7 +96,6 @@ public class CandidateResourceExt : CandidateResource
         }
 
         var retVal = true;
-        var context = new ValidationContext(this);
         
         switch(ResourceType.Name)
         {
@@ -146,30 +104,22 @@ public class CandidateResourceExt : CandidateResource
                 break;
             case ResourceTypeNames.Url:
                 retVal = Uri.IsWellFormedUriString(UrlValue, UriKind.Absolute);
-                break;  
-             case ResourceTypeNames.Mobile:
-                context.MemberName = nameof(MobileValue);             
-                retVal = Validator.TryValidateProperty(MobileValue, context, null);
-                break;   
-             case ResourceTypeNames.Email:
-                context.MemberName = nameof(EmailValue);             
-                retVal = Validator.TryValidateProperty(EmailValue, context, null);
-                break;                                        
+                break;                                         
         }
 
         return retVal;
-    }  
+    } 
 
-    public CandidateResource ToCandidateResource()
+    public VacancyResource ToVacancyResource()
     {
-        return new CandidateResource
+        return new VacancyResource
         {
             Id = this.Id,
-            Candidate = this.Candidate,
-            CandidateId = this.CandidateId,
+            Vacancy = this.Vacancy,
+            VacancyId = this.VacancyId,
             ResourceType = this.ResourceType,
             ResourceTypeId = this.ResourceTypeId,
-            Value = this.Value            
+            Value = this.Value             
         };
-    } 
+    }            
 }
