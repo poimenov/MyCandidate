@@ -1,19 +1,19 @@
-<UserControl x:Class="MyCandidate.MVVM.Views.Candidates.CandidateSkillsView"
+<UserControl x:Class="MyCandidate.MVVM.Views.Vacancies.VacancySkillsView"
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"             
-             xmlns:vm="using:MyCandidate.MVVM.ViewModels.Candidates"
+             xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"
+             xmlns:vm="using:MyCandidate.MVVM.ViewModels.Vacancies"
              xmlns:cm="using:MyCandidate.Common"
-             xmlns:dt="using:MyCandidate.MVVM.DataTemplates"
+             xmlns:dt="using:MyCandidate.MVVM.DataTemplates"             
              mc:Ignorable="d"
              d:DesignWidth="300" d:DesignHeight="400"
-             x:DataType="vm:CandidateSkillsViewModel" x:CompileBindings="True">
+             x:DataType="vm:VacancySkillsViewModel" x:CompileBindings="True">
 
     <StackPanel>
-        <ListBox ItemsSource="{Binding CandidateSkills}" Height="60"
-            SelectedItem="{Binding SelectedCandidateSkill, Mode=TwoWay}"> 
+        <ListBox ItemsSource="{Binding VacancySkills}" Height="60"
+            SelectedItem="{Binding SelectedVacancySkill, Mode=TwoWay}"> 
             <ListBox.Styles>
                 <Style Selector="ListBoxItem">
                     <Setter Property="Padding" Value="2"/>
@@ -25,7 +25,7 @@
                 </ItemsPanelTemplate>                    
             </ListBox.ItemsPanel>                    
             <ListBox.ItemTemplate>
-                <DataTemplate DataType="cm:CandidateSkill">                            
+                <DataTemplate DataType="cm:VacancySkill">                            
                     <Border BorderBrush="{StaticResource DataGridBorderBrush}"
                             BorderThickness="1" CornerRadius="3"> 
                         <StackPanel Orientation="Horizontal">                           
@@ -36,8 +36,9 @@
             </ListBox.ItemTemplate>
         </ListBox>
         <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="{ll:Localize Create}" Command="{Binding CreateCandidateSkillCmd}" Margin="4" />
-            <Button Content="{ll:Localize Delete}" Command="{Binding DeleteCandidateSkillCmd}" CommandParameter="{Binding SelectedCandidateSkill}" Margin="4" />
+            <Button Content="{ll:Localize Create}" Command="{Binding CreateVacancySkillCmd}" Margin="4" />
+            <Button Content="{ll:Localize Delete}" Command="{Binding DeleteVacancySkillCmd}" 
+                CommandParameter="{Binding SelectedVacancySkill}" Margin="4" />
         </StackPanel>
     </StackPanel> 
 

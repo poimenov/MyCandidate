@@ -35,6 +35,7 @@
     "Save_Text": "Are you sure you want to save the changes?",
     "Cancel_Text": "Are you sure you want to cancel the changes?",
     "DeleteCandidate_Text": "Are you sure you want to Delete this Candidate?",
+    "DeleteVacancy_Text": "Are you sure you want to Delete this Vacancy?",
     
     //validation messages
     "BirthdateValidationMessage": "Minimum age must be {0} years"    

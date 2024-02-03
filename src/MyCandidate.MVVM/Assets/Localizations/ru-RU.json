@@ -70,6 +70,7 @@
     "Save_Text": "Сохранить изменения?",
     "Cancel_Text": "Отменить изменения?",
     "DeleteCandidate_Text": "Удалить этого кандидата?",
+    "DeleteVacancy_Text": "Удалить эту вакансию?",
 
     //validation messages
     "BirthdateValidationMessage": "Минимальный возраст должен быть {0} лет"

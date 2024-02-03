@@ -36,7 +36,7 @@ public class CandidateSkillsViewModel : ViewModelBase
                     if (Properties != null)
                     {
                         Properties.SelectedItem = x;
-                        Properties.SelectedTypeName = LocalizationService.Default["CandidateSkill"]; ;
+                        Properties.SelectedTypeName = LocalizationService.Default["Skill"]; ;
                     }
                 }
             );
@@ -91,7 +91,7 @@ public class CandidateSkillsViewModel : ViewModelBase
     {
         if (Properties != null)
         {
-            Properties.SelectedTypeName = LocalizationService.Default["CandidateSkill"];
+            Properties.SelectedTypeName = LocalizationService.Default["Skill"];
         }
     }
 

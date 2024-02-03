@@ -228,7 +228,6 @@ public class CandidateViewModel : Document
                     );
     }
 
-
     #region FirstName
     private string _firstName;
     [Required]

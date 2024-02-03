@@ -31,6 +31,7 @@ public class VacancyViewModel : Document
     private readonly IDataAccess<Office> _officesData;
     private readonly IProperties _properties;
     private Vacancy _vacancy;
+    private bool _initialSet = false;
 
     public VacancyViewModel(IVacancyService vacancyService, IDictionariesDataAccess dictionariesData, IDataAccess<Company> companies, IDataAccess<Office> officies, IProperties properties)
     {
@@ -50,6 +51,9 @@ public class VacancyViewModel : Document
         _vacancy = NewVacancy;
         LoadVacancy();
         LocalizationService.Default.OnCultureChanged += CultureChanged;
+        CancelCmd = CreateCancelCmd();
+        SaveCmd = CreateSaveCmd();
+        DeleteCmd = CreateDeleteCmd();        
     }
 
     public VacancyViewModel(IVacancyService vacancyService, IDictionariesDataAccess dictionariesData, IDataAccess<Company> companies, IDataAccess<Office> officies, IProperties properties, int vacancyId)
@@ -70,7 +74,9 @@ public class VacancyViewModel : Document
         _vacancy = _vacancyService.Get(vacancyId);
         LoadVacancy();
         LocalizationService.Default.OnCultureChanged += CultureChanged;
-
+        CancelCmd = CreateCancelCmd();
+        SaveCmd = CreateSaveCmd();
+        DeleteCmd = CreateDeleteCmd();
     }
 
     private void CultureChanged(object? sender, EventArgs e)
@@ -121,26 +127,126 @@ public class VacancyViewModel : Document
     #endregion
 
     private void LoadVacancy()
-    {
+    {        
         Title = (_vacancy.Id == 0) ? LocalizationService.Default["New_Vacancy"] : _vacancy.Name;
         Name = _vacancy.Name;
         Description = _vacancy.Description;
         Enabled = _vacancy.Enabled;
-        SelectedVacancyStatus = _vacancy.VacancyStatus;
+        SelectedVacancyStatus = VacancyStatuses.First(x => x.Id == _vacancy.VacancyStatusId);
+        _initialSet = true;
         SelectedCompany = Companies.First(x => x.Id == _vacancy.Office.CompanyId);
+        _initialSet = false;
         SelectedOffice = Offices.First(x => x.Id == _vacancy.OfficeId);
 
         VacancyResources = new VacancyResourcesViewModel(_vacancy, _properties);
-        VacancyResources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });        
+        VacancyResources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
+        VacancySkills = new VacancySkillsViewModel(_vacancy, _properties);
+        VacancySkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });        
+        this.RaisePropertyChanged(nameof(VacancyId));        
     }
 
     public IReactiveCommand SaveCmd { get; }
 
+    private IReactiveCommand CreateSaveCmd()
+    {
+        return ReactiveCommand.Create(
+                    async () =>
+                        {
+                            var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
+                                                                                    LocalizationService.Default["Save_Text"],
+                                                                                    ButtonEnum.YesNo, Icon.Question);
+                            var result = await dialog.ShowAsync();
+                            if (result == ButtonResult.No)
+                            {
+                                return;
+                            }
+
+                            _vacancy.VacancyResources = VacancyResources.VacancyResources.Select(x => x.ToVacancyResource()).ToList();
+                            _vacancy.VacancySkills = VacancySkills.VacancySkills.ToList();
+                            string message;
+                            int id;
+                            bool success;
+
+                            if (_vacancy.Id == 0)
+                            {
+                                success = _vacancyService.Create(_vacancy, out id, out message);
+                            }
+                            else
+                            {
+                                success = _vacancyService.Update(_vacancy, out message);
+                                id = _vacancy.Id;
+                            }
+
+                            if (success)
+                            {
+                                _vacancy = _vacancyService.Get(id);
+                                LoadVacancy();                                
+                            }
+                            else
+                            {
+                                dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
+                                                                                    message, ButtonEnum.Ok, Icon.Error);
+                                await dialog.ShowAsync();
+                            }
+
+                        }, this.WhenAnyValue(x => x.IsValid, v => v == true)
+                    );
+    }    
+
     public IReactiveCommand CancelCmd { get; }
+
+    private IReactiveCommand CreateCancelCmd()
+    {
+        return ReactiveCommand.Create(
+                    async () =>
+                        {
+                            var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Cancel"],
+                                                                                    LocalizationService.Default["Cancel_Text"],
+                                                                                    ButtonEnum.YesNo, Icon.Question);
+                            var result = await dialog.ShowAsync();
+                            if (result == ButtonResult.No)
+                            {
+                                return;
+                            }
+                            _vacancy = _vacancy.Id == 0 ? NewVacancy : _vacancyService.Get(_vacancy.Id);
+                            LoadVacancy();
+                        }
+                    );
+    }    
 
     public IReactiveCommand DeleteCmd { get; }
 
-    public int CandidateId
+    private IReactiveCommand CreateDeleteCmd()
+    {
+        return ReactiveCommand.Create(
+                    async () =>
+                        {
+                            var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
+                                                                                    LocalizationService.Default["DeleteVacancy_Text"],
+                                                                                    ButtonEnum.YesNo, Icon.Question);
+                            var result = await dialog.ShowAsync();
+                            if (result == ButtonResult.No)
+                            {
+                                return;
+                            }
+
+                            string message;
+                            if (_vacancyService.Delete(VacancyId, out message))
+                            {
+                                this.Factory.CloseDockable(this);
+                            }
+                            else
+                            {
+                                dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
+                                                                                    message, ButtonEnum.Ok, Icon.Error);
+                                await dialog.ShowAsync();
+                            }
+
+                        }, this.WhenAnyValue(x => x.VacancyId, y => y != 0)
+                    );
+    }    
+
+    public int VacancyId
     {
         get
         {
@@ -152,9 +258,9 @@ public class VacancyViewModel : Document
     {
         get
         {
-            var retVal = Validator.TryValidateObject(this, new ValidationContext(this), null, true);
-            // && VacancyResources.IsValid
-            // && VacancySkills.IsValid;
+            var retVal = Validator.TryValidateObject(this, new ValidationContext(this), null, true)
+            && VacancyResources.IsValid
+            && VacancySkills.IsValid;
             return retVal;
         }
     }
@@ -165,14 +271,23 @@ public class VacancyViewModel : Document
     public string Name
     {
         get => _name;
-        set => this.RaiseAndSetIfChanged(ref _name, value);
+        set
+        {
+            _vacancy.Name = value;
+            this.RaiseAndSetIfChanged(ref _name, value);
+            this.RaisePropertyChanged(nameof(IsValid));
+        }         
     }
 
     private string _description;
     public string Description
     {
         get => _description;
-        set => this.RaiseAndSetIfChanged(ref _description, value);
+        set
+        {
+            _vacancy.Description = value;
+            this.RaiseAndSetIfChanged(ref _description, value);
+        }
     }
 
     #region Enabled
@@ -208,7 +323,12 @@ public class VacancyViewModel : Document
     public VacancyStatus SelectedVacancyStatus
     {
         get => _selectedVacancyStatus;
-        set => this.RaiseAndSetIfChanged(ref _selectedVacancyStatus, value);
+        set
+        {
+            _vacancy.VacancyStatus = value;
+            _vacancy.VacancyStatusId = value.Id;
+            this.RaiseAndSetIfChanged(ref _selectedVacancyStatus, value);
+        }
     }
     #endregion
 
@@ -234,7 +354,10 @@ public class VacancyViewModel : Document
         set
         {
             this.RaiseAndSetIfChanged(ref _selectedCompany, value);
-            SelectedOffice = Offices.First();
+            if(!_initialSet)
+            {
+                SelectedOffice = Offices.First();
+            }            
         }
     }
     #endregion
@@ -250,6 +373,12 @@ public class VacancyViewModel : Document
         get => _selectedOffice;
         set
         {
+            if(value != null)
+            {
+                _vacancy.Office = value;
+                _vacancy.OfficeId = value.Id;                
+            }            
+
             this.RaiseAndSetIfChanged(ref _selectedOffice, value);
         }
     }
@@ -260,5 +389,12 @@ public class VacancyViewModel : Document
     {
         get => _vacancyResources;
         set => this.RaiseAndSetIfChanged(ref _vacancyResources, value);
-    }    
+    }  
+
+    private VacancySkillsViewModel _vacancySkills;
+    public VacancySkillsViewModel VacancySkills
+    {
+        get => _vacancySkills;
+        set => this.RaiseAndSetIfChanged(ref _vacancySkills, value);
+    }      
 }
