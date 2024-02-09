@@ -115,9 +115,22 @@ public class MainWindowViewModel : ViewModelBase
             var service = CurrentApplication.GetRequiredService<ICandidateService>();
             var countries = CurrentApplication.GetRequiredService<IDataAccess<Country>>();
             var cities = CurrentApplication.GetRequiredService<IDataAccess<City>>();
-            _factory?.AddDockable(Documents, new CandidateViewModel(service, countries, cities, Properties) { Factory = _factory });
+            var doc = new CandidateViewModel(service, countries, cities, Properties){ Factory = _factory };
+            OpenViewModel(doc, true);           
         }
     } 
+
+    public void OpenSearchCandidate()
+    {
+        if (Documents?.VisibleDockables != null)
+        {
+            var service = CurrentApplication.GetRequiredService<ICandidateService>();
+            var countries = CurrentApplication.GetRequiredService<IDataAccess<Country>>();
+            var cities = CurrentApplication.GetRequiredService<IDataAccess<City>>();
+            var doc = new CandidateSearchViewModel(service, countries, cities, Properties){ Factory = _factory };
+            OpenViewModel(doc, true);                       
+        }
+    }
     
     public void OpenCreateVacancy()
     {
@@ -127,7 +140,8 @@ public class MainWindowViewModel : ViewModelBase
             var dictionariesData = CurrentApplication.GetRequiredService<IDictionariesDataAccess>();
             var companies = CurrentApplication.GetRequiredService<IDataAccess<Company>>();
             var offices = CurrentApplication.GetRequiredService<IDataAccess<Office>>();
-            _factory?.AddDockable(Documents, new VacancyViewModel(service, dictionariesData, companies, offices, Properties) { Factory = _factory });
+            var doc = new VacancyViewModel(service, dictionariesData, companies, offices, Properties) { Factory = _factory };
+            OpenViewModel(doc, true);             
         }
     }         
 

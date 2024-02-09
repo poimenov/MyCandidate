@@ -10,6 +10,7 @@ using DynamicData;
 using DynamicData.Binding;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
+using MyCandidate.MVVM.Models;
 using PropertyModels.Extensions;
 
 namespace MyCandidate.MVVM.Views.Tools.CellEdit;
@@ -56,22 +57,10 @@ public class SeniorityCellEditFactory : AbstractCellEditFactory
         .Subscribe(
             x =>
             {
-                if(x.Value is Seniority seniority)
+                if (x.Value is Seniority seniority && target is SkillModel skillModel)
                 {
-                    if(target is CandidateSkill candidateSkill)
-                    {
-                        candidateSkill.SeniorityId = seniority.Id;
-                        candidateSkill.RaisePropertyChanged(nameof(CandidateSkill.SeniorityId));
-                        candidateSkill.Seniority = seniority;
-                        candidateSkill.RaisePropertyChanged(nameof(CandidateSkill.Seniority));                        
-                    }
-                    else if(target is VacancySkill vacancySkill)
-                    {
-                        vacancySkill.SeniorityId = seniority.Id;
-                        vacancySkill.RaisePropertyChanged(nameof(CandidateSkill.SeniorityId));
-                        vacancySkill.Seniority = seniority;
-                        vacancySkill.RaisePropertyChanged(nameof(CandidateSkill.Seniority)); 
-                    }
+                    skillModel.Seniority = seniority;
+                    skillModel.RaisePropertyChanged(nameof(SkillModel.Seniority));
                 }
             }
         );
@@ -92,20 +81,11 @@ public class SeniorityCellEditFactory : AbstractCellEditFactory
 
         ValidateProperty(control, propertyDescriptor, target);
 
-        if (control is ComboBox cb)
+        if (control is ComboBox cb && target is SkillModel skillModel)
         {
-            if(target is CandidateSkill candidateSkill)
-            {
-                cb.SelectedItem = candidateSkill.Seniority;
-                cb.SelectedIndex = cb.ItemsSource!.OfType<Seniority>().IndexOf(candidateSkill.Seniority, new SeniorityEqualityComparer());
-                return true;
-            }
-            else if(target is VacancySkill vacancySkill)
-            {
-                cb.SelectedItem = vacancySkill.Seniority;
-                cb.SelectedIndex = cb.ItemsSource!.OfType<Seniority>().IndexOf(vacancySkill.Seniority, new SeniorityEqualityComparer());
-                return true;
-            }
+            cb.SelectedItem = skillModel.Seniority;
+            cb.SelectedIndex = cb.ItemsSource!.OfType<Seniority>().IndexOf(skillModel.Seniority, new SeniorityEqualityComparer());
+            return true;
         }
 
         return false;

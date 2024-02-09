@@ -1,11 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace MyCandidate.MVVM.Views.Candidates;
+namespace MyCandidate.MVVM.Views.Shared;
 
-public partial class CandidateSkillsView : UserControl
+public partial class PagerView : UserControl
 {
-    public CandidateSkillsView()
+    public PagerView()
     {
         InitializeComponent();
     }

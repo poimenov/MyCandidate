@@ -10,27 +10,26 @@ using MyCandidate.MVVM.ViewModels.Tools;
 using ReactiveUI;
 using System.ComponentModel;
 using MyCandidate.Common.Interfaces;
+using MyCandidate.MVVM.Models;
+using System.Collections.Generic;
 
-namespace MyCandidate.MVVM.ViewModels.Vacancies;
+namespace MyCandidate.MVVM.ViewModels.Shared;
 
-public class VacancySkillsViewModel : ViewModelBase
+public class SkillsViewModel : ViewModelBase
 {
-    private readonly Vacancy _vacancy;
-
-    public VacancySkillsViewModel(Vacancy vacancy, IProperties properties)
+    public SkillsViewModel(IEnumerable<SkillModel> skills, IProperties properties)
     {
-        _vacancy = vacancy;
         Properties = properties;
         LocalizationService.Default.OnCultureChanged += CultureChanged;
-        SourceVacancySkills = new ObservableCollectionExtended<VacancySkill>(_vacancy.VacancySkills);
-        SourceVacancySkills.ToObservableChangeSet()
+        SourceSkills = new ObservableCollectionExtended<SkillModel>(skills);
+        SourceSkills.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Bind(out _vacancySkills)
+            .Bind(out _skills)
             .Subscribe();
 
-        _vacancySkills.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
+        _skills.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
 
-        this.WhenAnyValue(x => x.SelectedVacancySkill)
+        this.WhenAnyValue(x => x.SelectedSkill)
             .Subscribe(
                 x =>
                 {
@@ -42,20 +41,19 @@ public class VacancySkillsViewModel : ViewModelBase
                 }
             );
 
-        DeleteVacancySkillCmd = ReactiveCommand.Create(
+        DeleteSkillCmd = ReactiveCommand.Create(
             (object obj) =>
             {
-                SourceVacancySkills.Remove((VacancySkill)obj);
+                SourceSkills.Remove((SkillModel)obj);
+                this.RaisePropertyChanged(nameof(IsValid));
             }
         );
 
-        CreateVacancySkillCmd = ReactiveCommand.Create(
+        CreateSkillCmd = ReactiveCommand.Create(
             () =>
             {
-                var _newVacancySkill = new VacancySkill()
+                var _newSkill = new SkillModel
                 {
-                    Vacancy = _vacancy,
-                    VacancyId = _vacancy.Id,
                     Seniority = new Seniority
                     {
                         Id = 1,
@@ -63,11 +61,11 @@ public class VacancySkillsViewModel : ViewModelBase
                         Enabled =true
                     }                                        
                 };
-                SourceVacancySkills.Add(_newVacancySkill);
-                _newVacancySkill.PropertyChanged += ItemPropertyChanged;
-                SelectedVacancySkill = _newVacancySkill;
+                SourceSkills.Add(_newSkill);
+                _newSkill.PropertyChanged += ItemPropertyChanged;
+                SelectedSkill = _newSkill;
             }
-        );         
+        );            
     }
 
     private void ItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -79,7 +77,7 @@ public class VacancySkillsViewModel : ViewModelBase
     {
         get
         {
-            if(VacancySkills.Select(x => x.Skill.Name).Distinct().Count() != VacancySkills.Count())
+            if(Skills.Select(x => x.Skill.Id).Distinct().Count() != Skills.Count())
             {
                 return false;
             }
@@ -97,21 +95,21 @@ public class VacancySkillsViewModel : ViewModelBase
 
     public IProperties? Properties { get; set; }
 
-    #region VacancySkills
-    public ObservableCollectionExtended<VacancySkill> SourceVacancySkills;
-    private readonly ReadOnlyObservableCollection<VacancySkill> _vacancySkills;
-    public ReadOnlyObservableCollection<VacancySkill> VacancySkills => _vacancySkills;
+    #region Skills
+    public ObservableCollectionExtended<SkillModel> SourceSkills;
+    private readonly ReadOnlyObservableCollection<SkillModel> _skills;
+    public ReadOnlyObservableCollection<SkillModel> Skills => _skills;
     #endregion
 
-    #region SelectedVacancySkill
-    private VacancySkill? _selectedVacancySkill;
-    public VacancySkill? SelectedVacancySkill
+    #region SelectedSkill
+    private SkillModel? _selectedSkill;
+    public SkillModel? SelectedSkill
     {
-        get => _selectedVacancySkill;
-        set => this.RaiseAndSetIfChanged(ref _selectedVacancySkill, value);
+        get => _selectedSkill;
+        set => this.RaiseAndSetIfChanged(ref _selectedSkill, value);
     }
     #endregion  
 
-    public IReactiveCommand CreateVacancySkillCmd { get; }
-    public IReactiveCommand DeleteVacancySkillCmd { get; }       
+    public IReactiveCommand CreateSkillCmd { get; }
+    public IReactiveCommand DeleteSkillCmd { get; }  
 }

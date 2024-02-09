@@ -24,7 +24,12 @@
     "First_Name": "First name",
     "Last_Name": "Last name",
     "Date_Birth": "Date of birth",
-    "Age": "Age",      
+    "Age": "Age",  
+    "Candidate_Search": "Candidate search",
+    "Candidate_Search_Vacancy": "Search for vacancy: ",
+    "Vacancy_Search": "Vacancy search",
+    "Vacancy_Search_Candidate": "Search for candidate: ", 
+    "AddToVacancy": "Add to vacancy",        
     
     //ViewModels
     "SkillCategories": "Skill categories",

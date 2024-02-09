@@ -30,6 +30,8 @@
         <MenuItem Header="{ll:Localize Candidates}">
             <MenuItem Header="{ll:Localize Create}" Command="{Binding OpenCreateCandidate}">
             </MenuItem>
+            <MenuItem Header="{ll:Localize Search}" Command="{Binding OpenSearchCandidate}">
+            </MenuItem>            
         </MenuItem>        
         <MenuItem Header="{ll:Localize Dictionary}">
             <MenuItem Header="{ll:Localize Address}">            

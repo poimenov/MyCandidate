@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"             
              xmlns:vm="using:MyCandidate.MVVM.ViewModels.Candidates" 
-             xmlns:v="using:MyCandidate.MVVM.Views.Candidates"            
+             xmlns:v="using:MyCandidate.MVVM.Views.Candidates" 
+             xmlns:sh="using:MyCandidate.MVVM.Views.Shared"           
              xmlns:vw="using:MyCandidate.MVVM.Views.Tools"             
              mc:Ignorable="d"
              d:DesignWidth="300" d:DesignHeight="400"
@@ -49,7 +50,7 @@
                 <vw:LocationView DataContext="{Binding Location}" Margin="0,5,0,0"></vw:LocationView>
             </HeaderedContentControl>
             <HeaderedContentControl Grid.Row="1" Grid.Column="2" Header="{ll:Localize Skills}" Margin="5,5,5,0">
-                <v:CandidateSkillsView DataContext="{Binding CandidateSkills}" Margin="0,5,0,0" />
+                <sh:SkillsView DataContext="{Binding CandidateSkills}" Margin="0,5,0,0" />
             </HeaderedContentControl>
        
     </Grid>

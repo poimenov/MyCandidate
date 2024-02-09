@@ -16,6 +16,7 @@
     "Languages": "Языки",
     "Help": "Справка",
     "About": "О программе",
+    "Search": "Поиск",
 
     //properties
     "Value": "Значение",
@@ -48,6 +49,12 @@
     "Last_Name": "Фамилия",
     "Date_Birth": "Дата рождения",
     "Age": "Возраст",
+    "Candidate_Search": "Поиск кандидата",
+    "Candidate_Search_Vacancy": "Поиск для вакансии: ",
+    "Vacancy_Search": "Поиск вакансии",
+    "Vacancy_Search_Candidate": "Поиск для кандидата: ",
+    "Open": "Открыть",
+    "AddToVacancy": "Добавить в вакансию", 
     
     //ViewModels
     "SkillCategories": "Категории навыков",

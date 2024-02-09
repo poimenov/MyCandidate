@@ -17,7 +17,9 @@ using MyCandidate.Common.Interfaces;
 using MyCandidate.DataAccess;
 using MyCandidate.MVVM.DataAnnotations;
 using MyCandidate.MVVM.Extensions;
+using MyCandidate.MVVM.Models;
 using MyCandidate.MVVM.Services;
+using MyCandidate.MVVM.ViewModels.Shared;
 using MyCandidate.MVVM.ViewModels.Tools;
 using ReactiveUI;
 
@@ -106,6 +108,8 @@ public class VacancyViewModel : Document
         }
     }
 
+    public Vacancy Vacancy => _vacancy;
+
     #region Filter
     private IObservable<Func<Office, bool>>? Filter =>
         this.WhenAnyValue(x => x.SelectedCompany)
@@ -140,7 +144,7 @@ public class VacancyViewModel : Document
 
         VacancyResources = new VacancyResourcesViewModel(_vacancy, _properties);
         VacancyResources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
-        VacancySkills = new VacancySkillsViewModel(_vacancy, _properties);
+        VacancySkills = new SkillsViewModel(_vacancy.VacancySkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _properties);
         VacancySkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });        
         this.RaisePropertyChanged(nameof(VacancyId));        
     }
@@ -162,7 +166,7 @@ public class VacancyViewModel : Document
                             }
 
                             _vacancy.VacancyResources = VacancyResources.VacancyResources.Select(x => x.ToVacancyResource()).ToList();
-                            _vacancy.VacancySkills = VacancySkills.VacancySkills.ToList();
+                            _vacancy.VacancySkills = VacancySkills.Skills.Select(x => x.ToVacancySkill(_vacancy)).ToList();
                             string message;
                             int id;
                             bool success;
@@ -391,8 +395,8 @@ public class VacancyViewModel : Document
         set => this.RaiseAndSetIfChanged(ref _vacancyResources, value);
     }  
 
-    private VacancySkillsViewModel _vacancySkills;
-    public VacancySkillsViewModel VacancySkills
+    private SkillsViewModel _vacancySkills;
+    public SkillsViewModel VacancySkills
     {
         get => _vacancySkills;
         set => this.RaiseAndSetIfChanged(ref _vacancySkills, value);

@@ -248,4 +248,50 @@ public class Candidates : ICandidates
                 .First(x => x.Id == id);
         }
     }
+
+    public IEnumerable<Candidate> Search(CandidateSearch searchParams)
+    {
+        using (var db = new Database())
+        {
+            var retVal = db.Candidates.AsQueryable();
+
+            if(searchParams.Enabled.HasValue)
+            {
+                retVal = retVal.Where(x => x.Enabled == searchParams.Enabled.Value);
+            }            
+
+            if(!string.IsNullOrWhiteSpace(searchParams.LastName))
+            {
+                retVal = retVal.Where(x => x.LastName.StartsWith(searchParams.LastName));
+            }
+
+            if(!string.IsNullOrWhiteSpace(searchParams.FirstName))
+            {
+                retVal = retVal.Where(x => x.FirstName.StartsWith(searchParams.FirstName));
+            }
+
+            if(searchParams.CityId.HasValue)
+            {
+                retVal = retVal.Where(x => x.Location.CityId == searchParams.CityId.Value);
+            }  
+            else if(searchParams.CountryId.HasValue)
+            {
+                retVal = retVal.Where(x => x.Location.City.CountryId == searchParams.CountryId.Value);
+            }   
+
+            if(searchParams.Skills.Any())
+            {
+                foreach(var skill in searchParams.Skills)
+                {
+                    retVal = retVal.Where(x => x.CandidateSkills.Any(s => s.SkillId == skill.SkillId && s.SeniorityId == skill.SeniorityId));
+                }
+            }       
+
+            return retVal.Include(x => x.Location)
+                .ThenInclude(x => x.City)
+                .ThenInclude(x => x.Country)
+                .Include(x => x.CandidateOnVacancies)
+                .ToList();
+        }
+    }
 }

@@ -11,7 +11,9 @@ using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.DataAnnotations;
 using MyCandidate.MVVM.Extensions;
+using MyCandidate.MVVM.Models;
 using MyCandidate.MVVM.Services;
+using MyCandidate.MVVM.ViewModels.Shared;
 using MyCandidate.MVVM.ViewModels.Tools;
 using ReactiveUI;
 
@@ -99,7 +101,7 @@ public class CandidateViewModel : Document
 
         CandidateResources = new CandidateResourcesViewModel(_candidate, _properties);
         CandidateResources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
-        CandidateSkills = new CandidateSkillsViewModel(_candidate, _properties);
+        CandidateSkills = new SkillsViewModel(_candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _properties);
         CandidateSkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });  
         this.RaisePropertyChanged(nameof(CandidateId));      
     }
@@ -108,6 +110,8 @@ public class CandidateViewModel : Document
     {
         Title = LocalizationService.Default["New_Candidate"];
     }
+
+    public Candidate Candidate =>_candidate;
 
     public bool IsValid
     {
@@ -145,7 +149,7 @@ public class CandidateViewModel : Document
                             }
 
                             _candidate.CandidateResources = CandidateResources.CandidateResources.Select(x => x.ToCandidateResource()).ToList();
-                            _candidate.CandidateSkills = CandidateSkills.CandidateSkills.ToList();
+                            _candidate.CandidateSkills = CandidateSkills.Skills.Select(x => x.ToCandidateSkill(_candidate)).ToList();
                             string message;
                             int id;
                             bool success;
@@ -326,8 +330,8 @@ public class CandidateViewModel : Document
         set => this.RaiseAndSetIfChanged(ref _candidateResources, value);
     }
 
-    private CandidateSkillsViewModel _candidateSkills;
-    public CandidateSkillsViewModel CandidateSkills
+    private SkillsViewModel _candidateSkills;
+    public SkillsViewModel CandidateSkills
     {
         get => _candidateSkills;
         set => this.RaiseAndSetIfChanged(ref _candidateSkills, value);

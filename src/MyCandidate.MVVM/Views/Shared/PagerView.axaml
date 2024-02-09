@@ -1,0 +1,40 @@
+<UserControl x:Class="MyCandidate.MVVM.Views.Shared.PagerView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"
+             xmlns:vm="using:MyCandidate.MVVM.ViewModels.Shared"
+             mc:Ignorable="d"
+             d:DesignWidth="300" d:DesignHeight="400"
+             x:DataType="vm:PagerViewModel" x:CompileBindings="True">
+
+    <Grid>
+        <StackPanel Grid.Row="0" Margin="4" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Padding="0" Command="{Binding FirstPageCmd}">
+                <Image Width="24" Height="24" Source="{SvgImage /Assets/skip-backward-fill-svgrepo-com.svg}"/>
+            </Button>
+            <Button Padding="0" Margin="4,0,0,0" Command="{Binding PreviousPageCmd}">
+                <Image Width="24" Height="24" Source="{SvgImage /Assets/skip-previous-play-fill-svgrepo-com.svg}" />
+            </Button>
+            <TextBlock Margin="8,0" VerticalAlignment="Center">
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="Page {0} of {1}">
+                        <Binding Path="CurrentPage" />
+                        <Binding Path="TotalPages" />
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+            <Button Padding="0" Margin="0,0,4,0" Command="{Binding NextPageCmd}">
+                <Image Width="24" Height="24" Source="{SvgImage /Assets/skip-next-play-fill-svgrepo-com.svg}"/>
+            </Button>
+            <Button Padding="0" Command="{Binding LastPageCmd}">
+                <Image Width="24" Height="24" Source="{SvgImage /Assets/skip-forward-fill-svgrepo-com.svg}"/>                        
+            </Button>
+        </StackPanel>
+
+        <TextBlock Grid.Row="0" Margin="0,0,15,0" 
+                       HorizontalAlignment="Right" VerticalAlignment="Center"
+                       Text="{Binding TotalItems, StringFormat={}{0} items}"/>                      
+    </Grid>
+</UserControl>             

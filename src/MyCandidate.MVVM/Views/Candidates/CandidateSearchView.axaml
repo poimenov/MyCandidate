@@ -1,0 +1,88 @@
+<UserControl x:Class="MyCandidate.MVVM.Views.Candidates.CandidateSearchView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"
+             xmlns:vm="using:MyCandidate.MVVM.ViewModels.Candidates"
+             xmlns:v="using:MyCandidate.MVVM.Views.Candidates"            
+             xmlns:vw="using:MyCandidate.MVVM.Views.Tools"
+             xmlns:sh="using:MyCandidate.MVVM.Views.Shared"
+             xmlns:cm="using:MyCandidate.Common"              
+             mc:Ignorable="d"
+             d:DesignWidth="300" d:DesignHeight="400"
+             x:DataType="vm:CandidateSearchViewModel" x:CompileBindings="True">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="CountryTemplate" DataType="cm:Country">
+            <TextBlock Text="{Binding Name}" />
+        </DataTemplate>
+        <DataTemplate x:Key="CityTemplate" DataType="cm:City">
+            <TextBlock Text="{Binding Name}" />
+        </DataTemplate>        
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="Auto, *, Auto">
+
+        <Grid Grid.Row="0" ColumnDefinitions="520,*">
+            <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="80,150,140,150">
+                <Label Grid.Column="0" Grid.Row="0" Content="{ll:Localize Last_Name}" Margin="4,15,4,4" VerticalContentAlignment="Center"/> 
+                <Label Grid.Column="0" Grid.Row="1" Content="{ll:Localize First_Name}" Margin="4" VerticalContentAlignment="Center"/> 
+                <Label Grid.Column="0" Grid.Row="2" Content="{ll:Localize Enabled}" Margin="4" VerticalContentAlignment="Center"/> 
+
+                <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding LastName}" HorizontalAlignment="Stretch" Margin="4,15,4,4"/>
+                <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding LastName}" HorizontalAlignment="Stretch" Margin="4"/>
+                <CheckBox Grid.Column="1" Grid.Row="2" IsChecked="{Binding Enabled}" IsThreeState="True" Margin="4" />
+
+                <Label Grid.Column="2" Grid.Row="0" Content="{ll:Localize Country_Name}" Margin="4,15,4,4" VerticalContentAlignment="Center"/> 
+                <Label Grid.Column="2" Grid.Row="1" Content="{ll:Localize City_Name}" Margin="4" VerticalContentAlignment="Center"/>
+
+                <ComboBox Grid.Column="3" Grid.Row="0" 
+                        ItemsSource="{Binding Countries}" 
+                        ItemTemplate="{DynamicResource CountryTemplate}"
+                        SelectedItem="{Binding Country}" 
+                        HorizontalAlignment="Stretch" Margin="4,15,4,4"></ComboBox>    
+
+                <ComboBox Grid.Column="3" Grid.Row="1" 
+                        ItemsSource="{Binding Cities}" 
+                        ItemTemplate="{DynamicResource CityTemplate}"
+                        SelectedItem="{Binding City}" 
+                        HorizontalAlignment="Stretch" Margin="4"></ComboBox>                                                                               
+            </Grid> 
+
+            <StackPanel Grid.Column="1">
+                <HeaderedContentControl Header="{ll:Localize Skills}" HorizontalAlignment="Stretch" Margin="4">
+                    <sh:SkillsView DataContext="{Binding Skills}" Margin="0,5,0,0" />
+                </HeaderedContentControl>  
+
+                <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="{ll:Localize AddToVacancy}" Command="{Binding AddToVacancyCmd}" Margin="0,4,0,4" Width="170" HorizontalContentAlignment="Center" />
+                        <Button Content="{ll:Localize Open}" Command="{Binding OpenCmd}"  Margin="4,4,0,4" Width="100" HorizontalContentAlignment="Center" />
+                </StackPanel>              
+            </StackPanel>       
+        </Grid>
+
+        <DataGrid Grid.Row="1" 
+                BorderThickness="1" 
+                BorderBrush="{StaticResource DataGridBorderBrush}"
+                GridLinesVisibility="All"  
+                Margin="4,0,4,0"        
+                Padding="4" 
+                IsVisible="true"
+                IsReadOnly="True"              
+                SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                ItemsSource="{Binding ItemList}">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="{ll:Localize Last_Name}"  Binding="{Binding LastName}" Width="200"/>
+                <DataGridTextColumn Header="{ll:Localize First_Name}"  Binding="{Binding FirstName}" Width="200"/>              
+                <DataGridTextColumn Header="{ll:Localize Country_Name}"  Binding="{Binding Location.City.Country.Name}" Width="200"/>
+                <DataGridTextColumn Header="{ll:Localize City_Name}"  Binding="{Binding Location.City.Name}" Width="200"/>
+                <DataGridCheckBoxColumn Header="{ll:Localize Enabled}" Binding="{Binding Enabled}" Width="120" />
+            </DataGrid.Columns>  
+        </DataGrid>  
+
+        <sh:PagerView Grid.Row="2"  DataContext="{Binding Pager}" />
+
+    </Grid>
+
+</UserControl>             

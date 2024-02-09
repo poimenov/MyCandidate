@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using log4net;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
@@ -67,6 +68,11 @@ public class CandidateService : ICandidateService
     public Candidate Get(int id)
     {
         return _candidates.Get(id);
+    }
+
+    public IEnumerable<Candidate> Search(CandidateSearch searchParams)
+    {
+        return _candidates.Search(searchParams);
     }
 
     public bool Update(Candidate item, out string message)
