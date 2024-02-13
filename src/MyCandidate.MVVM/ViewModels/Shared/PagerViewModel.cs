@@ -11,7 +11,7 @@ public class PagerViewModel : ViewModelBase
 
     public PagerViewModel()
     {
-        CurrentPage = FIRST_PAGE;
+        //CurrentPage = FIRST_PAGE;
         FirstPageCmd = ReactiveCommand.Create(
                     async () =>
                     {
@@ -40,13 +40,13 @@ public class PagerViewModel : ViewModelBase
 
     public System.IObservable<IPageRequest> Pager =>
         this.WhenAnyValue(x => x.CurrentPage)
-            .Select(x => new PageRequest(x, PageSize));    
+            .Select(x => new PageRequest(x == 0 ? 1 : x, PageSize));    
 
-    public void PagingUpdate(int totalSize, int page, int pages)
-    {
-            TotalItems = totalSize;
-            CurrentPage = page;
+    public void PagingUpdate(int page, int totalCount, int pages)
+    {            
             TotalPages = pages;
+            CurrentPage = page;
+            TotalItems = totalCount;
     }
 
     public IReactiveCommand FirstPageCmd { get; }

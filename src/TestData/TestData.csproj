@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Bogus" Version="35.4.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MyCandidate.Common\MyCandidate.Common.csproj" />
+    <ProjectReference Include="..\MyCandidate.DataAccess\MyCandidate.DataAccess.csproj" />
+  </ItemGroup>
+</Project>

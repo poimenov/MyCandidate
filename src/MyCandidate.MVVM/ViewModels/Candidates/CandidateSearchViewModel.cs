@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.PropertyGrid.Services;
+using Dock.Model.Controls;
 using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
 using DynamicData.Binding;
@@ -60,7 +61,9 @@ public class CandidateSearchViewModel : Document
             .Do(x => Pager.PagingUpdate(x.Response.TotalSize, x.Response.Page, x.Response.Pages))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _itemList)
-            .Subscribe();        
+            .Subscribe();   
+
+        OpenCmd = CreateOpenCmd();     
     }
 
     public CandidateSearchViewModel(VacancyViewModel vacancyViewModel, ICandidateService candidateService, IDataAccess<Country> countries, IDataAccess<City> cities, IProperties properties)
@@ -89,9 +92,7 @@ public class CandidateSearchViewModel : Document
     }
 
     private void LoadCandidateSearch()
-    {
-        
-
+    {        
         if (_vacancyViewModel == null)
         {
             Skills = new SkillsViewModel(new List<SkillModel>(), _properties);
@@ -146,6 +147,21 @@ public class CandidateSearchViewModel : Document
     }    
 
     public IReactiveCommand OpenCmd { get; }
+    private IReactiveCommand CreateOpenCmd()
+    {
+        return ReactiveCommand.Create(
+                    async () =>
+                        {
+                            var doc = new CandidateViewModel(_candidateService, _countriesData, _citiesData, _properties, SelectedItem.Id)
+                            { 
+                                Factory = this.Factory 
+                            };
+                            this.Factory.AddDockable(this.Factory.GetDockable<IDocumentDock>("Documents"), doc);  
+                            this.Factory.SetActiveDockable(doc);                           
+                        }, this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
+                            (obj, list) => obj != null && list.Count > 0)
+                    );
+    }
     public IReactiveCommand AddToVacancyCmd { get; }
 
     private PagerViewModel _pagerViewModel;
