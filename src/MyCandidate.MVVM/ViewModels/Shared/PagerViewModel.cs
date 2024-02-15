@@ -1,3 +1,4 @@
+using System;
 using System.Reactive.Linq;
 using DynamicData;
 using ReactiveUI;
@@ -11,48 +12,73 @@ public class PagerViewModel : ViewModelBase
 
     public PagerViewModel()
     {
-        //CurrentPage = FIRST_PAGE;
         FirstPageCmd = ReactiveCommand.Create(
                     async () =>
                     {
                         CurrentPage = FIRST_PAGE;
-                    }, this.WhenAnyValue(x => x.CurrentPage, y => y > FIRST_PAGE)
+                    }, this.WhenAnyValue(x => x.PreviousPageEnabled, y => y == true)
                 );
         PreviousPageCmd = ReactiveCommand.Create(
                     async () =>
                     {
                         CurrentPage = CurrentPage - 1;
-                    }, this.WhenAnyValue(x => x.CurrentPage, y => y > FIRST_PAGE)
-                );   
+                    }, this.WhenAnyValue(x => x.PreviousPageEnabled, y => y == true)
+                );
         NextPageCmd = ReactiveCommand.Create(
                     async () =>
                     {
                         CurrentPage = CurrentPage + 1;
-                    }, this.WhenAnyValue(x => x.CurrentPage, y => y < TotalPages)
-                );    
+                    }, this.WhenAnyValue(x => x.NextPageEnabled, y => y == true)
+                );
         LastPageCmd = ReactiveCommand.Create(
                     async () =>
                     {
                         CurrentPage = TotalPages;
-                    }, this.WhenAnyValue(x => x.CurrentPage, y => y < TotalPages)
-                );                                           
+                    }, this.WhenAnyValue(x => x.NextPageEnabled, y => y == true)
+                );
     }
+
+    private bool _previousPageEnabled;
+    public bool PreviousPageEnabled
+    {
+        get => _previousPageEnabled;
+        set => this.RaiseAndSetIfChanged(ref _previousPageEnabled, value);
+    }
+
+    private bool _nextPageEnabled;
+    public bool NextPageEnabled
+    {
+        get => _nextPageEnabled;
+        set => this.RaiseAndSetIfChanged(ref _nextPageEnabled, value);
+    }           
 
     public System.IObservable<IPageRequest> Pager =>
         this.WhenAnyValue(x => x.CurrentPage)
-            .Select(x => new PageRequest(x == 0 ? 1 : x, PageSize));    
+            .Select(x => new PageRequest(x == 0 ? 1 : x, PageSize));
 
     public void PagingUpdate(int page, int totalCount, int pages)
-    {            
-            TotalPages = pages;
-            CurrentPage = page;
-            TotalItems = totalCount;
+    {
+        TotalPages = pages;
+        CurrentPage = page;
+        TotalItems = totalCount;
+        PreviousPageEnabled = CurrentPage > FIRST_PAGE;
+        NextPageEnabled = CurrentPage < TotalItems;
+    }
+
+    public void PagingUpdate(int totalCount)
+    {        
+        TotalPages = Convert.ToInt32(Math.Ceiling(Convert.ToDecimal(totalCount) / PAGE_SIZE));
+        CurrentPage = 1;
+        TotalItems = totalCount;
+        PreviousPageEnabled = CurrentPage > FIRST_PAGE;
+        NextPageEnabled = CurrentPage < TotalItems;        
     }
 
     public IReactiveCommand FirstPageCmd { get; }
     public IReactiveCommand PreviousPageCmd { get; }
     public IReactiveCommand NextPageCmd { get; }
     public IReactiveCommand LastPageCmd { get; }
+
     private int _totalItems;
     public int TotalItems
     {

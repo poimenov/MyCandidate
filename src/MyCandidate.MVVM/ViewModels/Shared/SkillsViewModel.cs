@@ -64,6 +64,7 @@ public class SkillsViewModel : ViewModelBase
                 SourceSkills.Add(_newSkill);
                 _newSkill.PropertyChanged += ItemPropertyChanged;
                 SelectedSkill = _newSkill;
+                this.RaisePropertyChanged(nameof(IsValid));
             }
         );            
     }
@@ -75,14 +76,7 @@ public class SkillsViewModel : ViewModelBase
 
     public bool IsValid
     {
-        get
-        {
-            if(Skills.Select(x => x.Skill.Id).Distinct().Count() != Skills.Count())
-            {
-                return false;
-            }
-            return true;
-        }
+        get => Skills.Select(x => x.Skill.Id).Distinct().Count() == Skills.Count();
     }    
 
     private void CultureChanged(object? sender, EventArgs e)

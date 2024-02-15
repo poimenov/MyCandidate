@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.PropertyGrid.Services;
+using Dock.Model.Controls;
 using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
 using DynamicData.Binding;
@@ -14,11 +14,9 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
-using MyCandidate.DataAccess;
-using MyCandidate.MVVM.DataAnnotations;
-using MyCandidate.MVVM.Extensions;
 using MyCandidate.MVVM.Models;
 using MyCandidate.MVVM.Services;
+using MyCandidate.MVVM.ViewModels.Candidates;
 using MyCandidate.MVVM.ViewModels.Shared;
 using MyCandidate.MVVM.ViewModels.Tools;
 using ReactiveUI;
@@ -32,6 +30,7 @@ public class VacancyViewModel : Document
     private readonly IDataAccess<Company> _companiesData;
     private readonly IDataAccess<Office> _officesData;
     private readonly IProperties _properties;
+    private App CurrentApplication => (App)Application.Current;
     private Vacancy _vacancy;
     private bool _initialSet = false;
 
@@ -55,7 +54,8 @@ public class VacancyViewModel : Document
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = CreateCancelCmd();
         SaveCmd = CreateSaveCmd();
-        DeleteCmd = CreateDeleteCmd();        
+        DeleteCmd = CreateDeleteCmd(); 
+        SearchCmd = CreateSearchCmd();       
     }
 
     public VacancyViewModel(IVacancyService vacancyService, IDictionariesDataAccess dictionariesData, IDataAccess<Company> companies, IDataAccess<Office> officies, IProperties properties, int vacancyId)
@@ -79,6 +79,7 @@ public class VacancyViewModel : Document
         CancelCmd = CreateCancelCmd();
         SaveCmd = CreateSaveCmd();
         DeleteCmd = CreateDeleteCmd();
+        SearchCmd = CreateSearchCmd();
     }
 
     private void CultureChanged(object? sender, EventArgs e)
@@ -154,47 +155,47 @@ public class VacancyViewModel : Document
     private IReactiveCommand CreateSaveCmd()
     {
         return ReactiveCommand.Create(
-                    async () =>
-                        {
-                            var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
-                                                                                    LocalizationService.Default["Save_Text"],
-                                                                                    ButtonEnum.YesNo, Icon.Question);
-                            var result = await dialog.ShowAsync();
-                            if (result == ButtonResult.No)
-                            {
-                                return;
-                            }
+            async () =>
+                {
+                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
+                                                                            LocalizationService.Default["Save_Text"],
+                                                                            ButtonEnum.YesNo, Icon.Question);
+                    var result = await dialog.ShowAsync();
+                    if (result == ButtonResult.No)
+                    {
+                        return;
+                    }
 
-                            _vacancy.VacancyResources = VacancyResources.VacancyResources.Select(x => x.ToVacancyResource()).ToList();
-                            _vacancy.VacancySkills = VacancySkills.Skills.Select(x => x.ToVacancySkill(_vacancy)).ToList();
-                            string message;
-                            int id;
-                            bool success;
+                    _vacancy.VacancyResources = VacancyResources.VacancyResources.Select(x => x.ToVacancyResource()).ToList();
+                    _vacancy.VacancySkills = VacancySkills.Skills.Select(x => x.ToVacancySkill(_vacancy)).ToList();
+                    string message;
+                    int id;
+                    bool success;
 
-                            if (_vacancy.Id == 0)
-                            {
-                                success = _vacancyService.Create(_vacancy, out id, out message);
-                            }
-                            else
-                            {
-                                success = _vacancyService.Update(_vacancy, out message);
-                                id = _vacancy.Id;
-                            }
+                    if (_vacancy.Id == 0)
+                    {
+                        success = _vacancyService.Create(_vacancy, out id, out message);
+                    }
+                    else
+                    {
+                        success = _vacancyService.Update(_vacancy, out message);
+                        id = _vacancy.Id;
+                    }
 
-                            if (success)
-                            {
-                                _vacancy = _vacancyService.Get(id);
-                                LoadVacancy();                                
-                            }
-                            else
-                            {
-                                dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
-                                                                                    message, ButtonEnum.Ok, Icon.Error);
-                                await dialog.ShowAsync();
-                            }
+                    if (success)
+                    {
+                        _vacancy = _vacancyService.Get(id);
+                        LoadVacancy();                                
+                    }
+                    else
+                    {
+                        dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
+                                                                            message, ButtonEnum.Ok, Icon.Error);
+                        await dialog.ShowAsync();
+                    }
 
-                        }, this.WhenAnyValue(x => x.IsValid, v => v == true)
-                    );
+                }, this.WhenAnyValue(x => x.IsValid, v => v == true)
+            );
     }    
 
     public IReactiveCommand CancelCmd { get; }
@@ -202,52 +203,71 @@ public class VacancyViewModel : Document
     private IReactiveCommand CreateCancelCmd()
     {
         return ReactiveCommand.Create(
-                    async () =>
-                        {
-                            var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Cancel"],
-                                                                                    LocalizationService.Default["Cancel_Text"],
-                                                                                    ButtonEnum.YesNo, Icon.Question);
-                            var result = await dialog.ShowAsync();
-                            if (result == ButtonResult.No)
-                            {
-                                return;
-                            }
-                            _vacancy = _vacancy.Id == 0 ? NewVacancy : _vacancyService.Get(_vacancy.Id);
-                            LoadVacancy();
-                        }
-                    );
-    }    
+            async () =>
+                {
+                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Cancel"],
+                                                                            LocalizationService.Default["Cancel_Text"],
+                                                                            ButtonEnum.YesNo, Icon.Question);
+                    var result = await dialog.ShowAsync();
+                    if (result == ButtonResult.No)
+                    {
+                        return;
+                    }
+                    _vacancy = _vacancy.Id == 0 ? NewVacancy : _vacancyService.Get(_vacancy.Id);
+                    LoadVacancy();
+                }
+            );
+    }  
+
+    public IReactiveCommand SearchCmd { get; }
+
+    private IReactiveCommand CreateSearchCmd()
+    {
+        return ReactiveCommand.Create(
+            async () => 
+            {
+                var _candidateService = CurrentApplication.GetRequiredService<ICandidateService>();
+                var _countriesData = CurrentApplication.GetRequiredService<IDataAccess<Country>>();
+                var _citiesData = CurrentApplication.GetRequiredService<IDataAccess<City>>();
+                var doc = new CandidateSearchViewModel(this, _candidateService, _countriesData, _citiesData, _properties)
+                {
+                    Factory = this.Factory
+                };
+                this.Factory.AddDockable(this.Factory.GetDockable<IDocumentDock>("Documents"), doc);
+                this.Factory.SetActiveDockable(doc);
+            }, this.WhenAnyValue(x => x.VacancyId, y => y != 0));
+    }
 
     public IReactiveCommand DeleteCmd { get; }
 
     private IReactiveCommand CreateDeleteCmd()
     {
         return ReactiveCommand.Create(
-                    async () =>
-                        {
-                            var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
-                                                                                    LocalizationService.Default["DeleteVacancy_Text"],
-                                                                                    ButtonEnum.YesNo, Icon.Question);
-                            var result = await dialog.ShowAsync();
-                            if (result == ButtonResult.No)
-                            {
-                                return;
-                            }
+            async () =>
+                {
+                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
+                                                                            LocalizationService.Default["DeleteVacancy_Text"],
+                                                                            ButtonEnum.YesNo, Icon.Question);
+                    var result = await dialog.ShowAsync();
+                    if (result == ButtonResult.No)
+                    {
+                        return;
+                    }
 
-                            string message;
-                            if (_vacancyService.Delete(VacancyId, out message))
-                            {
-                                this.Factory.CloseDockable(this);
-                            }
-                            else
-                            {
-                                dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
-                                                                                    message, ButtonEnum.Ok, Icon.Error);
-                                await dialog.ShowAsync();
-                            }
+                    string message;
+                    if (_vacancyService.Delete(VacancyId, out message))
+                    {
+                        this.Factory.CloseDockable(this);
+                    }
+                    else
+                    {
+                        dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
+                                                                            message, ButtonEnum.Ok, Icon.Error);
+                        await dialog.ShowAsync();
+                    }
 
-                        }, this.WhenAnyValue(x => x.VacancyId, y => y != 0)
-                    );
+                }, this.WhenAnyValue(x => x.VacancyId, y => y != 0)
+            );
     }    
 
     public int VacancyId

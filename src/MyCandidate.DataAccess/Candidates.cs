@@ -262,12 +262,12 @@ public class Candidates : ICandidates
 
             if(!string.IsNullOrWhiteSpace(searchParams.LastName))
             {
-                retVal = retVal.Where(x => x.LastName.StartsWith(searchParams.LastName));
+                retVal = retVal.Where(x => x.LastName.ToLower().StartsWith(searchParams.LastName.ToLower()));
             }
 
             if(!string.IsNullOrWhiteSpace(searchParams.FirstName))
             {
-                retVal = retVal.Where(x => x.FirstName.StartsWith(searchParams.FirstName));
+                retVal = retVal.Where(x => x.FirstName.ToLower().StartsWith(searchParams.FirstName.ToLower()));
             }
 
             if(searchParams.CityId.HasValue)
