@@ -55,6 +55,7 @@
     "Vacancy_Search_Candidate": "Поиск для кандидата: ",
     "Open": "Открыть",
     "AddToVacancy": "Добавить в вакансию", 
+    "AddToCandidate": "Добавить кандидату",
     
     //ViewModels
     "SkillCategories": "Категории навыков",

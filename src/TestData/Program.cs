@@ -14,83 +14,58 @@ void OnDatabaseCreate(object? sender, DatabaseCreateEventArgs e)
 {
     var countryCount = 5;
     var cityCount = 5;
+    var companyCount = 5;
+    var officeCount = 3;
     var categories = GetCategories();
     var countries = FakeData.GetCountries(countryCount, cityCount);
-    var cities = countries.SelectMany(country => country.Cities, (country, city) => new { CountryName = country.Name, CityName = city.Name }).ToList();
-    var companies = FakeData.GetCompanies(5, 3, countryCount * cityCount);
+    var officeNames = countries.SelectMany(country => country.Cities, (country, city) => $"{country.Name}, {city.Name} Office").ToList();
+    var companies = FakeData.GetCompanies(companyCount, officeCount, countryCount * cityCount);
     foreach (var company in companies)
     {
         foreach (var office in company.Officies)
         {
-            var city = cities.ElementAt(office.Location.CityId - 1);
-            office.Name = $"{city.CountryName}, {city.CityName} Office";
+            office.Name = officeNames.ElementAt(office.Location.CityId - 1);
         }
     }
-    
+    var skillCount = categories.Sum(x => x.Skills.Count());   
     e.Countries.AddRange(countries);
     e.Companies.AddRange(companies);
     e.SkillCategories.AddRange(categories);
-    e.Candidates.AddRange(FakeData.GetCandidates(1000, countryCount * cityCount, categories.Count));
+    e.Candidates.AddRange(FakeData.GetCandidates(1000, countryCount * cityCount, skillCount));
+    e.Vacancies.AddRange(FakeData.GetVacancies(50, companyCount * officeCount, skillCount));
 }
+
+
 
 List<SkillCategory> GetCategories()
 {
+    var source = new Dictionary<string, string[]>();
+    source.Add("Programming languages", new string[] {"C#", "Python", "Java", "JavaScript"});
+    source.Add("Frameworks", new string[] {".NET", ".NET WPF", "ASP.NET MVC"});
+    source.Add("Web Frameworks", new string[] {"Angular", "React", "Vue.js"});
+    source.Add("Databases", new string[] {"MS Sql Server", "Oracle", "Postgresql", "MySql"});
+    source.Add("Languages spoken", new string[] {"English", "Spanish"});
+    
     var retVal = new List<SkillCategory>();
-    retVal.Add(new SkillCategory
+    foreach(var item in source)
     {
-        Name = "Programming languages",
-        Enabled = true,
-        Skills = new List<Skill>
+        var skills = new List<Skill>();
+        foreach(var skill in item.Value)
         {
-            new Skill { Name = "C#", Enabled = true},
-            new Skill { Name = "Python", Enabled = true},
-            new Skill { Name = "Java", Enabled = true},
-            new Skill { Name = "JavaScript", Enabled = true }
+            skills.Add(new Skill 
+            { 
+                Name = skill, 
+                Enabled = true
+            });
         }
-    });
-    retVal.Add(new SkillCategory
-    {
-        Name = "Frameworks",
-        Enabled = true,
-        Skills = new List<Skill>
+
+        retVal.Add(new SkillCategory
         {
-            new Skill { Name = ".NET", Enabled = true },
-            new Skill { Name = ".NET WPF", Enabled = true },
-            new Skill { Name = "ASP.NET MVC", Enabled = true }
-        }
-    });
-    retVal.Add(new SkillCategory
-    {
-        Name = "Web Frameworks",
-        Enabled = true,
-        Skills = new List<Skill>
-        {
-            new Skill { Name = "Angular", Enabled = true },
-            new Skill { Name = "React", Enabled = true },
-            new Skill { Name = "Vue.js", Enabled = true }
-        }
-    });
-    retVal.Add(new SkillCategory
-    {
-        Name = "Languages spoken",
-        Enabled = true,
-        Skills = new List<Skill>
-        {
-            new Skill { Name = "English", Enabled = true },
-            new Skill { Name = "Spanish", Enabled = true }
-        }
-    });
-    retVal.Add(new SkillCategory
-    {
-        Name = "Databases",
-        Enabled = true,
-        Skills = new List<Skill>
-        {
-            new Skill { Name = "MS Sql Server", Enabled = true },
-            new Skill { Name = "Oracle", Enabled = true },
-            new Skill { Name = "Postgresql", Enabled = true },
-            new Skill { Name = "MySql", Enabled = true }
-        }
-    });
+            Name = item.Key,
+            Enabled = true,
+            Skills = skills
+        });        
+    }
+
     return retVal;
 }

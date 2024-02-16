@@ -129,6 +129,52 @@ public class Vacancies : IVacancies
         }
     }
 
+    public IEnumerable<Vacancy> Search(VacancySearch searchParams)
+    {
+        using (var db = new Database())
+        {
+            var retVal = db.Vacancies.AsQueryable();
+
+            if(searchParams.Enabled.HasValue)
+            {
+                retVal = retVal.Where(x => x.Enabled == searchParams.Enabled.Value);
+            }            
+
+            if(!string.IsNullOrWhiteSpace(searchParams.Name))
+            {
+                retVal = retVal.Where(x => x.Name.ToLower().Contains(searchParams.Name.ToLower()));
+            }
+
+            if(searchParams.VacancyStatusId.HasValue)
+            {
+                retVal = retVal.Where(x => x.VacancyStatusId == searchParams.VacancyStatusId);
+            }
+
+            if(searchParams.OfficeId.HasValue)
+            {
+                retVal = retVal.Where(x => x.OfficeId == searchParams.OfficeId.Value);
+            }  
+            else if(searchParams.CompanyId.HasValue)
+            {
+                retVal = retVal.Where(x => x.Office.CompanyId == searchParams.CompanyId.Value);
+            }   
+
+            if(searchParams.Skills.Any())
+            {
+                foreach(var skill in searchParams.Skills)
+                {
+                    retVal = retVal.Where(x => x.VacancySkills.Any(s => s.SkillId == skill.SkillId && s.SeniorityId == skill.SeniorityId));
+                }
+            }       
+
+            return retVal.Include(x => x.Office)
+                .ThenInclude(x => x.Company)
+                .Include(x => x.VacancyStatus)
+                .Include(x => x.CandidateOnVacancies)
+                .ToList();
+        }
+    }
+
     public void Update(Vacancy vacancy)
     {
         using (var db = new Database())

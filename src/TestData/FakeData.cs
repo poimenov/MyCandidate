@@ -6,6 +6,40 @@ namespace TestData
 {
     public static class FakeData
 {
+    public static IEnumerable<Vacancy> GetVacancies(int count, int officeCount, int skillsCount)
+    {
+         var skillFaker = new Faker<VacancySkill>()
+            .RuleFor(x => x.SkillId, f => f.Random.Int(1, skillsCount))
+            .RuleFor(x => x.SeniorityId, f => f.Random.Int(1, 5)); 
+
+        var urlFaker = new Faker<VacancyResource>()
+            .RuleFor(x => x.ResourceTypeId, f => 4)
+            .RuleFor(x => x.Value, f => f.Internet.UrlWithPath());            
+
+        var vacancyFaker = new Faker<Vacancy>() 
+            .RuleFor(x => x.Enabled, f => true)
+            .RuleFor(x => x.OfficeId, f => f.Random.Int(1, officeCount))
+            .RuleFor(x => x.VacancyStatusId, f => 1)
+            .RuleFor(x => x.CreationDate, f => f.Date.Between(DateTime.Today.AddMinutes(-40), DateTime.Today.AddMinutes(-30)))
+            .RuleFor(x => x.LastModificationDate, f => f.Date.Between(DateTime.Today.AddMinutes(-20), DateTime.Today.AddMinutes(-10))) 
+            .RuleFor(x => x.VacancyResources, (f, x) =>
+            {
+                return new List<VacancyResource>
+                {
+                    urlFaker.Generate()
+                };               
+            })             
+            .RuleFor(x => x.VacancySkills, (f, x) => 
+            {
+                var skills =  skillFaker.Generate(f.Random.Int(1, 12));                
+                return skills.Distinct(new VacancySkillComparer()).ToList();
+            })                      
+            .RuleFor(x => x.Name, f => f.Name.ItJobTitle())
+            .RuleFor(x => x.Description, f => f.Lorem.Paragraphs());
+
+        return vacancyFaker.Generate(count);     
+    }
+    
     public static IEnumerable<Candidate> GetCandidates(int count, int cityCount, int skillsCount)
     {
         var phoneFaker = new Faker<CandidateResource>()
@@ -40,7 +74,6 @@ namespace TestData
             .RuleFor(x => x.Enabled, f => true)
             .RuleFor(x => x.CreationDate, f => f.Date.Between(DateTime.Today.AddMinutes(-40), DateTime.Today.AddMinutes(-30)))
             .RuleFor(x => x.LastModificationDate, f => f.Date.Between(DateTime.Today.AddMinutes(-20), DateTime.Today.AddMinutes(-10)))
-            .RuleFor(x => x.CreationDate, f => f.Date.Between(DateTime.Today.AddMinutes(-40), DateTime.Today.AddMinutes(-30)))
             .RuleFor(x => x.Location, (f, x) =>            
             {
                 return locationFaker.Generate();
@@ -60,9 +93,8 @@ namespace TestData
                     skypeFaker.Generate()
                 };               
             });
-            var retVal = new List<Candidate>();
-            retVal.AddRange(candidateFaker.Generate(count));
-            return retVal;
+
+            return candidateFaker.Generate(count);
     }
 
     public static IEnumerable<Country> GetCountries(int countryCount, int cityCount)
@@ -124,4 +156,18 @@ namespace TestData
             return obj.SkillId.GetHashCode();
         }
     }
+
+    public class VacancySkillComparer : IEqualityComparer<VacancySkill>
+    {
+        public bool Equals(VacancySkill? x, VacancySkill? y)
+        {
+            if (Object.ReferenceEquals(x, y)) return true;
+            return x.SkillId == y.SkillId;
+        }
+
+        public int GetHashCode([DisallowNull] VacancySkill obj)
+        {
+            return obj.SkillId.GetHashCode();
+        }
+    }    
 }

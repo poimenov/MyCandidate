@@ -229,7 +229,6 @@ public class CandidateSearchViewModel : Document
         );
     }
 
-
     #region Pager
     private PagerViewModel _pagerViewModel;
     public PagerViewModel Pager

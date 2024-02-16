@@ -131,6 +131,19 @@ public class MainWindowViewModel : ViewModelBase
             OpenViewModel(doc, true);                       
         }
     }
+
+    public void OpenSearchVacancy()
+    {
+        if (Documents?.VisibleDockables != null)
+        {
+            var service = CurrentApplication.GetRequiredService<IVacancyService>();
+            var companies = CurrentApplication.GetRequiredService<IDataAccess<Company>>();
+            var offices = CurrentApplication.GetRequiredService<IDataAccess<Office>>();
+            var dictionariesData = CurrentApplication.GetRequiredService<IDictionariesDataAccess>();
+            var doc = new VacancySearchViewModel(service, companies, offices, dictionariesData, Properties){ Factory = _factory };
+            OpenViewModel(doc, true);                       
+        }
+    }    
     
     public void OpenCreateVacancy()
     {

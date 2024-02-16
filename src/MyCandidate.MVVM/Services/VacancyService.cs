@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using log4net;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
@@ -67,6 +68,12 @@ public class VacancyService : IVacancyService
     public Vacancy Get(int id)
     {
         return _vacancies.Get(id);
+    }
+
+    public IEnumerable<Vacancy> Search(VacancySearch searchParams)
+    {
+        //Add logic for sort by count skill found desc
+        return _vacancies.Search(searchParams);
     }
 
     public bool Update(Vacancy item, out string message)

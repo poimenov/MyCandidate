@@ -57,7 +57,10 @@ namespace MyCandidate.DataAccess
                         _database.SaveChanges();       
 
                         _database.Candidates.AddRange(e.Candidates);
-                        _database.SaveChanges();                                                                  
+                        _database.SaveChanges();  
+
+                        _database.Vacancies.AddRange(e.Vacancies);
+                        _database.SaveChanges();                                                                                         
 
                         transaction.Commit();
                     }

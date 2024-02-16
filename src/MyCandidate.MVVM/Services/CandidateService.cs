@@ -72,6 +72,7 @@ public class CandidateService : ICandidateService
 
     public IEnumerable<Candidate> Search(CandidateSearch searchParams)
     {
+        //Add logic for sort by count skill found desc
         return _candidates.Search(searchParams);
     }
 

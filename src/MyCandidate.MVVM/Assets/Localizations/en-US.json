@@ -29,7 +29,8 @@
     "Candidate_Search_Vacancy": "Search for vacancy: ",
     "Vacancy_Search": "Vacancy search",
     "Vacancy_Search_Candidate": "Search for candidate: ", 
-    "AddToVacancy": "Add to vacancy",        
+    "AddToVacancy": "Add to vacancy",  
+    "AddToCandidate": "Add to candidate",      
     
     //ViewModels
     "SkillCategories": "Skill categories",

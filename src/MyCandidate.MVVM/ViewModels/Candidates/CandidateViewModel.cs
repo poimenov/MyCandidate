@@ -108,7 +108,10 @@ public class CandidateViewModel : Document
 
     private void CultureChanged(object? sender, EventArgs e)
     {
-        Title = LocalizationService.Default["New_Candidate"];
+        if(_candidate.Id == 0)
+        {
+            Title = LocalizationService.Default["New_Candidate"];
+        }        
     }
 
     public Candidate Candidate =>_candidate;
