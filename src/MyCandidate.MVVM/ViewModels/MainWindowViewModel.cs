@@ -6,25 +6,22 @@ using Dock.Model.Controls;
 using Dock.Model.Core;
 using Microsoft.Extensions.Options;
 using MyCandidate.Common;
-using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.Localizations;
 using MyCandidate.MVVM.Services;
-using MyCandidate.MVVM.ViewModels.Candidates;
 using MyCandidate.MVVM.ViewModels.Dictionary;
 using MyCandidate.MVVM.ViewModels.Tools;
-using MyCandidate.MVVM.ViewModels.Vacancies;
 using ReactiveUI;
 
 namespace MyCandidate.MVVM.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
+    private readonly IAppServiceProvider _appServiceProvider;    
     private readonly IOptions<AppSettings> _options;
     private readonly IFactory? _factory;
     private IRootDock? _layout;
     public MenuThemeViewModel MenuThemeViewModel { get; private set; }
-    public MenuLanguageViewModel MenuLanguageViewModel { get; private set; }
-    private App CurrentApplication => (App)Application.Current;
+    public MenuLanguageViewModel MenuLanguageViewModel { get; private set; }  
 
     public IRootDock? Layout
     {
@@ -32,13 +29,15 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _layout, value);
     }
 
-    public MainWindowViewModel(IOptions<AppSettings> options)
+    public MainWindowViewModel(IAppServiceProvider appServiceProvider, IOptions<AppSettings> options)
     {
+        _appServiceProvider = appServiceProvider;
         _options = options;
         LocalizationService.Default.AddExtraService(new AppLocalizationService());
         MenuThemeViewModel = new MenuThemeViewModel(_options.Value);
         MenuLanguageViewModel = new MenuLanguageViewModel(_options.Value);
-        _factory = new DockFactory();
+        _factory = appServiceProvider.Factory;
+        //Layout = appServiceProvider.Layout;
         Layout = _factory?.CreateLayout();
         if (Layout is { })
         {
@@ -110,52 +109,22 @@ public class MainWindowViewModel : ViewModelBase
 
     public void OpenCreateCandidate()
     {
-        if (Documents?.VisibleDockables != null)
-        {
-            var service = CurrentApplication.GetRequiredService<ICandidateService>();
-            var countries = CurrentApplication.GetRequiredService<IDataAccess<Country>>();
-            var cities = CurrentApplication.GetRequiredService<IDataAccess<City>>();
-            var doc = new CandidateViewModel(service, countries, cities, Properties){ Factory = _factory };
-            OpenViewModel(doc, true);           
-        }
+        _appServiceProvider.OpenDock(_appServiceProvider.GetCandidateViewModel());
     } 
 
     public void OpenSearchCandidate()
     {
-        if (Documents?.VisibleDockables != null)
-        {
-            var service = CurrentApplication.GetRequiredService<ICandidateService>();
-            var countries = CurrentApplication.GetRequiredService<IDataAccess<Country>>();
-            var cities = CurrentApplication.GetRequiredService<IDataAccess<City>>();
-            var doc = new CandidateSearchViewModel(service, countries, cities, Properties){ Factory = _factory };
-            OpenViewModel(doc, true);                       
-        }
+        _appServiceProvider.OpenDock(_appServiceProvider.GetCandidateSearchViewModel());
     }
 
     public void OpenSearchVacancy()
     {
-        if (Documents?.VisibleDockables != null)
-        {
-            var service = CurrentApplication.GetRequiredService<IVacancyService>();
-            var companies = CurrentApplication.GetRequiredService<IDataAccess<Company>>();
-            var offices = CurrentApplication.GetRequiredService<IDataAccess<Office>>();
-            var dictionariesData = CurrentApplication.GetRequiredService<IDictionariesDataAccess>();
-            var doc = new VacancySearchViewModel(service, companies, offices, dictionariesData, Properties){ Factory = _factory };
-            OpenViewModel(doc, true);                       
-        }
+        _appServiceProvider.OpenDock(_appServiceProvider.GetVacancySearchViewModel());
     }    
     
     public void OpenCreateVacancy()
     {
-        if (Documents?.VisibleDockables != null)
-        {
-            var service = CurrentApplication.GetRequiredService<IVacancyService>();
-            var dictionariesData = CurrentApplication.GetRequiredService<IDictionariesDataAccess>();
-            var companies = CurrentApplication.GetRequiredService<IDataAccess<Company>>();
-            var offices = CurrentApplication.GetRequiredService<IDataAccess<Office>>();
-            var doc = new VacancyViewModel(service, dictionariesData, companies, offices, Properties) { Factory = _factory };
-            OpenViewModel(doc, true);             
-        }
+        _appServiceProvider.OpenDock(_appServiceProvider.GetVacancyViewModel());
     }         
 
     private void OpenViewModel(IDockable dockable, bool addNew)
@@ -172,37 +141,8 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    #region Documents
-    private IDocumentDock? _documents;
-    public IDocumentDock? Documents
-    {
-        get
-        {
-            if (_documents == null)
-            {
-                _documents = _factory?.GetDockable<IDocumentDock>("Documents");
-            }
-
-            return _documents;
-        }
-    }
-    #endregion
-
-    #region Properties
-    private IProperties? _properties;
-    public IProperties? Properties
-    {
-        get
-        {
-            if (_properties == null)
-            {
-                _properties = _factory?.GetDockable<PropertiesViewModel>("Properties") as IProperties;
-            }
-
-            return _properties;
-        }
-    }
-    #endregion
+    public IDocumentDock? Documents => _appServiceProvider.Documents;
+    public IProperties? Properties => _appServiceProvider.Properties;
 
     #region CountriesViewModel
     private DictionaryViewModel<Country>? _countriesViewModel;
@@ -212,8 +152,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (_countriesViewModel == null)
             {
-                _countriesViewModel = CurrentApplication.GetRequiredService<DictionaryViewModel<Country>>();
-                _countriesViewModel!.Properties = Properties;
+                _countriesViewModel = _appServiceProvider.GetCountriesViewModel();
             }
             return _countriesViewModel;
         }
@@ -232,8 +171,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (_citiesViewModel == null)
             {
-                _citiesViewModel = CurrentApplication.GetRequiredService<DictionaryViewModel<City>>();
-                _citiesViewModel!.Properties = Properties;
+                _citiesViewModel = _appServiceProvider.GetCitiesViewModel();
             }
             return _citiesViewModel;
         }
@@ -252,8 +190,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (_categoriesViewModel == null)
             {
-                _categoriesViewModel = CurrentApplication.GetRequiredService<DictionaryViewModel<SkillCategory>>();
-                _categoriesViewModel!.Properties = Properties;
+                _categoriesViewModel = _appServiceProvider.GetCategoriesViewModel();
             }
             return _categoriesViewModel;
         }
@@ -272,8 +209,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (_skillsViewModel == null)
             {
-                _skillsViewModel = CurrentApplication.GetRequiredService<DictionaryViewModel<Skill>>();
-                _skillsViewModel!.Properties = Properties;
+                _skillsViewModel = _appServiceProvider.GetSkillsViewModel();
             }
             return _skillsViewModel;
         }
@@ -292,8 +228,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (_companiesViewModel == null)
             {
-                _companiesViewModel = CurrentApplication.GetRequiredService<DictionaryViewModel<Company>>();
-                _companiesViewModel!.Properties = Properties;
+                _companiesViewModel = _appServiceProvider.GetCompaniesViewModel();
             }
             return _companiesViewModel;
         }
@@ -312,8 +247,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (_officiesViewModel == null)
             {
-                _officiesViewModel = CurrentApplication.GetRequiredService<DictionaryViewModel<Office>>();
-                _officiesViewModel!.Properties = Properties;
+                _officiesViewModel = _appServiceProvider.GetOfficiesViewModel();
             }
             return _officiesViewModel;
         }

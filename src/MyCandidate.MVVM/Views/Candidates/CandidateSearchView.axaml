@@ -5,7 +5,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"
              xmlns:vm="using:MyCandidate.MVVM.ViewModels.Candidates"           
-             xmlns:vw="using:MyCandidate.MVVM.Views.Tools"
              xmlns:sh="using:MyCandidate.MVVM.Views.Shared"
              xmlns:cm="using:MyCandidate.Common"              
              mc:Ignorable="d"
@@ -55,7 +54,7 @@
                 </HeaderedContentControl>  
 
                 <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="{ll:Localize AddToVacancy}" Command="{Binding AddToVacancyCmd}" Margin="0,4,0,4" Width="170" HorizontalContentAlignment="Center" />                        
+                        <Button Content="{ll:Localize AddToVacancy}" Command="{Binding AddToVacancyCmd}" IsVisible="{Binding AddToVacancyVisible}" Margin="0,4,0,4" Width="170" HorizontalContentAlignment="Center" />                        
                         <Button Content="{ll:Localize Open}" Command="{Binding OpenCmd}"  Margin="4,4,0,4" Width="100" HorizontalContentAlignment="Center" />
                         <Button Content="{ll:Localize Search}" Command="{Binding SearchCmd}" Margin="4,4,0,4" Width="100" HorizontalContentAlignment="Center" />
                 </StackPanel>              
@@ -73,10 +72,10 @@
                 SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                 ItemsSource="{Binding ItemList}">
               <DataGrid.Columns>
-                <DataGridTextColumn Header="{ll:Localize Last_Name}"  Binding="{Binding LastName}" Width="200"/>
-                <DataGridTextColumn Header="{ll:Localize First_Name}"  Binding="{Binding FirstName}" Width="200"/>              
-                <DataGridTextColumn Header="{ll:Localize Country_Name}"  Binding="{Binding Location.City.Country.Name}" Width="200"/>
-                <DataGridTextColumn Header="{ll:Localize City_Name}"  Binding="{Binding Location.City.Name}" Width="200"/>
+                <DataGridTextColumn Header="{ll:Localize Last_Name}" Binding="{Binding LastName}" Width="200"/>
+                <DataGridTextColumn Header="{ll:Localize First_Name}" Binding="{Binding FirstName}" Width="200"/>              
+                <DataGridTextColumn Header="{ll:Localize Country_Name}" Binding="{Binding Location.City.Country.Name}" Width="200"/>
+                <DataGridTextColumn Header="{ll:Localize City_Name}" Binding="{Binding Location.City.Name}" Width="200"/>
                 <DataGridCheckBoxColumn Header="{ll:Localize Enabled}" Binding="{Binding Enabled}" Width="120" />
             </DataGrid.Columns>  
         </DataGrid>  

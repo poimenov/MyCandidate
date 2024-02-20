@@ -11,4 +11,5 @@ public interface ICandidateService
     bool Update (Candidate item, out string message);
     bool Delete (int id, out string message);
     IEnumerable<Candidate> Search(CandidateSearch searchParams);
+    IEnumerable<CandidateOnVacancy> GetCandidateOnVacancies(int candidateId);
 }

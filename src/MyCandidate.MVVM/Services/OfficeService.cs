@@ -49,6 +49,11 @@ public class OfficeService : IDictionaryService<Office>
         return true;
     }
 
+    public Office Get(int id)
+    {
+        return _officies.Get(id);
+    }
+
     public bool Update(IEnumerable<Office> items, out string message)
     {
         message = string.Empty;

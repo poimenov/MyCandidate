@@ -49,6 +49,11 @@ public class SkillService : IDictionaryService<Skill>
         return true;
     }
 
+    public Skill Get(int id)
+    {
+        return _skills.Get(id);
+    }
+
     public bool Update(IEnumerable<Skill> items, out string message)
     {
         message = string.Empty;

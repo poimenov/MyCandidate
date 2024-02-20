@@ -16,10 +16,10 @@ namespace MyCandidate.MVVM.ViewModels.Tools;
 public class LocationViewModel : ViewModelBase
 {
     private bool _locationChanges = false;
-    public LocationViewModel(IDataAccess<Country> countries, IDataAccess<City> cities)
+    public LocationViewModel(IEnumerable<Country> countries, IEnumerable<City> cities)
     {
-        Countries = countries.ItemsList.Where(x => x.Enabled == true);
-        CitiesSource = new ObservableCollectionExtended<City>(cities!.ItemsList.Where(x => x.Enabled == true));
+        Countries = countries;
+        CitiesSource = new ObservableCollectionExtended<City>(cities);
         CitiesSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter)

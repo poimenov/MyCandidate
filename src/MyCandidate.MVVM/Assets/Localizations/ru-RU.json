@@ -56,6 +56,7 @@
     "Open": "Открыть",
     "AddToVacancy": "Добавить в вакансию", 
     "AddToCandidate": "Добавить кандидату",
+    "Selection_Status": "Статус подбора",
     
     //ViewModels
     "SkillCategories": "Категории навыков",
@@ -72,7 +73,11 @@
     "Office": "Офис",
     "Candidates": "Кандидаты",
     "Vacancies": "Вакансии",
+    "Candidate": "Кандидат",
+    "Vacancy": "Вакансия",    
     "Resource": "Доп.информация",
+    "Comments": "Комментарии",
+    "Comment": "Комментарий",
 
     //Dialog messages
     "Save_Text": "Сохранить изменения?",

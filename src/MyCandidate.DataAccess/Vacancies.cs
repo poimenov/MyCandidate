@@ -6,9 +6,10 @@ namespace MyCandidate.DataAccess;
 
 public class Vacancies : IVacancies
 {
-    public Vacancies()
+    private readonly ICandidateOnVacancies _candidateOnVacancies;
+    public Vacancies(ICandidateOnVacancies candidateOnVacancies)
     {
-        //
+        _candidateOnVacancies = candidateOnVacancies;
     }
 
     public bool Create(Vacancy vacancy, out int id)
@@ -92,8 +93,8 @@ public class Vacancies : IVacancies
                             db.VacancySkills.RemoveRange(db.VacancySkills.Where(x => x.VacancyId == id));
                         }
 
-                        var item = db.Vacancies.First(x => x.Id == id);
-                        db.Vacancies.Remove(item);
+                        _candidateOnVacancies.DeleteByVacancyId(id);
+                        db.Vacancies.Remove(db.Vacancies.First(x => x.Id == id));
 
                         db.SaveChanges();
                         transaction.Commit();
@@ -123,8 +124,8 @@ public class Vacancies : IVacancies
                 .ThenInclude(x => x.Seniority)
                 .Include(x => x.VacancySkills)
                 .ThenInclude(x => x.Skill)
-                .ThenInclude(x => x.SkillCategory) 
-                .Include(x => x.CandidateOnVacancies)                   
+                .ThenInclude(x => x.SkillCategory)
+                .Include(x => x.CandidateOnVacancies)
                 .First(x => x.Id == id);
         }
     }
@@ -135,37 +136,37 @@ public class Vacancies : IVacancies
         {
             var retVal = db.Vacancies.AsQueryable();
 
-            if(searchParams.Enabled.HasValue)
+            if (searchParams.Enabled.HasValue)
             {
                 retVal = retVal.Where(x => x.Enabled == searchParams.Enabled.Value);
-            }            
+            }
 
-            if(!string.IsNullOrWhiteSpace(searchParams.Name))
+            if (!string.IsNullOrWhiteSpace(searchParams.Name))
             {
                 retVal = retVal.Where(x => x.Name.ToLower().Contains(searchParams.Name.ToLower()));
             }
 
-            if(searchParams.VacancyStatusId.HasValue)
+            if (searchParams.VacancyStatusId.HasValue)
             {
                 retVal = retVal.Where(x => x.VacancyStatusId == searchParams.VacancyStatusId);
             }
 
-            if(searchParams.OfficeId.HasValue)
+            if (searchParams.OfficeId.HasValue)
             {
                 retVal = retVal.Where(x => x.OfficeId == searchParams.OfficeId.Value);
-            }  
-            else if(searchParams.CompanyId.HasValue)
+            }
+            else if (searchParams.CompanyId.HasValue)
             {
                 retVal = retVal.Where(x => x.Office.CompanyId == searchParams.CompanyId.Value);
-            }   
+            }
 
-            if(searchParams.Skills.Any())
+            if (searchParams.Skills.Any())
             {
-                foreach(var skill in searchParams.Skills)
+                foreach (var skill in searchParams.Skills)
                 {
                     retVal = retVal.Where(x => x.VacancySkills.Any(s => s.SkillId == skill.SkillId && s.SeniorityId == skill.SeniorityId));
                 }
-            }       
+            }
 
             return retVal.Include(x => x.Office)
                 .ThenInclude(x => x.Company)
@@ -181,88 +182,98 @@ public class Vacancies : IVacancies
         {
             using (var transaction = db.Database.BeginTransaction())
             {
-                if (db.Vacancies.Any(x => x.Id == vacancy.Id))
+                try
                 {
-                    var entity = db.Vacancies.First(x => x.Id == vacancy.Id);
-                    entity.LastModificationDate = DateTime.Now;
-                    entity.Name = vacancy.Name;
-                    entity.Description = vacancy.Description;
-                    entity.VacancyStatusId = vacancy.VacancyStatusId;
-                    entity.OfficeId = vacancy.OfficeId;
-                    entity.Enabled = vacancy.Enabled;
+                    if (db.Vacancies.Any(x => x.Id == vacancy.Id))
+                    {
+                        var entity = db.Vacancies.First(x => x.Id == vacancy.Id);
+                        entity.LastModificationDate = DateTime.Now;
+                        entity.Name = vacancy.Name;
+                        entity.Description = vacancy.Description;
+                        entity.VacancyStatusId = vacancy.VacancyStatusId;
+                        entity.OfficeId = vacancy.OfficeId;
+                        entity.Enabled = vacancy.Enabled;
 
-                    //update existed resources
-                    var idsToUpdate = vacancy.VacancyResources.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
-                    foreach (var idToUpdate in idsToUpdate)
-                    {
-                        if (db.VacancyResources.Any(x => x.Id == idToUpdate))
+                        //update existed resources
+                        var idsToUpdate = vacancy.VacancyResources.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
+                        foreach (var idToUpdate in idsToUpdate)
                         {
-                            var resourceToUpdate = vacancy.VacancyResources.First(x => x.Id == idToUpdate);
-                            var resource = db.VacancyResources.First(x => x.Id == idToUpdate);
-                            resource.Value = resourceToUpdate.Value;
-                            resource.ResourceTypeId = resourceToUpdate.ResourceTypeId;
+                            if (db.VacancyResources.Any(x => x.Id == idToUpdate))
+                            {
+                                var resourceToUpdate = vacancy.VacancyResources.First(x => x.Id == idToUpdate);
+                                var resource = db.VacancyResources.First(x => x.Id == idToUpdate);
+                                resource.Value = resourceToUpdate.Value;
+                                resource.ResourceTypeId = resourceToUpdate.ResourceTypeId;
+                            }
                         }
-                    }
-                    //delete existed resources
-                    var idsToDelete = db.VacancyResources.Where(x => x.VacancyId == vacancy.Id && !idsToUpdate.Contains(x.Id))
-                                                                   .Select(x => x.Id).ToArray();
-                    foreach (var idToDelete in idsToDelete)
-                    {
-                        if (db.VacancyResources.Any(x => x.Id == idToDelete))
+                        //delete existed resources
+                        var idsToDelete = db.VacancyResources.Where(x => x.VacancyId == vacancy.Id && !idsToUpdate.Contains(x.Id))
+                                                                       .Select(x => x.Id).ToArray();
+                        foreach (var idToDelete in idsToDelete)
                         {
-                            var resource = db.VacancyResources.First(x => x.Id == idToDelete);
-                            db.VacancyResources.Remove(resource);
+                            if (db.VacancyResources.Any(x => x.Id == idToDelete))
+                            {
+                                var resource = db.VacancyResources.First(x => x.Id == idToDelete);
+                                db.VacancyResources.Remove(resource);
+                            }
                         }
-                    }
-                    //add new resources
-                    foreach (var resourceToAdd in vacancy.VacancyResources.Where(x => x.Id == 0))
-                    {
-                        var newResource = new VacancyResource
+                        //add new resources
+                        foreach (var resourceToAdd in vacancy.VacancyResources.Where(x => x.Id == 0))
                         {
-                            VacancyId = vacancy.Id,
-                            Value = resourceToAdd.Value,
-                            ResourceTypeId = resourceToAdd.ResourceTypeId
-                        };
-                        db.VacancyResources.Add(newResource);
-                    }
+                            var newResource = new VacancyResource
+                            {
+                                VacancyId = vacancy.Id,
+                                Value = resourceToAdd.Value,
+                                ResourceTypeId = resourceToAdd.ResourceTypeId
+                            };
+                            db.VacancyResources.Add(newResource);
+                        }
 
-                    //update existed skills
-                    idsToUpdate = vacancy.VacancySkills.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
-                    foreach (var idToUpdate in idsToUpdate)
-                    {
-                        if (db.VacancySkills.Any(x => x.Id == idToUpdate))
+                        //update existed skills
+                        idsToUpdate = vacancy.VacancySkills.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
+                        foreach (var idToUpdate in idsToUpdate)
                         {
-                            var skillToUpdate = vacancy.VacancySkills.First(x => x.Id == idToUpdate);
-                            var skill = db.VacancySkills.First(x => x.Id == idToUpdate);
-                            skill.SeniorityId = skillToUpdate.SeniorityId;
-                            skill.SkillId = skillToUpdate.SkillId;
+                            if (db.VacancySkills.Any(x => x.Id == idToUpdate))
+                            {
+                                var skillToUpdate = vacancy.VacancySkills.First(x => x.Id == idToUpdate);
+                                var skill = db.VacancySkills.First(x => x.Id == idToUpdate);
+                                skill.SeniorityId = skillToUpdate.SeniorityId;
+                                skill.SkillId = skillToUpdate.SkillId;
+                            }
                         }
-                    }
-                    //delete existed skills
-                    idsToDelete = db.VacancySkills.Where(x => x.VacancyId == vacancy.Id && !idsToUpdate.Contains(x.Id))
-                                                                   .Select(x => x.Id).ToArray();
-                    foreach (var idToDelete in idsToDelete)
-                    {
-                        if (db.VacancySkills.Any(x => x.Id == idToDelete))
+                        //delete existed skills
+                        idsToDelete = db.VacancySkills.Where(x => x.VacancyId == vacancy.Id && !idsToUpdate.Contains(x.Id))
+                                                                       .Select(x => x.Id).ToArray();
+                        foreach (var idToDelete in idsToDelete)
                         {
-                            var skill = db.VacancySkills.First(x => x.Id == idToDelete);
-                            db.VacancySkills.Remove(skill);
+                            if (db.VacancySkills.Any(x => x.Id == idToDelete))
+                            {
+                                var skill = db.VacancySkills.First(x => x.Id == idToDelete);
+                                db.VacancySkills.Remove(skill);
+                            }
                         }
-                    }
-                    //add new skills
-                    foreach (var skillToAdd in vacancy.VacancySkills.Where(x => x.Id == 0))
-                    {
-                        var newSkill = new VacancySkill
+                        //add new skills
+                        foreach (var skillToAdd in vacancy.VacancySkills.Where(x => x.Id == 0))
                         {
-                            VacancyId = vacancy.Id,
-                            SeniorityId = skillToAdd.SeniorityId,
-                            SkillId = skillToAdd.SkillId
-                        };
-                        db.VacancySkills.Add(newSkill);
-                    }
+                            var newSkill = new VacancySkill
+                            {
+                                VacancyId = vacancy.Id,
+                                SeniorityId = skillToAdd.SeniorityId,
+                                SkillId = skillToAdd.SkillId
+                            };
+                            db.VacancySkills.Add(newSkill);
+                        }
 
-                    db.SaveChanges();
-                    transaction.Commit();
+                        _candidateOnVacancies.Update(vacancy.CandidateOnVacancies);
+
+                        db.SaveChanges();
+                        transaction.Commit();
+                    }
+                }
+                catch (System.Exception)
+                {
+                    transaction.Rollback();
+                    throw;
                 }
             }
         }

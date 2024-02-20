@@ -78,6 +78,11 @@ public class CountryService : IDictionaryService<Country>
         }
     }
 
+    public Country Get(int id)
+    {
+        return _countries.Get(id);
+    }
+
     public bool Update(IEnumerable<Country> items, out string message)
     {
         message = string.Empty;

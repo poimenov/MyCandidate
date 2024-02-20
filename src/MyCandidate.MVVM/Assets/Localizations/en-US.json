@@ -30,7 +30,8 @@
     "Vacancy_Search": "Vacancy search",
     "Vacancy_Search_Candidate": "Search for candidate: ", 
     "AddToVacancy": "Add to vacancy",  
-    "AddToCandidate": "Add to candidate",      
+    "AddToCandidate": "Add to candidate",  
+    "Selection_Status": "Selection status",    
     
     //ViewModels
     "SkillCategories": "Skill categories",

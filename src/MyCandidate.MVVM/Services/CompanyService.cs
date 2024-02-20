@@ -78,6 +78,11 @@ public class CompanyService : IDictionaryService<Company>
         }
     }
 
+    public Company Get(int id)
+    {
+        return _companies.Get(id);
+    }
+
     public bool Update(IEnumerable<Company> items, out string message)
     {
         message = string.Empty;

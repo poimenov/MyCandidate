@@ -49,6 +49,11 @@ public class CityService : IDictionaryService<City>
         return true;
     }
 
+    public City Get(int id)
+    {
+        return _cities.Get(id);
+    }
+
     public bool Update(IEnumerable<City> items, out string message)
     {
         message = string.Empty;

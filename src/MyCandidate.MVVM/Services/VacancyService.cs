@@ -9,11 +9,13 @@ namespace MyCandidate.MVVM.Services;
 public class VacancyService : IVacancyService
 {
     private readonly IVacancies _vacancies;
+    private readonly ICandidateOnVacancies _candidateOnVacancies;
     private readonly ILog _log; 
 
-    public VacancyService(IVacancies vacancies, ILog log)
+    public VacancyService(IVacancies vacancies, ICandidateOnVacancies candidateOnVacancies, ILog log)
     {
         _vacancies = vacancies;
+        _candidateOnVacancies = candidateOnVacancies;
         _log = log;
     }   
     
@@ -68,6 +70,11 @@ public class VacancyService : IVacancyService
     public Vacancy Get(int id)
     {
         return _vacancies.Get(id);
+    }
+
+    public IEnumerable<CandidateOnVacancy> GetCandidateOnVacancies(int vacancyId)
+    {
+        return _candidateOnVacancies.GetListByVacancyId(vacancyId);
     }
 
     public IEnumerable<Vacancy> Search(VacancySearch searchParams)

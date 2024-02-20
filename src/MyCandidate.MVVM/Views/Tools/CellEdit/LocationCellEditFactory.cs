@@ -47,7 +47,7 @@ class LocationCellEditFactory : AbstractCellEditFactory
             return null;
         }
 
-        var vm = new LocationViewModel(_countries, _cities);
+        var vm = new LocationViewModel(_countries.ItemsList.Where(x => x.Enabled == true), _cities.ItemsList.Where(x => x.Enabled == true));
         var control = new LocationView
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,

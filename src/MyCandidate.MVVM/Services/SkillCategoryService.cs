@@ -78,6 +78,11 @@ public class SkillCategoryService : IDictionaryService<SkillCategory>
         }
     }
 
+    public SkillCategory Get(int id)
+    {
+        return _categories.Get(id);
+    }
+
     public bool Update(IEnumerable<SkillCategory> items, out string message)
     {
         message = string.Empty;

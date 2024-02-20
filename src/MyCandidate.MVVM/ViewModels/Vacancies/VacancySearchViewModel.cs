@@ -16,33 +16,24 @@ using MyCandidate.MVVM.Services;
 using MyCandidate.MVVM.ViewModels.Candidates;
 using MyCandidate.MVVM.ViewModels.Shared;
 using MyCandidate.MVVM.ViewModels.Tools;
-using MyCandidate.MVVM.ViewModels.Vacancies;
 using ReactiveUI;
 
 namespace MyCandidate.MVVM.ViewModels.Vacancies;
 
 public class VacancySearchViewModel : Document
 {
-    private readonly IVacancyService _vacancyService;
-    private readonly IProperties _properties;
-    private readonly IDataAccess<Company> _companiesData;
-    private readonly IDataAccess<Office> _officesData;
-    private readonly IDictionariesDataAccess _dictionariesDataAccess;
+    private readonly IAppServiceProvider _provider; 
     private readonly CandidateViewModel _candidateViewModel;
 
-    public VacancySearchViewModel(IVacancyService vacancyService, IDataAccess<Company> companiesData, IDataAccess<Office> officesData, IDictionariesDataAccess dictionariesDataAccess, IProperties properties)
+    public VacancySearchViewModel(IAppServiceProvider appServiceProvider)
     {
-        _vacancyService = vacancyService;
-        _companiesData = companiesData;
-        _officesData = officesData;
-        _dictionariesDataAccess = dictionariesDataAccess;        
-        _properties = properties;
+        _provider = appServiceProvider;        
 
         Title = LocalizationService.Default["Vacancy_Search"];
         LocalizationService.Default.OnCultureChanged += CultureChanged;  
 
         var _offices = new List<Office>() { new Office() { Id = 0, CompanyId = 0, Name = string.Empty } };
-        _offices.AddRange(_officesData.ItemsList.Where(x => x.Enabled == true));   
+        _offices.AddRange(_provider.OfficeService.ItemsList.Where(x => x.Enabled == true));   
 
         OfficesSource = new ObservableCollectionExtended<Office>(_offices); 
         OfficesSource.ToObservableChangeSet()
@@ -64,20 +55,16 @@ public class VacancySearchViewModel : Document
         SearchCmd = CreateSearchCmd();                     
     }
 
-    public VacancySearchViewModel(CandidateViewModel candidateViewModel, IVacancyService vacancyService, IDataAccess<Company> companiesData, IDataAccess<Office> officesData, IDictionariesDataAccess dictionariesDataAccess, IProperties properties)
+    public VacancySearchViewModel(CandidateViewModel candidateViewModel, IAppServiceProvider appServiceProvider)
     {
         _candidateViewModel = candidateViewModel;
-        _vacancyService = vacancyService;
-        _companiesData = companiesData;
-        _officesData = officesData;
-        _dictionariesDataAccess = dictionariesDataAccess;
-        _properties = properties;
+        _provider = appServiceProvider; 
 
         Title = $"{LocalizationService.Default["Vacancy_Search_Candidate"]} {_candidateViewModel.Candidate.Name}";
         LocalizationService.Default.OnCultureChanged += CultureChanged; 
 
         var _offices = new List<Office>() { new Office() { Id = 0, CompanyId = 0, Name = string.Empty } };
-        _offices.AddRange(_officesData.ItemsList.Where(x => x.Enabled == true));   
+        _offices.AddRange(_provider.OfficeService.ItemsList.Where(x => x.Enabled == true));   
 
         OfficesSource = new ObservableCollectionExtended<Office>(_offices); 
         OfficesSource.ToObservableChangeSet()
@@ -103,12 +90,12 @@ public class VacancySearchViewModel : Document
     {
         if (_candidateViewModel == null)
         {
-            Skills = new SkillsViewModel(new List<SkillModel>(), _properties);
+            Skills = new SkillsViewModel(new List<SkillModel>(), _provider.Properties);
             VacancySearch = new VacancySearch();
         }
         else
         {
-            Skills = new SkillsViewModel(_candidateViewModel.Candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _properties);            
+            Skills = new SkillsViewModel(_candidateViewModel.Candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _provider.Properties);            
             VacancySearch = new VacancySearch(_candidateViewModel.Candidate.CandidateSkills);
             var location = _candidateViewModel.Candidate.Location;
             Office = Offices.FirstOrDefault(x => x.Location.CityId == location.CityId);
@@ -167,19 +154,24 @@ public class VacancySearchViewModel : Document
     private IReactiveCommand CreateOpenCmd()
     {
         return ReactiveCommand.Create(
-                    async () =>
-                        {
-                            var doc = new VacancyViewModel(_vacancyService, _dictionariesDataAccess, _companiesData, _officesData, _properties, SelectedItem.Id)
-                            {
-                                Factory = this.Factory
-                            };
-                            this.Factory.AddDockable(this.Factory.GetDockable<IDocumentDock>("Documents"), doc);
-                            this.Factory.SetActiveDockable(doc);
-                        }, this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
-                            (obj, list) => obj != null && list.Count > 0)
-                    );
+            async () =>
+                {
+                    _provider.OpenDock(_provider.GetVacancyViewModel(SelectedItem.Id));
+                }, this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
+                    (obj, list) => obj != null && list.Count > 0)
+            );
     }
     public IReactiveCommand AddToCandidateCmd { get; }
+    private IReactiveCommand CreateAddToCandidateCmd()
+    {
+        return ReactiveCommand.Create(
+            async () =>
+            {
+                //TODO
+            }, this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
+                    (obj, list) => obj != null && list.Count > 0)
+        );
+    }     
     public IReactiveCommand SearchCmd { get; }
     private IReactiveCommand CreateSearchCmd()
     {
@@ -187,7 +179,7 @@ public class VacancySearchViewModel : Document
             async () =>
             {
                 VacancySearch.Skills = Skills.Skills.Select(x => x.ToSkillVaue());                
-                Source.Load(_vacancyService.Search(VacancySearch));
+                Source.Load(_provider.VacancyService.Search(VacancySearch));
                 Pager.PagingUpdate(Source.Count());
             }, this.WhenAnyValue(x => x.IsValid, v => v == true)
         );
@@ -290,7 +282,7 @@ public class VacancySearchViewModel : Document
             if (_companiesList == null)
             {
                 var retVal = new List<Company>() { new Company() { Id = 0, Name = string.Empty } };
-                retVal.AddRange(_companiesData.ItemsList.Where(x => x.Enabled == true));
+                retVal.AddRange(_provider.CompanyService.ItemsList.Where(x => x.Enabled == true));
                 _companiesList = retVal;
             }
             return _companiesList;
@@ -325,7 +317,7 @@ public class VacancySearchViewModel : Document
             if (_vacancyStatuses == null)
             {
                 var retVal = new List<VacancyStatus>() { new VacancyStatus() { Id = 0, Name = string.Empty } };
-                retVal.AddRange(_dictionariesDataAccess.GetVacancyStatuses().Where(x => x.Enabled == true));
+                retVal.AddRange(_provider.DictionariesDataAccess.GetVacancyStatuses().Where(x => x.Enabled == true));
                 _vacancyStatuses = retVal;
             }
             return _vacancyStatuses;

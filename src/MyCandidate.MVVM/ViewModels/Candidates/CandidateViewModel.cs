@@ -8,7 +8,6 @@ using Dock.Model.ReactiveUI.Controls;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using MyCandidate.Common;
-using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.DataAnnotations;
 using MyCandidate.MVVM.Extensions;
 using MyCandidate.MVVM.Models;
@@ -21,18 +20,12 @@ namespace MyCandidate.MVVM.ViewModels.Candidates;
 
 public class CandidateViewModel : Document
 {
-    private readonly ICandidateService _candidateService;
-    private readonly IProperties _properties;
-    private readonly IDataAccess<Country> _countries;
-    private readonly IDataAccess<City> _cities;
+    private readonly IAppServiceProvider _provider;    
     private Candidate _candidate;
 
-    public CandidateViewModel(ICandidateService candidateService, IDataAccess<Country> countries, IDataAccess<City> cities, IProperties properties)
-    {
-        _candidateService = candidateService;
-         _countries = countries;
-        _cities = cities;       
-        _properties = properties;
+    public CandidateViewModel(IAppServiceProvider appServiceProvider)
+    {   
+        _provider = appServiceProvider;   
         _candidate = NewCandidate;
         LoadCandidate();
         LocalizationService.Default.OnCultureChanged += CultureChanged;
@@ -41,13 +34,10 @@ public class CandidateViewModel : Document
         DeleteCmd = CreateDeleteCmd();
     }
 
-    public CandidateViewModel(ICandidateService candidateService, IDataAccess<Country> countries, IDataAccess<City> cities, IProperties properties, int candidateId)
+    public CandidateViewModel(IAppServiceProvider appServiceProvider, int candidateId)
     {
-        _candidateService = candidateService;
-        _countries = countries;
-        _cities = cities;        
-        _properties = properties;
-        _candidate = _candidateService.Get(candidateId);
+        _provider = appServiceProvider;        
+        _candidate = _provider.CandidateService.Get(candidateId);
         LoadCandidate();
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = CreateCancelCmd();
@@ -59,7 +49,7 @@ public class CandidateViewModel : Document
     {
         get
         {
-            var defaultCity = _cities.ItemsList.First();
+            var defaultCity = _provider.CityService.ItemsList.First();
             return new Candidate
             {
                 Id = 0,
@@ -94,14 +84,14 @@ public class CandidateViewModel : Document
         FirstName = _candidate.FirstName;
         LastName = _candidate.LastName;
         Enabled = _candidate.Enabled;
-        Location = new LocationViewModel(_countries, _cities)
+        Location = new LocationViewModel(_provider.CountryService.ItemsList.Where(x => x.Enabled == true), _provider.CityService.ItemsList.Where(x => x.Enabled == true))
         {
             Location = _candidate.Location
         };
 
-        CandidateResources = new CandidateResourcesViewModel(_candidate, _properties);
+        CandidateResources = new CandidateResourcesViewModel(_candidate, _provider.Properties);
         CandidateResources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
-        CandidateSkills = new SkillsViewModel(_candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _properties);
+        CandidateSkills = new SkillsViewModel(_candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _provider.Properties);
         CandidateSkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });  
         this.RaisePropertyChanged(nameof(CandidateId));      
     }
@@ -140,67 +130,67 @@ public class CandidateViewModel : Document
     private IReactiveCommand CreateSaveCmd()
     {
         return ReactiveCommand.Create(
-                    async () =>
-                        {
-                            var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
-                                                                                    LocalizationService.Default["Save_Text"],
-                                                                                    ButtonEnum.YesNo, Icon.Question);
-                            var result = await dialog.ShowAsync();
-                            if (result == ButtonResult.No)
-                            {
-                                return;
-                            }
+            async () =>
+                {
+                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
+                                                                            LocalizationService.Default["Save_Text"],
+                                                                            ButtonEnum.YesNo, Icon.Question);
+                    var result = await dialog.ShowAsync();
+                    if (result == ButtonResult.No)
+                    {
+                        return;
+                    }
 
-                            _candidate.CandidateResources = CandidateResources.CandidateResources.Select(x => x.ToCandidateResource()).ToList();
-                            _candidate.CandidateSkills = CandidateSkills.Skills.Select(x => x.ToCandidateSkill(_candidate)).ToList();
-                            string message;
-                            int id;
-                            bool success;
+                    _candidate.CandidateResources = CandidateResources.CandidateResources.Select(x => x.ToCandidateResource()).ToList();
+                    _candidate.CandidateSkills = CandidateSkills.Skills.Select(x => x.ToCandidateSkill(_candidate)).ToList();
+                    string message;
+                    int id;
+                    bool success;
 
-                            if (_candidate.Id == 0)
-                            {
-                                success = _candidateService.Create(_candidate, out id, out message);
-                            }
-                            else
-                            {
-                                success = _candidateService.Update(_candidate, out message);
-                                id = _candidate.Id;
-                            }
+                    if (_candidate.Id == 0)
+                    {
+                        success = _provider.CandidateService.Create(_candidate, out id, out message);
+                    }
+                    else
+                    {
+                        success = _provider.CandidateService.Update(_candidate, out message);
+                        id = _candidate.Id;
+                    }
 
-                            if (success)
-                            {
-                                _candidate = _candidateService.Get(id);
-                                LoadCandidate();                                
-                            }
-                            else
-                            {
-                                dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
-                                                                                    message, ButtonEnum.Ok, Icon.Error);
-                                await dialog.ShowAsync();
-                            }
+                    if (success)
+                    {
+                        _candidate = _provider.CandidateService.Get(id);
+                        LoadCandidate();                                
+                    }
+                    else
+                    {
+                        dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
+                                                                            message, ButtonEnum.Ok, Icon.Error);
+                        await dialog.ShowAsync();
+                    }
 
-                        }, this.WhenAnyValue(x => x.IsValid, v => v == true)
-                    );
+                }, this.WhenAnyValue(x => x.IsValid, v => v == true)
+            );
     }
     public IReactiveCommand CancelCmd { get; }
 
     private IReactiveCommand CreateCancelCmd()
     {
         return ReactiveCommand.Create(
-                    async () =>
-                        {
-                            var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Cancel"],
-                                                                                    LocalizationService.Default["Cancel_Text"],
-                                                                                    ButtonEnum.YesNo, Icon.Question);
-                            var result = await dialog.ShowAsync();
-                            if (result == ButtonResult.No)
-                            {
-                                return;
-                            }
-                            _candidate = _candidate.Id == 0 ? NewCandidate : _candidateService.Get(_candidate.Id);
-                            LoadCandidate();
-                        }
-                    );
+            async () =>
+                {
+                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Cancel"],
+                                                                            LocalizationService.Default["Cancel_Text"],
+                                                                            ButtonEnum.YesNo, Icon.Question);
+                    var result = await dialog.ShowAsync();
+                    if (result == ButtonResult.No)
+                    {
+                        return;
+                    }
+                    _candidate = _candidate.Id == 0 ? NewCandidate : _provider.CandidateService.Get(_candidate.Id);
+                    LoadCandidate();
+                }
+            );
     }
 
     public IReactiveCommand DeleteCmd { get; }
@@ -208,31 +198,31 @@ public class CandidateViewModel : Document
     private IReactiveCommand CreateDeleteCmd()
     {
         return ReactiveCommand.Create(
-                    async () =>
-                        {
-                            var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
-                                                                                    LocalizationService.Default["DeleteCandidate_Text"],
-                                                                                    ButtonEnum.YesNo, Icon.Question);
-                            var result = await dialog.ShowAsync();
-                            if (result == ButtonResult.No)
-                            {
-                                return;
-                            }
+            async () =>
+                {
+                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
+                                                                            LocalizationService.Default["DeleteCandidate_Text"],
+                                                                            ButtonEnum.YesNo, Icon.Question);
+                    var result = await dialog.ShowAsync();
+                    if (result == ButtonResult.No)
+                    {
+                        return;
+                    }
 
-                            string message;
-                            if (_candidateService.Delete(CandidateId, out message))
-                            {
-                                this.Factory.CloseDockable(this);
-                            }
-                            else
-                            {
-                                dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
-                                                                                    message, ButtonEnum.Ok, Icon.Error);
-                                await dialog.ShowAsync();
-                            }
+                    string message;
+                    if (_provider.CandidateService.Delete(CandidateId, out message))
+                    {
+                        this.Factory.CloseDockable(this);
+                    }
+                    else
+                    {
+                        dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
+                                                                            message, ButtonEnum.Ok, Icon.Error);
+                        await dialog.ShowAsync();
+                    }
 
-                        }, this.WhenAnyValue(x => x.CandidateId, y => y != 0)
-                    );
+                }, this.WhenAnyValue(x => x.CandidateId, y => y != 0)
+            );
     }
 
     #region FirstName

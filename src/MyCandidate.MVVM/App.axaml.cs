@@ -82,7 +82,9 @@ public partial class App : Application
                 .AddTransient<IVacancies, Vacancies>()
                 .AddTransient<ICandidateSkills, CandidateSkills>()
                 .AddTransient<IVacancySkills, VacancySkills>()
-                //dictionary services
+                .AddTransient<ICandidateOnVacancies, CandidateOnVacancies>()
+                .AddTransient<IComments, Comments>()
+                //services
                 .AddTransient<IDictionaryService<Country>, CountryService>()
                 .AddTransient<IDictionaryService<City>, CityService>()
                 .AddTransient<IDictionaryService<Skill>, SkillService>()
@@ -91,7 +93,8 @@ public partial class App : Application
                 .AddTransient<IDictionaryService<Office>, OfficeService>()
                 .AddTransient<ICandidateService, CandidateService>()
                 .AddTransient<IVacancyService, VacancyService>()
-                //dictionary ViewModels
+                .AddTransient<IAppServiceProvider, AppServiceProvider>()
+                //ViewModels
                 .AddTransient<DictionaryViewModel<Country>, CountriesViewModel>()
                 .AddTransient<DictionaryViewModel<City>, CitiesViewModel>()
                 .AddTransient<DictionaryViewModel<Skill>, SkillsViewModel>()
