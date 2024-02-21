@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
-using Avalonia.PropertyGrid.Services;
 using DynamicData;
 using DynamicData.Binding;
 using MyCandidate.Common;
@@ -20,7 +19,6 @@ public class CandidateResourcesViewModel : ViewModelBase
     {
         _candidate = candidate;
         Properties = properties;
-        LocalizationService.Default.OnCultureChanged += CultureChanged;
         SourceCandidateResources = new ObservableCollectionExtended<CandidateResourceExt>(_candidate.CandidateResources.Select(x => new CandidateResourceExt(x)).ToList());
         SourceCandidateResources.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -36,7 +34,6 @@ public class CandidateResourcesViewModel : ViewModelBase
                     if (Properties != null)
                     {
                         Properties.SelectedItem = x;
-                        Properties.SelectedTypeName = LocalizationService.Default["Resource"]; ;
                     }
                 }
             );
@@ -86,14 +83,6 @@ public class CandidateResourcesViewModel : ViewModelBase
             return true;
         }
     }     
-
-    private void CultureChanged(object? sender, EventArgs e)
-    {
-        if (Properties != null)
-        {
-            Properties.SelectedTypeName = LocalizationService.Default["Resource"];
-        }
-    }
 
     public IProperties? Properties { get; set; }
 

@@ -37,7 +37,6 @@ public class MainWindowViewModel : ViewModelBase
         MenuThemeViewModel = new MenuThemeViewModel(_options.Value);
         MenuLanguageViewModel = new MenuLanguageViewModel(_options.Value);
         _factory = appServiceProvider.Factory;
-        //Layout = appServiceProvider.Layout;
         Layout = _factory?.CreateLayout();
         if (Layout is { })
         {

@@ -18,7 +18,6 @@ public class SkillsViewModel : DictionaryViewModel<Skill>
         Id = "Skills";
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         Title = LocalizationService.Default["Skills"];
-        SelectedTypeName = LocalizationService.Default["Skill"];
         var categories = new List<SkillCategory>() { new SkillCategory() { Id = 0, Name = string.Empty } };
         categories.AddRange(ItemList.Select(x => x.SkillCategory).Distinct().ToList());
         SkillCategories = categories;        
@@ -31,7 +30,6 @@ public class SkillsViewModel : DictionaryViewModel<Skill>
     private void CultureChanged(object? sender, EventArgs e)
     {
         Title = LocalizationService.Default["Skills"];
-        SelectedTypeName = LocalizationService.Default["Skill"];
     }  
 
     #region SkillCategories

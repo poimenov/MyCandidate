@@ -35,7 +35,6 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
     {
         _service = service;
         _log = log;
-        SelectedTypeName = string.Empty;
         _deletedIds = new List<int>();
         _updatedIds = new List<int>();
 
@@ -56,7 +55,6 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
                     if (Properties != null)
                     {
                         Properties.SelectedItem = x;
-                        Properties.SelectedTypeName = SelectedTypeName;
                     }
                 }
             );
@@ -169,22 +167,6 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
     {
         get => _selectedItem;
         set => this.RaiseAndSetIfChanged(ref _selectedItem, value);
-    }
-    #endregion
-
-    #region SelectedTypeName
-    private string _selectedTypeName;
-    protected string SelectedTypeName
-    {
-        get => _selectedTypeName;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedTypeName, value);
-            if (Properties != null)
-            {
-                Properties.SelectedTypeName = SelectedTypeName;
-            }
-        }
     }
     #endregion
 

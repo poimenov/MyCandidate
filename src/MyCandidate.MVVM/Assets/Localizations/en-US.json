@@ -10,7 +10,11 @@
     "Target_Path": "Target Path",
     "Phone_Number": "Phone Number",
     "Email_Address": "Email Address",
-    "Web_Address": "Web Address",    
+    "Web_Address": "Web Address",  
+    "Candidate_for_vacancy":"Candidate for vacancy",
+    "Vacancy_for_candidate":"Vacancy for candidate", 
+    "Creation_Date":"Created",
+    "Last_Modification_Date":"Modified",     
 
     //Views
     "Country_Name": "Country name",
@@ -21,6 +25,7 @@
     "Office_Name": "Office name", 
     "Full_Address": "Full address",
     "New_Candidate": "New candidate", 
+    "New_Vacancy":"New vacancy",
     "First_Name": "First name",
     "Last_Name": "Last name",
     "Date_Birth": "Date of birth",

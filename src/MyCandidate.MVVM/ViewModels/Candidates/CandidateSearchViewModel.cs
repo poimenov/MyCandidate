@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.PropertyGrid.Services;
-using Dock.Model.Controls;
 using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
 using DynamicData.Binding;
@@ -14,7 +13,6 @@ using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.Models;
 using MyCandidate.MVVM.Services;
 using MyCandidate.MVVM.ViewModels.Shared;
-using MyCandidate.MVVM.ViewModels.Tools;
 using MyCandidate.MVVM.ViewModels.Vacancies;
 using ReactiveUI;
 
@@ -198,7 +196,15 @@ public class CandidateSearchViewModel : Document
         return ReactiveCommand.Create(
             async () =>
                 {
-                    _provider.OpenDock(_provider.GetCandidateViewModel(SelectedItem.Id));
+                    var existed = _provider.Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CandidateViewModel) && ((CandidateViewModel)x).CandidateId == SelectedItem.Id);
+                    if(existed != null)
+                    {
+                        _provider.Factory.SetActiveDockable(existed);
+                    }
+                    else
+                    {
+                        _provider.OpenDock(_provider.GetCandidateViewModel(SelectedItem.Id));
+                    }                                        
                 }, this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                     (obj, list) => obj != null && list.Count > 0)
             );
@@ -209,6 +215,11 @@ public class CandidateSearchViewModel : Document
         return ReactiveCommand.Create(
             async () =>
                 {                    
+                    if(!_provider.Documents.VisibleDockables.Any(x => x.GetType() == typeof(VacancyViewModel) && ((VacancyViewModel)x).VacancyId == VacancyViewModel.VacancyId ))
+                    {
+                        _provider.Factory.AddDockable(_provider.Documents, VacancyViewModel);
+                    }
+
                     var status = new SelectionStatus { Id = 1, Name = SelectionStatusNames.SetContact, Enabled = true };
                     var newItem = new CandidateOnVacancy
                     {
@@ -217,8 +228,11 @@ public class CandidateSearchViewModel : Document
                         Vacancy = VacancyViewModel.Vacancy,
                         VacancyId = VacancyViewModel.Vacancy.Id,
                         SelectionStatus = status,
-                        SelectionStatusId = status.Id
+                        SelectionStatusId = status.Id,
+                        CreationDate = DateTime.Now,
+                        LastModificationDate = DateTime.Now
                     };
+
                     VacancyViewModel.CandidatesOnVacancy.Add(newItem);
                     _provider.Factory.SetActiveDockable(VacancyViewModel);
                 }, this.WhenAnyValue(x => x.SelectedItem, x => x.VacancyViewModel,

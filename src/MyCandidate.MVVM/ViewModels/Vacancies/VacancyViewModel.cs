@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.PropertyGrid.Services;
-using Dock.Model.Controls;
 using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
 using DynamicData.Binding;
@@ -16,9 +15,7 @@ using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.Models;
 using MyCandidate.MVVM.Services;
-using MyCandidate.MVVM.ViewModels.Candidates;
 using MyCandidate.MVVM.ViewModels.Shared;
-using MyCandidate.MVVM.ViewModels.Tools;
 using ReactiveUI;
 
 namespace MyCandidate.MVVM.ViewModels.Vacancies;
@@ -70,7 +67,7 @@ public class VacancyViewModel : Document
 
     private void CultureChanged(object? sender, EventArgs e)
     {
-        Title = LocalizationService.Default["New_Vacancy"];
+        Title = (_vacancy.Id == 0) ? LocalizationService.Default["New_Vacancy"] : _vacancy.Name;
     }
 
     private Vacancy NewVacancy

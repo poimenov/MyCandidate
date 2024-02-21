@@ -19,7 +19,6 @@ public class OfficiesViewModel : DictionaryViewModel<Office>
         Id = "Officies";
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         Title = LocalizationService.Default["Officies"];
-        SelectedTypeName = LocalizationService.Default["Office"];
         var companies = new List<Company>() { new Company() { Id = 0, Name = string.Empty } };
         companies.AddRange(ItemList.Select(x => x.Company).Distinct().ToList());
         Companies = companies;
@@ -47,7 +46,6 @@ public class OfficiesViewModel : DictionaryViewModel<Office>
     private void CultureChanged(object? sender, EventArgs e)
     {
         Title = LocalizationService.Default["Officies"];
-        SelectedTypeName = LocalizationService.Default["Office"];
     }
 
     #region Companies

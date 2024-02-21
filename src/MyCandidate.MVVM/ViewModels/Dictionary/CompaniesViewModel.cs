@@ -12,13 +12,11 @@ public class CompaniesViewModel : DictionaryViewModel<Company>
     {
         Id = "Companies";
         LocalizationService.Default.OnCultureChanged += CultureChanged;
-        Title = LocalizationService.Default["Companies"];
-        SelectedTypeName = LocalizationService.Default["Company"];        
+        Title = LocalizationService.Default["Companies"];     
     }
 
     private void CultureChanged(object? sender, EventArgs e)
     {
         Title = LocalizationService.Default["Companies"];
-        SelectedTypeName = LocalizationService.Default["Company"];
     }     
 }

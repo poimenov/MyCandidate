@@ -18,7 +18,6 @@ public class CitiesViewModel : DictionaryViewModel<City>
         Id = "Cities";
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         Title = LocalizationService.Default["Cities"];
-        SelectedTypeName = LocalizationService.Default["City"];
         var countries = new List<Country>() { new Country() { Id = 0, Name = string.Empty } };
         countries.AddRange(ItemList.Select(x => x.Country).Distinct().ToList());
         Countries = countries;
@@ -31,7 +30,6 @@ public class CitiesViewModel : DictionaryViewModel<City>
     private void CultureChanged(object? sender, EventArgs e)
     {
         Title = LocalizationService.Default["Cities"];
-        SelectedTypeName = LocalizationService.Default["City"];
     }
 
     #region Countries

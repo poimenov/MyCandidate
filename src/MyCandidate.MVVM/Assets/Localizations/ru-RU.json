@@ -27,6 +27,11 @@
     "Email_Address": "Электронная почта",
     "Web_Address": "Веб-адрес",
     "Skype": "Логин в скайпе",
+    "Candidate_for_vacancy":"Кандидат для вакансии",
+    "Vacancy_for_candidate":"Вакансия для кандидата",
+    "Creation_Date":"Создан",
+    "Last_Modification_Date":"Изменён",
+    "Main":"Основное",
 
     //Views
     "Country_Name": "Название страны",
@@ -57,6 +62,7 @@
     "AddToVacancy": "Добавить в вакансию", 
     "AddToCandidate": "Добавить кандидату",
     "Selection_Status": "Статус подбора",
+    "Description": "Описание",
     
     //ViewModels
     "SkillCategories": "Категории навыков",

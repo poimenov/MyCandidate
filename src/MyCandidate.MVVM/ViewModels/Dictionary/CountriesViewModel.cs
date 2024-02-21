@@ -13,12 +13,10 @@ public class CountriesViewModel : DictionaryViewModel<Country>
         Id = "Countries";
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         Title = LocalizationService.Default["Countries"];
-        SelectedTypeName = LocalizationService.Default["Country"];
     }
 
     private void CultureChanged(object? sender, EventArgs e)
     {
         Title = LocalizationService.Default["Countries"];
-        SelectedTypeName = LocalizationService.Default["Country"];
     }    
 }

@@ -13,12 +13,10 @@ public class CategoriesViewModel : DictionaryViewModel<SkillCategory>
         Id = "SkillCategories";
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         Title = LocalizationService.Default["SkillCategories"];
-        SelectedTypeName = LocalizationService.Default["SkillCategory"];
     }
 
     private void CultureChanged(object? sender, EventArgs e)
     {
         Title = LocalizationService.Default["SkillCategories"];
-        SelectedTypeName = LocalizationService.Default["SkillCategory"];
     }    
 }
