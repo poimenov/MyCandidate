@@ -39,15 +39,17 @@ public class SkillsViewModel : ViewModelBase
             );
 
         DeleteSkillCmd = ReactiveCommand.Create(
-            (object obj) =>
+            async (SkillModel obj) =>
             {
-                SourceSkills.Remove((SkillModel)obj);
+                SourceSkills.Remove(obj);
                 this.RaisePropertyChanged(nameof(IsValid));
-            }
+            },
+            this.WhenAnyValue(x => x.SelectedSkill, x => x.Skills,
+                (obj, list) => obj != null && list.Count > 0)              
         );
 
         CreateSkillCmd = ReactiveCommand.Create(
-            () =>
+            async () =>
             {
                 var _newSkill = new SkillModel
                 {
@@ -62,7 +64,7 @@ public class SkillsViewModel : ViewModelBase
                 _newSkill.PropertyChanged += ItemPropertyChanged;
                 SelectedSkill = _newSkill;
                 this.RaisePropertyChanged(nameof(IsValid));
-            }
+            }          
         );            
     }
 

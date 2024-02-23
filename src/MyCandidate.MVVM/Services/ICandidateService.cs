@@ -12,4 +12,5 @@ public interface ICandidateService
     bool Delete (int id, out string message);
     IEnumerable<Candidate> Search(CandidateSearch searchParams);
     IEnumerable<CandidateOnVacancy> GetCandidateOnVacancies(int candidateId);
+    IEnumerable<Comment> GetComments(int candidateId);
 }

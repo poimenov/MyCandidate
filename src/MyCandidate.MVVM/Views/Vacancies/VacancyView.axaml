@@ -82,12 +82,13 @@
             </HeaderedContentControl> 
 
             <HeaderedContentControl Grid.Row="2" Grid.Column="2" Header="{ll:Localize Comments}" Margin="5,5,5,0">
+                <sh:CommentsView DataContext="{Binding Comments}" Margin="0,6,0,0"  />
             </HeaderedContentControl>                       
 
         </Grid>
 
         <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-                <Button Content="{ll:Localize Search}" Command="{Binding SearchCmd}" Margin="0,4,0,4" Width="100" HorizontalContentAlignment="Center" />
+                <Button Content="{ll:Localize Candidate_Search}" Command="{Binding SearchCmd}" Margin="0,4,0,4" Width="140" HorizontalContentAlignment="Center" />
                 <Button Content="{ll:Localize Delete}" Command="{Binding DeleteCmd}" Margin="4,4,0,4" Width="100" HorizontalContentAlignment="Center" />
                 <Button Content="{ll:Localize Save}" Command="{Binding SaveCmd}"  Margin="4,4,0,4" Width="100" HorizontalContentAlignment="Center" />
                 <Button Content="{ll:Localize Cancel}" Command="{Binding CancelCmd}" Margin="4,4,4,4" Width="100" HorizontalContentAlignment="Center" />

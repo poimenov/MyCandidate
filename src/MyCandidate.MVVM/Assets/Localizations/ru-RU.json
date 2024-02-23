@@ -63,6 +63,7 @@
     "AddToCandidate": "Добавить кандидату",
     "Selection_Status": "Статус подбора",
     "Description": "Описание",
+    "Status": "Статус",
     
     //ViewModels
     "SkillCategories": "Категории навыков",

@@ -10,20 +10,22 @@ public class VacancyService : IVacancyService
 {
     private readonly IVacancies _vacancies;
     private readonly ICandidateOnVacancies _candidateOnVacancies;
-    private readonly ILog _log; 
+    private readonly IComments _comments;
+    private readonly ILog _log;
 
-    public VacancyService(IVacancies vacancies, ICandidateOnVacancies candidateOnVacancies, ILog log)
+    public VacancyService(IVacancies vacancies, ICandidateOnVacancies candidateOnVacancies, IComments comments, ILog log)
     {
         _vacancies = vacancies;
         _candidateOnVacancies = candidateOnVacancies;
+        _comments = comments;
         _log = log;
-    }   
-    
+    }
+
     public bool Create(Vacancy item, out int id, out string message)
     {
         message = string.Empty;
         id = 0;
-        bool retVal = false;        
+        bool retVal = false;
         try
         {
             _vacancies.Create(item, out id);
@@ -33,11 +35,11 @@ public class VacancyService : IVacancyService
         {
             message = ex.Message;
             _log.Error(ex);
-            if(ex.InnerException != null)
+            if (ex.InnerException != null)
             {
                 message = ex.InnerException.Message;
                 _log.Error(ex.InnerException);
-            }  
+            }
         }
 
         return retVal;
@@ -57,11 +59,11 @@ public class VacancyService : IVacancyService
         {
             message = ex.Message;
             _log.Error(ex);
-            if(ex.InnerException != null)
+            if (ex.InnerException != null)
             {
                 message = ex.InnerException.Message;
                 _log.Error(ex.InnerException);
-            }  
+            }
         }
 
         return retVal;
@@ -77,6 +79,11 @@ public class VacancyService : IVacancyService
         return _candidateOnVacancies.GetListByVacancyId(vacancyId);
     }
 
+    public IEnumerable<Comment> GetComments(int vacancyId)
+    {
+        return _comments.GetCommentsByVacancyId(vacancyId);
+    }
+
     public IEnumerable<Vacancy> Search(VacancySearch searchParams)
     {
         //Add logic for sort by count skill found desc
@@ -87,7 +94,7 @@ public class VacancyService : IVacancyService
     {
         message = string.Empty;
         bool retVal = false;
-        
+
         try
         {
             _vacancies.Update(item);
@@ -97,11 +104,11 @@ public class VacancyService : IVacancyService
         {
             message = ex.Message;
             _log.Error(ex);
-            if(ex.InnerException != null)
+            if (ex.InnerException != null)
             {
                 message = ex.InnerException.Message;
                 _log.Error(ex.InnerException);
-            }  
+            }
         }
 
         return retVal;

@@ -20,13 +20,13 @@ namespace MyCandidate.MVVM.ViewModels.Candidates;
 
 public class CandidateSearchViewModel : Document
 {
-    private readonly IAppServiceProvider _provider; 
+    private readonly IAppServiceProvider _provider;
     private readonly VacancyViewModel _vacancyViewModel;
     public VacancyViewModel VacancyViewModel => _vacancyViewModel;
 
     public CandidateSearchViewModel(IAppServiceProvider appServiceProvider)
     {
-        _provider = appServiceProvider; 
+        _provider = appServiceProvider;
 
         Title = LocalizationService.Default["Candidate_Search"];
         LocalizationService.Default.OnCultureChanged += CultureChanged;
@@ -51,15 +51,15 @@ public class CandidateSearchViewModel : Document
             .Subscribe();
 
         OpenCmd = CreateOpenCmd();
-        SearchCmd = CreateSearchCmd();        
+        SearchCmd = CreateSearchCmd();
     }
 
     public CandidateSearchViewModel(VacancyViewModel vacancyViewModel, IAppServiceProvider appServiceProvider)
     {
         _vacancyViewModel = vacancyViewModel;
-        _provider = appServiceProvider; 
+        _provider = appServiceProvider;
 
-        Title = $"{LocalizationService.Default["Candidate_Search_Vacancy"]} {_vacancyViewModel.Name}";
+        Title = $"{LocalizationService.Default["Candidate_Search_Vacancy"]} {VacancyViewModel.Name}";
         LocalizationService.Default.OnCultureChanged += CultureChanged;
 
         var _cities = new List<City>() { new City() { Id = 0, CountryId = 0, Name = string.Empty } };
@@ -89,18 +89,18 @@ public class CandidateSearchViewModel : Document
 
     private void LoadCandidateSearch()
     {
-        if (_vacancyViewModel == null)
+        if (VacancyViewModel == null)
         {
             Skills = new SkillsViewModel(new List<SkillModel>(), _provider.Properties);
             CandidateSearch = new CandidateSearch();
         }
         else
         {
-            Skills = new SkillsViewModel(_vacancyViewModel.Vacancy.VacancySkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _provider.Properties);
-            var location = _vacancyViewModel.Vacancy.Office.Location;
+            Skills = new SkillsViewModel(VacancyViewModel.Vacancy.VacancySkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _provider.Properties);
+            var location = VacancyViewModel.Vacancy.Office.Location;
             Country = Countries.First(x => x.Id == location.City.CountryId);
             City = Cities.First(x => x.Id == location.CityId);
-            CandidateSearch = new CandidateSearch(_vacancyViewModel.Vacancy.VacancySkills)
+            CandidateSearch = new CandidateSearch(VacancyViewModel.Vacancy.VacancySkills)
             {
                 CountryId = location.City.CountryId,
                 CityId = location.CityId
@@ -141,13 +141,13 @@ public class CandidateSearchViewModel : Document
 
     private void CultureChanged(object? sender, EventArgs e)
     {
-        if (_vacancyViewModel == null)
+        if (VacancyViewModel == null)
         {
             Title = LocalizationService.Default["Candidate_Search"];
         }
         else
         {
-            Title = $"{LocalizationService.Default["Candidate_Search_Vacancy"]} {_vacancyViewModel.Name}";
+            Title = $"{LocalizationService.Default["Candidate_Search_Vacancy"]} {VacancyViewModel.Name}";
         }
     }
 
@@ -197,14 +197,14 @@ public class CandidateSearchViewModel : Document
             async () =>
                 {
                     var existed = _provider.Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CandidateViewModel) && ((CandidateViewModel)x).CandidateId == SelectedItem.Id);
-                    if(existed != null)
+                    if (existed != null)
                     {
                         _provider.Factory.SetActiveDockable(existed);
                     }
                     else
                     {
                         _provider.OpenDock(_provider.GetCandidateViewModel(SelectedItem.Id));
-                    }                                        
+                    }
                 }, this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                     (obj, list) => obj != null && list.Count > 0)
             );
@@ -214,8 +214,8 @@ public class CandidateSearchViewModel : Document
     {
         return ReactiveCommand.Create(
             async () =>
-                {                    
-                    if(!_provider.Documents.VisibleDockables.Any(x => x.GetType() == typeof(VacancyViewModel) && ((VacancyViewModel)x).VacancyId == VacancyViewModel.VacancyId ))
+                {
+                    if (!_provider.Documents.VisibleDockables.Any(x => x.GetType() == typeof(VacancyViewModel) && ((VacancyViewModel)x).VacancyId == VacancyViewModel.VacancyId))
                     {
                         _provider.Factory.AddDockable(_provider.Documents, VacancyViewModel);
                     }
@@ -233,12 +233,12 @@ public class CandidateSearchViewModel : Document
                         LastModificationDate = DateTime.Now
                     };
 
-                    VacancyViewModel.CandidatesOnVacancy.Add(newItem);
                     _provider.Factory.SetActiveDockable(VacancyViewModel);
+                    VacancyViewModel.CandidatesOnVacancy.Add(newItem);
                 }, this.WhenAnyValue(x => x.SelectedItem, x => x.VacancyViewModel,
-                    (obj, vm) => obj != null && vm !=null && !vm.CandidatesOnVacancy.ItemList.Any(y => y.CandidateId == obj.Id))
+                    (obj, vm) => obj != null && vm != null && !vm.CandidatesOnVacancy.ItemList.Any(y => y.CandidateId == obj.Id))
             );
-    }    
+    }
     public IReactiveCommand SearchCmd { get; }
     private IReactiveCommand CreateSearchCmd()
     {

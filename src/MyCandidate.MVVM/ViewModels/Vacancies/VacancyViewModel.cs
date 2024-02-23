@@ -91,9 +91,7 @@ public class VacancyViewModel : Document
             };
         }
     }
-
-    public Vacancy Vacancy => _vacancy;
-
+    
     #region Filter
     private IObservable<Func<Office, bool>>? Filter =>
         this.WhenAnyValue(x => x.SelectedCompany)
@@ -130,10 +128,13 @@ public class VacancyViewModel : Document
         VacancyResources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
         VacancySkills = new SkillsViewModel(_vacancy.VacancySkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _provider.Properties);
         VacancySkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
-        CandidatesOnVacancy = new CandidateOnVacancyViewModel(_vacancy, _provider);
+        CandidatesOnVacancy = new CandidateOnVacancyViewModel(this, _provider);
+        Comments = new CommentsViewModel(this, _provider);
+        Comments.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
         this.RaisePropertyChanged(nameof(VacancyId));
     }
 
+    #region Commands
     public IReactiveCommand SaveCmd { get; }
 
     private IReactiveCommand CreateSaveCmd()
@@ -152,6 +153,7 @@ public class VacancyViewModel : Document
 
                     _vacancy.VacancyResources = VacancyResources.VacancyResources.Select(x => x.ToVacancyResource()).ToList();
                     _vacancy.VacancySkills = VacancySkills.Skills.Select(x => x.ToVacancySkill(_vacancy)).ToList();
+                    _vacancy.CandidateOnVacancies = CandidatesOnVacancy.GetCandidateOnVacancies();
                     string message;
                     int id;
                     bool success;
@@ -233,7 +235,7 @@ public class VacancyViewModel : Document
                     string message;
                     if (_provider.VacancyService.Delete(VacancyId, out message))
                     {
-                        this.Factory.CloseDockable(this);
+                        _provider.CloseDock(this);
                     }
                     else
                     {
@@ -245,14 +247,10 @@ public class VacancyViewModel : Document
                 }, this.WhenAnyValue(x => x.VacancyId, y => y != 0)
             );
     }
+    #endregion
 
-    public int VacancyId
-    {
-        get
-        {
-            return _vacancy.Id;
-        }
-    }
+    public Vacancy Vacancy => _vacancy;
+    public int VacancyId => _vacancy.Id;
 
     public bool IsValid
     {
@@ -260,7 +258,8 @@ public class VacancyViewModel : Document
         {
             var retVal = Validator.TryValidateObject(this, new ValidationContext(this), null, true)
             && VacancyResources.IsValid
-            && VacancySkills.IsValid;
+            && VacancySkills.IsValid
+            && Comments.IsValid;
             return retVal;
         }
     }
@@ -283,6 +282,7 @@ public class VacancyViewModel : Document
 
     #region Description
     private string _description;
+    [Required]
     public string Description
     {
         get => _description;
@@ -290,6 +290,7 @@ public class VacancyViewModel : Document
         {
             _vacancy.Description = value;
             this.RaiseAndSetIfChanged(ref _description, value);
+            this.RaisePropertyChanged(nameof(IsValid));
         }
     }
     #endregion
@@ -414,4 +415,13 @@ public class VacancyViewModel : Document
         set => this.RaiseAndSetIfChanged(ref _candidatesOnVacancy, value);
     }
     #endregion
+
+    #region Comments
+    private CommentsViewModel _comments;
+    public CommentsViewModel Comments
+    {
+        get => _comments;
+        set => this.RaiseAndSetIfChanged(ref _comments, value);
+    }
+    #endregion    
 }

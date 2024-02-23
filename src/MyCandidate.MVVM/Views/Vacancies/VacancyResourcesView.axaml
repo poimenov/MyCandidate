@@ -34,8 +34,10 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
                 <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="{ll:Localize Create}" Command="{Binding CreateVacancyResourceCmd}" Margin="0,4,0,4" />
-                    <Button Content="{ll:Localize Delete}" Command="{Binding DeleteVacancyResourceCmd}" CommandParameter="{Binding SelectedVacancyResource}" Margin="4" />
+                    <Button Content="{ll:Localize Delete}" Command="{Binding DeleteVacancyResourceCmd}" 
+                        CommandParameter="{Binding SelectedVacancyResource}" Margin="0,4,0,4" />                    
+                    <Button Content="{ll:Localize Create}" Command="{Binding CreateVacancyResourceCmd}" Margin="4" />
+
                 </StackPanel>
             </StackPanel>  
 

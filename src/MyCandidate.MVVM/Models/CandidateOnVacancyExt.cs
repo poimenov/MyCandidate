@@ -37,7 +37,7 @@ public class CandidateOnVacancyExt : CandidateOnVacancy
     [DisplayName("Last_Modification_Date")]
     public string Updated => LastModificationDate.ToString("G");
 
-    public CandidateOnVacancy TpCandidateOnVacancy()
+    public CandidateOnVacancy ToCandidateOnVacancy()
     {
         return new CandidateOnVacancy
         {

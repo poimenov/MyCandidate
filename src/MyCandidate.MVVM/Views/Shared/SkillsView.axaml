@@ -35,9 +35,9 @@
             </ListBox.ItemTemplate>
         </ListBox>
         <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="{ll:Localize Create}" Command="{Binding CreateSkillCmd}" Margin="4" />
             <Button Content="{ll:Localize Delete}" Command="{Binding DeleteSkillCmd}" 
-                CommandParameter="{Binding SelectedSkill}" Margin="4" />
+                CommandParameter="{Binding SelectedSkill}" Margin="4" />        
+            <Button Content="{ll:Localize Create}" Command="{Binding CreateSkillCmd}" Margin="4" />
         </StackPanel>
     </StackPanel>              
              

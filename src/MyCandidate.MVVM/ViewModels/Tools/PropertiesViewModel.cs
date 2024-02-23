@@ -42,7 +42,8 @@ public class PropertiesViewModel : Tool, IProperties
                             { typeof(CandidateOnVacancyExt), () => SelectedTypeName = "Candidate_for_vacancy" },
                             { typeof(CandidateResourceExt), () => SelectedTypeName = "Resource" },
                             { typeof(VacancyResourceExt), () => SelectedTypeName = "Resource" },
-                            { typeof(SkillModel), () => SelectedTypeName = "Skill" },                            
+                            { typeof(SkillModel), () => SelectedTypeName = "Skill" }, 
+                            { typeof(CommentExt), () => SelectedTypeName = "Comment" },                            
                         };                        
                         @switch[x.GetType()]();                        
                     }                    

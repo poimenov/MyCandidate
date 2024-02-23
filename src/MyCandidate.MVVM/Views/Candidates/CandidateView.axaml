@@ -14,7 +14,7 @@
 
     <Grid RowDefinitions="*,Auto">
 
-    <Grid Grid.Row="0" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,5,*">
+    <Grid Grid.Row="0" RowDefinitions="Auto,Auto,*" ColumnDefinitions="*,5,*">
 
             <Grid Grid.Row="0" Grid.Column="0" ColumnDefinitions="132,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="5,15,5,5">                
                 <TextBlock Text="{ll:Localize Last_Name}" Grid.Row="0" Grid.Column="0"
@@ -44,6 +44,10 @@
                 <v:CandidateResourcesView DataContext="{Binding CandidateResources}" Margin="0,5,0,0" />
             </HeaderedContentControl>
 
+            <HeaderedContentControl Grid.Row="2" Grid.Column="0" Header="{ll:Localize Vacancies}" Margin="5,5,5,0">
+                <sh:CandidateOnVacancyView DataContext="{Binding CandidatesOnVacancy}" Margin="0,6,0,0"  />
+            </HeaderedContentControl>            
+
         <GridSplitter Grid.Column="1" Grid.RowSpan="2" Width="5" HorizontalAlignment="Stretch" />
 
             <HeaderedContentControl Grid.Row="0" Grid.Column="2" Header="{ll:Localize Location}" Margin="5,5,5,0">
@@ -52,10 +56,15 @@
             <HeaderedContentControl Grid.Row="1" Grid.Column="2" Header="{ll:Localize Skills}" Margin="5,5,5,0">
                 <sh:SkillsView DataContext="{Binding CandidateSkills}" Margin="0,5,0,0" />
             </HeaderedContentControl>
+
+            <HeaderedContentControl Grid.Row="2" Grid.Column="2" Header="{ll:Localize Comments}" Margin="5,5,5,0">
+                <sh:CommentsView DataContext="{Binding Comments}" Margin="0,6,0,0"  />
+            </HeaderedContentControl>              
        
     </Grid>
 
     <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+            <Button Content="{ll:Localize Vacancy_Search}" Command="{Binding SearchCmd}" Margin="0,4,0,4" Width="140" HorizontalContentAlignment="Center" />
             <Button Content="{ll:Localize Delete}" Command="{Binding DeleteCmd}" Margin="0,4,0,4" Width="100" HorizontalContentAlignment="Center" />
             <Button Content="{ll:Localize Save}" Command="{Binding SaveCmd}"  Margin="4,4,0,4" Width="100" HorizontalContentAlignment="Center" />
             <Button Content="{ll:Localize Cancel}" Command="{Binding CancelCmd}" Margin="4,4,4,4" Width="100" HorizontalContentAlignment="Center" />

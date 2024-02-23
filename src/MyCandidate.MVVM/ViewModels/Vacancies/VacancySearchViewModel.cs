@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.PropertyGrid.Services;
-using Dock.Model.Controls;
 using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
 using DynamicData.Binding;
@@ -15,34 +14,34 @@ using MyCandidate.MVVM.Models;
 using MyCandidate.MVVM.Services;
 using MyCandidate.MVVM.ViewModels.Candidates;
 using MyCandidate.MVVM.ViewModels.Shared;
-using MyCandidate.MVVM.ViewModels.Tools;
 using ReactiveUI;
 
 namespace MyCandidate.MVVM.ViewModels.Vacancies;
 
 public class VacancySearchViewModel : Document
 {
-    private readonly IAppServiceProvider _provider; 
+    private readonly IAppServiceProvider _provider;
     private readonly CandidateViewModel _candidateViewModel;
+    public CandidateViewModel CandidateViewModel => _candidateViewModel;
 
     public VacancySearchViewModel(IAppServiceProvider appServiceProvider)
     {
-        _provider = appServiceProvider;        
+        _provider = appServiceProvider;
 
         Title = LocalizationService.Default["Vacancy_Search"];
-        LocalizationService.Default.OnCultureChanged += CultureChanged;  
+        LocalizationService.Default.OnCultureChanged += CultureChanged;
 
         var _offices = new List<Office>() { new Office() { Id = 0, CompanyId = 0, Name = string.Empty } };
-        _offices.AddRange(_provider.OfficeService.ItemsList.Where(x => x.Enabled == true));   
+        _offices.AddRange(_provider.OfficeService.ItemsList.Where(x => x.Enabled == true));
 
-        OfficesSource = new ObservableCollectionExtended<Office>(_offices); 
+        OfficesSource = new ObservableCollectionExtended<Office>(_offices);
         OfficesSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter)
             .Bind(out _officesList)
-            .Subscribe(); 
+            .Subscribe();
 
-        LoadVacancySearch();  
+        LoadVacancySearch();
 
         Source.ToObservableChangeSet()
             .Page(Pager.Pager)
@@ -52,28 +51,28 @@ public class VacancySearchViewModel : Document
             .Subscribe();
 
         OpenCmd = CreateOpenCmd();
-        SearchCmd = CreateSearchCmd();                     
+        SearchCmd = CreateSearchCmd();
     }
 
     public VacancySearchViewModel(CandidateViewModel candidateViewModel, IAppServiceProvider appServiceProvider)
     {
         _candidateViewModel = candidateViewModel;
-        _provider = appServiceProvider; 
+        _provider = appServiceProvider;
 
-        Title = $"{LocalizationService.Default["Vacancy_Search_Candidate"]} {_candidateViewModel.Candidate.Name}";
-        LocalizationService.Default.OnCultureChanged += CultureChanged; 
+        Title = $"{LocalizationService.Default["Vacancy_Search_Candidate"]} {CandidateViewModel.Candidate.Name}";
+        LocalizationService.Default.OnCultureChanged += CultureChanged;
 
         var _offices = new List<Office>() { new Office() { Id = 0, CompanyId = 0, Name = string.Empty } };
-        _offices.AddRange(_provider.OfficeService.ItemsList.Where(x => x.Enabled == true));   
+        _offices.AddRange(_provider.OfficeService.ItemsList.Where(x => x.Enabled == true));
 
-        OfficesSource = new ObservableCollectionExtended<Office>(_offices); 
+        OfficesSource = new ObservableCollectionExtended<Office>(_offices);
         OfficesSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter)
             .Bind(out _officesList)
-            .Subscribe(); 
+            .Subscribe();
 
-        LoadVacancySearch();  
+        LoadVacancySearch();
 
         Source.ToObservableChangeSet()
             .Page(Pager.Pager)
@@ -83,23 +82,24 @@ public class VacancySearchViewModel : Document
             .Subscribe();
 
         OpenCmd = CreateOpenCmd();
-        SearchCmd = CreateSearchCmd();                
-    } 
+        SearchCmd = CreateSearchCmd();
+        AddToCandidateCmd = CreateAddToCandidateCmd();
+    }
 
     private void LoadVacancySearch()
     {
-        if (_candidateViewModel == null)
+        if (CandidateViewModel == null)
         {
             Skills = new SkillsViewModel(new List<SkillModel>(), _provider.Properties);
             VacancySearch = new VacancySearch();
         }
         else
         {
-            Skills = new SkillsViewModel(_candidateViewModel.Candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _provider.Properties);            
-            VacancySearch = new VacancySearch(_candidateViewModel.Candidate.CandidateSkills);
-            var location = _candidateViewModel.Candidate.Location;
+            Skills = new SkillsViewModel(CandidateViewModel.Candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _provider.Properties);
+            VacancySearch = new VacancySearch(CandidateViewModel.Candidate.CandidateSkills);
+            var location = CandidateViewModel.Candidate.Location;
             Office = Offices.FirstOrDefault(x => x.Location.CityId == location.CityId);
-            if(Office != null)
+            if (Office != null)
             {
                 VacancySearch.OfficeId = Office.Id;
                 Company = Companies.First(x => x.Id == Office.CompanyId);
@@ -112,7 +112,7 @@ public class VacancySearchViewModel : Document
         Source = new ObservableCollectionExtended<Vacancy>();
         Skills.WhenAnyValue(x => x.IsValid).Subscribe(x => { this.RaisePropertyChanged(nameof(IsValid)); });
         this.WhenAnyValue(x => x.Name).Subscribe(x => { VacancySearch.Name = x; });
-        this.WhenAnyValue(x => x.VacancyStatus).Subscribe(x => { VacancySearch.VacancyStatusId = (VacancyStatus.Id == 0)?null:VacancyStatus.Id; });
+        this.WhenAnyValue(x => x.VacancyStatus).Subscribe(x => { VacancySearch.VacancyStatusId = (VacancyStatus.Id == 0) ? null : VacancyStatus.Id; });
         this.WhenAnyValue(x => x.Enabled).Subscribe(x => { VacancySearch.Enabled = x; });
 
         this.WhenAnyValue(x => x.Office).Subscribe(
@@ -136,17 +136,17 @@ public class VacancySearchViewModel : Document
                 }
             }
         );
-    }         
+    }
 
     private void CultureChanged(object? sender, EventArgs e)
     {
-        if (_candidateViewModel == null)
+        if (CandidateViewModel == null)
         {
             Title = LocalizationService.Default["Vacancy_Search"];
         }
         else
         {
-            Title = $"{LocalizationService.Default["Vacancy_Search_Candidate"]} {_candidateViewModel.Candidate.Name}";
+            Title = $"{LocalizationService.Default["Vacancy_Search_Candidate"]} {CandidateViewModel.Candidate.Name}";
         }
     }
 
@@ -156,7 +156,15 @@ public class VacancySearchViewModel : Document
         return ReactiveCommand.Create(
             async () =>
                 {
-                    _provider.OpenDock(_provider.GetVacancyViewModel(SelectedItem.Id));
+                    var existed = _provider.Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(VacancyViewModel) && ((VacancyViewModel)x).VacancyId == SelectedItem.Id);
+                    if (existed != null)
+                    {
+                        _provider.Factory.SetActiveDockable(existed);
+                    }
+                    else
+                    {
+                        _provider.OpenDock(_provider.GetVacancyViewModel(SelectedItem.Id));
+                    }
                 }, this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                     (obj, list) => obj != null && list.Count > 0)
             );
@@ -166,24 +174,45 @@ public class VacancySearchViewModel : Document
     {
         return ReactiveCommand.Create(
             async () =>
-            {
-                //TODO
-            }, this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
-                    (obj, list) => obj != null && list.Count > 0)
-        );
-    }     
+                {
+                    if (!_provider.Documents.VisibleDockables.Any(x => x.GetType() == typeof(CandidateViewModel) && ((CandidateViewModel)x).CandidateId == CandidateViewModel.CandidateId))
+                    {
+                        _provider.Factory.AddDockable(_provider.Documents, CandidateViewModel);
+                    }
+
+                    var status = new SelectionStatus { Id = 1, Name = SelectionStatusNames.SetContact, Enabled = true };
+                    var newItem = new CandidateOnVacancy
+                    {
+                        Candidate = CandidateViewModel.Candidate,
+                        CandidateId = CandidateViewModel.Candidate.Id,
+                        Vacancy = SelectedItem,
+                        VacancyId = SelectedItem.Id,
+                        SelectionStatus = status,
+                        SelectionStatusId = status.Id,
+                        CreationDate = DateTime.Now,
+                        LastModificationDate = DateTime.Now
+                    };
+
+                    _provider.Factory.SetActiveDockable(CandidateViewModel);
+                    CandidateViewModel.CandidatesOnVacancy.Add(newItem);
+                }, this.WhenAnyValue(x => x.SelectedItem, x => x.CandidateViewModel,
+                    (obj, vm) => obj != null && vm != null && !vm.CandidatesOnVacancy.ItemList.Any(y => y.VacancyId == obj.Id))
+            );
+    }
     public IReactiveCommand SearchCmd { get; }
     private IReactiveCommand CreateSearchCmd()
     {
         return ReactiveCommand.Create(
             async () =>
             {
-                VacancySearch.Skills = Skills.Skills.Select(x => x.ToSkillVaue());                
+                VacancySearch.Skills = Skills.Skills.Select(x => x.ToSkillVaue());
                 Source.Load(_provider.VacancyService.Search(VacancySearch));
                 Pager.PagingUpdate(Source.Count());
             }, this.WhenAnyValue(x => x.IsValid, v => v == true)
         );
-    }    
+    }
+
+    public bool AddToCandidateVisible => AddToCandidateCmd != null;
 
     public bool IsValid
     {
@@ -193,7 +222,7 @@ public class VacancySearchViewModel : Document
                 && Skills.IsValid;
             return retVal;
         }
-    }    
+    }
 
     #region VacancySearch
     private VacancySearch _vacancySearch;
@@ -332,8 +361,8 @@ public class VacancySearchViewModel : Document
         get => _vacancyStatus;
         set => this.RaiseAndSetIfChanged(ref _vacancyStatus, value);
     }
-    #endregion      
-    
+    #endregion
+
     #region Skills
     private SkillsViewModel _Skills;
     public SkillsViewModel Skills

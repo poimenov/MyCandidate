@@ -10,11 +10,13 @@ public class CandidateService : ICandidateService
 {
     private readonly ICandidates _candidates;
     private readonly ICandidateOnVacancies _candidateOnVacancies;
+    private readonly IComments _comments;
     private readonly ILog _log;
-    public CandidateService(ICandidates candidates, ICandidateOnVacancies candidateOnVacancies, ILog log)
+    public CandidateService(ICandidates candidates, ICandidateOnVacancies candidateOnVacancies, IComments comments, ILog log)
     {
         _candidates = candidates;
         _candidateOnVacancies = candidateOnVacancies;
+        _comments = comments;
         _log = log;
     }
     public bool Create(Candidate item, out int id, out string message)
@@ -75,6 +77,11 @@ public class CandidateService : ICandidateService
     public IEnumerable<CandidateOnVacancy> GetCandidateOnVacancies(int candidateId)
     {
         return _candidateOnVacancies.GetListByCandidateId(candidateId);
+    }
+
+    public IEnumerable<Comment> GetComments(int candidateId)
+    {
+        return _comments.GetCommentsByCandidateId(candidateId);
     }
 
     public IEnumerable<Candidate> Search(CandidateSearch searchParams)

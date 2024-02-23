@@ -1,0 +1,39 @@
+<UserControl x:Class="MyCandidate.MVVM.Views.Shared.CommentsView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"
+             xmlns:vm="using:MyCandidate.MVVM.ViewModels.Shared"
+             mc:Ignorable="d"
+             d:DesignWidth="300" d:DesignHeight="400"
+             x:DataType="vm:CommentsViewModel" x:CompileBindings="True">
+
+    <Grid RowDefinitions="*, Auto">             
+        <DataGrid Grid.Row="0" 
+                BorderThickness="1" 
+                BorderBrush="{StaticResource DataGridBorderBrush}"
+                GridLinesVisibility="All"  
+                Margin="4,0,4,0"        
+                Padding="4" 
+                IsVisible="true"
+                IsReadOnly="True"              
+                SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                ItemsSource="{Binding ItemList}">
+              <DataGrid.Columns>
+                <DataGridTemplateColumn Header="{ll:Localize Comment}" Width="480" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Value}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="4,0,4,0" />
+                        </DataTemplate>                    
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>  
+        </DataGrid> 
+        <StackPanel Margin="4" Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Right">
+            <Button Content="{ll:Localize Delete}" Command="{Binding DeleteCmd}" CommandParameter="{Binding SelectedItem}" Margin="4,4,0,4" Width="100" HorizontalContentAlignment="Center" />
+            <Button Content="{ll:Localize Create}" Command="{Binding AddCmd}" Margin="4,4,0,4" Width="100" HorizontalContentAlignment="Center" />
+        </StackPanel> 
+    </Grid>
+
+</UserControl>             

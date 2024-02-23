@@ -39,14 +39,16 @@ public class CandidateResourcesViewModel : ViewModelBase
             );
 
         DeleteCandidateResourceCmd = ReactiveCommand.Create(
-            (object obj) =>
+            async (CandidateResourceExt obj) =>
             {
-                SourceCandidateResources.Remove((CandidateResourceExt)obj);
-            }
+                SourceCandidateResources.Remove(obj);
+            },
+            this.WhenAnyValue(x => x.SelectedCandidateResource, x => x.CandidateResources,
+                (obj, list) => obj != null && list.Count > 0)             
         );
 
         CreateCandidateResourceCmd = ReactiveCommand.Create(
-            () =>
+            async () =>
             {
                 var _newCandidateResource = new CandidateResourceExt()
                 {

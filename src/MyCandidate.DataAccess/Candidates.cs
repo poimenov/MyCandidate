@@ -6,10 +6,9 @@ namespace MyCandidate.DataAccess;
 
 public class Candidates : ICandidates
 {
-    private readonly ICandidateOnVacancies _candidateOnVacancies;
-    public Candidates(ICandidateOnVacancies candidateOnVacancies)
+    public Candidates()
     {
-        _candidateOnVacancies = candidateOnVacancies;
+        //
     }
 
     public bool Exist(string lastName, string firstName, DateTime birthdate)
@@ -44,7 +43,11 @@ public class Candidates : ICandidates
 
                         var item = db.Candidates.First(x => x.Id == id);
                         db.Locations.Remove(db.Locations.First(x => x.Id == item.LocationId));
-                        _candidateOnVacancies.DeleteByCandidateId(id);
+
+                        var candidateOnVacancies = db.CandidateOnVacancies.Where(x => x.CandidateId == id).ToList();
+                        candidateOnVacancies.ForEach(x => db.Comments.RemoveRange(db.Comments.Where(x => x.CandidateOnVacancyId == x.Id)));
+                        db.CandidateOnVacancies.RemoveRange(candidateOnVacancies);
+
                         db.Candidates.Remove(item);
 
                         db.SaveChanges();
@@ -142,10 +145,11 @@ public class Candidates : ICandidates
             {
                 try
                 {
+                    var dateTime = DateTime.Now;
                     if (db.Candidates.Any(x => x.Id == candidate.Id))
                     {
                         var entity = db.Candidates.First(x => x.Id == candidate.Id);
-                        entity.LastModificationDate = DateTime.Now;
+                        entity.LastModificationDate = dateTime;
                         entity.FirstName = candidate.FirstName;
                         entity.LastName = candidate.LastName;
                         entity.BirthDate = candidate.BirthDate;
@@ -225,7 +229,54 @@ public class Candidates : ICandidates
                             db.CandidateSkills.Add(newSkill);
                         }
 
-                        _candidateOnVacancies.Update(candidate.CandidateOnVacancies);
+                        //update existed candidateOnVacancies
+                        idsToUpdate = candidate.CandidateOnVacancies.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
+                        foreach (var idToUpdate in idsToUpdate)
+                        {
+                            if (db.CandidateOnVacancies.Any(x => x.Id == idToUpdate))
+                            {
+                                var candidateOnVacancyToUpdate = candidate.CandidateOnVacancies.First(x => x.Id == idToUpdate);
+                                var candidateOnVacancy = db.CandidateOnVacancies.First(x => x.Id == idToUpdate);
+                                candidateOnVacancy.SelectionStatusId = candidateOnVacancyToUpdate.SelectionStatusId;
+                                candidateOnVacancy.LastModificationDate = dateTime;
+                                CommentsUpdate(db, idToUpdate, candidateOnVacancyToUpdate.Comments, dateTime);
+                            }
+                        }
+                        //delete existed candidateOnVacancies
+                        idsToDelete = db.CandidateOnVacancies.Where(x => x.CandidateId == candidate.Id && !idsToUpdate.Contains(x.Id)).Select(x => x.Id).ToArray();
+                        foreach (var idToDelete in idsToDelete)
+                        {
+                            if (db.CandidateOnVacancies.Any(x => x.Id == idToDelete))
+                            {
+                                db.Comments.RemoveRange(db.Comments.Where(x => x.CandidateOnVacancyId == idToDelete).ToList());
+                                db.CandidateOnVacancies.Remove(db.CandidateOnVacancies.First(x => x.Id == idToDelete));
+                            }
+                        }
+                        //add new candidateOnVacancies
+                        foreach (var candidateOnVacancyToAdd in candidate.CandidateOnVacancies.Where(x => x.Id <= 0))
+                        {
+                            var newCandidateOnVacancy = new CandidateOnVacancy
+                            {
+                                CandidateId = candidateOnVacancyToAdd.CandidateId,
+                                VacancyId = candidateOnVacancyToAdd.VacancyId,
+                                SelectionStatusId = candidateOnVacancyToAdd.SelectionStatusId,
+                                CreationDate = dateTime,
+                                LastModificationDate = dateTime
+                            };
+                            db.CandidateOnVacancies.Add(newCandidateOnVacancy);
+                            db.SaveChanges();
+                            foreach (var comment in candidateOnVacancyToAdd.Comments)
+                            {
+                                var newComment = new Comment
+                                {
+                                    CandidateOnVacancyId = newCandidateOnVacancy.Id,
+                                    Value = comment.Value,
+                                    CreationDate = dateTime,
+                                    LastModificationDate = dateTime
+                                };
+                                db.Comments.Add(newComment);
+                            }
+                        }
 
                         db.SaveChanges();
                         transaction.Commit();
@@ -304,6 +355,43 @@ public class Candidates : ICandidates
                 .ThenInclude(x => x.Country)
                 .Include(x => x.CandidateOnVacancies)
                 .ToList();
+        }
+    }
+
+    private void CommentsUpdate(Database db, int candidateOnVacancyId, IEnumerable<Comment> comments, DateTime dateTime)
+    {
+        //update existed comments
+        var idsToUpdate = comments.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
+        foreach (var idToUpdate in idsToUpdate)
+        {
+            if (db.Comments.Any(x => x.Id == idToUpdate))
+            {
+                var commentToUpdate = comments.First(x => x.Id == idToUpdate);
+                var comment = db.Comments.First(x => x.Id == idToUpdate);
+                comment.Value = commentToUpdate.Value;
+                comment.LastModificationDate = dateTime;
+            }
+        }
+        //delete existed comments
+        var idsToDelete = db.Comments.Where(x => x.CandidateOnVacancyId == candidateOnVacancyId && !idsToUpdate.Contains(x.Id)).Select(x => x.Id).ToArray();
+        foreach (var idToDelete in idsToDelete)
+        {
+            if (db.Comments.Any(x => x.Id == idToDelete))
+            {
+                db.Comments.Remove(db.Comments.First(x => x.Id == idToDelete));
+            }
+        }
+        //add new comments
+        foreach (var commentToAdd in comments.Where(x => x.Id <= 0))
+        {
+            var newComment = new Comment
+            {
+                CandidateOnVacancyId = commentToAdd.CandidateOnVacancyId,
+                Value = commentToAdd.Value,
+                CreationDate = dateTime,
+                LastModificationDate = dateTime
+            };
+            db.Comments.Add(newComment);
         }
     }
 }

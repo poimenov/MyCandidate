@@ -30,7 +30,14 @@ public class AppServiceProvider : IAppServiceProvider
             _factory.AddDockable(Documents, dockable);
             _factory.SetActiveDockable(dockable);
         }
+    }
 
+    public void CloseDock(IDockable dockable)
+    {
+        if (dockable != null && Documents is { } && Documents?.VisibleDockables != null)
+        {
+            _factory.CloseDockable(dockable);
+        }
     }
 
     #region Documents

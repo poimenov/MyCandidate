@@ -12,4 +12,5 @@ public interface IVacancyService
     bool Update (Vacancy item, out string message);   
     IEnumerable<Vacancy> Search(VacancySearch searchParams); 
     IEnumerable<CandidateOnVacancy> GetCandidateOnVacancies(int vacancyId);
+    IEnumerable<Comment> GetComments(int vacancyId);
 }

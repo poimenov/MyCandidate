@@ -39,14 +39,16 @@ public class VacancyResourcesViewModel : ViewModelBase
             );
 
         DeleteVacancyResourceCmd = ReactiveCommand.Create(
-            (object obj) =>
+            async (VacancyResourceExt obj) =>
             {
-                SourceVacancyResources.Remove((VacancyResourceExt)obj);
-            }
+                SourceVacancyResources.Remove(obj);
+            },
+            this.WhenAnyValue(x => x.SelectedVacancyResource, x => x.VacancyResources,
+                (obj, list) => obj != null && list.Count > 0)              
         );
 
         CreateVacancyResourceCmd = ReactiveCommand.Create(
-            () =>
+            async () =>
             {
                 var _newVacancyResource = new VacancyResourceExt()
                 {

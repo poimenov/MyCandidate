@@ -20,29 +20,31 @@ namespace MyCandidate.MVVM.ViewModels.Candidates;
 
 public class CandidateViewModel : Document
 {
-    private readonly IAppServiceProvider _provider;    
+    private readonly IAppServiceProvider _provider;
     private Candidate _candidate;
 
     public CandidateViewModel(IAppServiceProvider appServiceProvider)
-    {   
-        _provider = appServiceProvider;   
+    {
+        _provider = appServiceProvider;
         _candidate = NewCandidate;
         LoadCandidate();
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = CreateCancelCmd();
         SaveCmd = CreateSaveCmd();
         DeleteCmd = CreateDeleteCmd();
+        SearchCmd = CreateSearchCmd();
     }
 
     public CandidateViewModel(IAppServiceProvider appServiceProvider, int candidateId)
     {
-        _provider = appServiceProvider;        
+        _provider = appServiceProvider;
         _candidate = _provider.CandidateService.Get(candidateId);
         LoadCandidate();
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = CreateCancelCmd();
         SaveCmd = CreateSaveCmd();
         DeleteCmd = CreateDeleteCmd();
+        SearchCmd = CreateSearchCmd();
     }
 
     private Candidate NewCandidate
@@ -70,7 +72,7 @@ public class CandidateViewModel : Document
 
     private void LoadCandidate()
     {
-        if(_candidate.Id == 0)
+        if (_candidate.Id == 0)
         {
             Title = LocalizationService.Default["New_Candidate"];
             BirthDate = null;
@@ -79,8 +81,8 @@ public class CandidateViewModel : Document
         {
             Title = _candidate.Name;
             BirthDate = _candidate.BirthDate;
-        } 
-        
+        }
+
         FirstName = _candidate.FirstName;
         LastName = _candidate.LastName;
         Enabled = _candidate.Enabled;
@@ -92,19 +94,23 @@ public class CandidateViewModel : Document
         CandidateResources = new CandidateResourcesViewModel(_candidate, _provider.Properties);
         CandidateResources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
         CandidateSkills = new SkillsViewModel(_candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _provider.Properties);
-        CandidateSkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });  
-        this.RaisePropertyChanged(nameof(CandidateId));      
+        CandidateSkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
+        CandidatesOnVacancy = new CandidateOnVacancyViewModel(this, _provider);
+        Comments = new CommentsViewModel(this, _provider);
+        Comments.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
+        this.RaisePropertyChanged(nameof(CandidateId));
     }
 
     private void CultureChanged(object? sender, EventArgs e)
     {
-        if(_candidate.Id == 0)
+        if (_candidate.Id == 0)
         {
             Title = LocalizationService.Default["New_Candidate"];
-        }        
+        }
     }
 
-    public Candidate Candidate =>_candidate;
+    public Candidate Candidate => _candidate;
+    public int CandidateId => _candidate.Id;
 
     public bool IsValid
     {
@@ -112,19 +118,13 @@ public class CandidateViewModel : Document
         {
             var retVal = Validator.TryValidateObject(this, new ValidationContext(this), null, true)
                 && CandidateResources.IsValid
-                && CandidateSkills.IsValid;
+                && CandidateSkills.IsValid
+                && Comments.IsValid;
             return retVal;
         }
     }
 
-    public int CandidateId
-    {
-        get
-        {
-            return _candidate.Id;
-        }
-    }
-
+    #region Commands
     public IReactiveCommand SaveCmd { get; }
 
     private IReactiveCommand CreateSaveCmd()
@@ -143,6 +143,7 @@ public class CandidateViewModel : Document
 
                     _candidate.CandidateResources = CandidateResources.CandidateResources.Select(x => x.ToCandidateResource()).ToList();
                     _candidate.CandidateSkills = CandidateSkills.Skills.Select(x => x.ToCandidateSkill(_candidate)).ToList();
+                    _candidate.CandidateOnVacancies = CandidatesOnVacancy.GetCandidateOnVacancies();
                     string message;
                     int id;
                     bool success;
@@ -160,7 +161,7 @@ public class CandidateViewModel : Document
                     if (success)
                     {
                         _candidate = _provider.CandidateService.Get(id);
-                        LoadCandidate();                                
+                        LoadCandidate();
                     }
                     else
                     {
@@ -172,6 +173,7 @@ public class CandidateViewModel : Document
                 }, this.WhenAnyValue(x => x.IsValid, v => v == true)
             );
     }
+
     public IReactiveCommand CancelCmd { get; }
 
     private IReactiveCommand CreateCancelCmd()
@@ -193,6 +195,17 @@ public class CandidateViewModel : Document
             );
     }
 
+    public IReactiveCommand SearchCmd { get; }
+
+    private IReactiveCommand CreateSearchCmd()
+    {
+        return ReactiveCommand.Create(
+            async () =>
+            {
+                _provider.OpenDock(_provider.GetVacancySearchViewModel(this));
+            }, this.WhenAnyValue(x => x.CandidateId, y => y != 0));
+    }
+
     public IReactiveCommand DeleteCmd { get; }
 
     private IReactiveCommand CreateDeleteCmd()
@@ -212,7 +225,7 @@ public class CandidateViewModel : Document
                     string message;
                     if (_provider.CandidateService.Delete(CandidateId, out message))
                     {
-                        this.Factory.CloseDockable(this);
+                        _provider.CloseDock(this);
                     }
                     else
                     {
@@ -224,6 +237,7 @@ public class CandidateViewModel : Document
                 }, this.WhenAnyValue(x => x.CandidateId, y => y != 0)
             );
     }
+    #endregion
 
     #region FirstName
     private string _firstName;
@@ -314,19 +328,41 @@ public class CandidateViewModel : Document
             this.RaisePropertyChanged(nameof(IsValid));
         }
     }
-    #endregion   
+    #endregion
 
+    #region CandidateResources
     private CandidateResourcesViewModel _candidateResources;
     public CandidateResourcesViewModel CandidateResources
     {
         get => _candidateResources;
         set => this.RaiseAndSetIfChanged(ref _candidateResources, value);
     }
+    #endregion
 
+    #region CandidateSkills
     private SkillsViewModel _candidateSkills;
     public SkillsViewModel CandidateSkills
     {
         get => _candidateSkills;
         set => this.RaiseAndSetIfChanged(ref _candidateSkills, value);
     }
+    #endregion
+
+    #region CandidatesOnVacancy
+    private CandidateOnVacancyViewModel _candidatesOnVacancy;
+    public CandidateOnVacancyViewModel CandidatesOnVacancy
+    {
+        get => _candidatesOnVacancy;
+        set => this.RaiseAndSetIfChanged(ref _candidatesOnVacancy, value);
+    }
+    #endregion
+
+    #region Comments
+    private CommentsViewModel _comments;
+    public CommentsViewModel Comments
+    {
+        get => _comments;
+        set => this.RaiseAndSetIfChanged(ref _comments, value);
+    }
+    #endregion     
 }
