@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
+using Avalonia.Input;
 using DynamicData;
 using DynamicData.Binding;
 using MyCandidate.Common;
@@ -36,6 +37,7 @@ public class CommentsViewModel : ViewModelBase
 
         AddCmd = CreateAddCmd();
         DeleteCmd = CreateDeleteCmd();
+        DeleteKetDownCmd = CreateDeleteKetDownCmd();
 
         LoadComments();
 
@@ -61,6 +63,7 @@ public class CommentsViewModel : ViewModelBase
 
         AddCmd = CreateAddCmd();
         DeleteCmd = CreateDeleteCmd();
+        DeleteKetDownCmd = CreateDeleteKetDownCmd();
 
         LoadComments();
 
@@ -182,6 +185,22 @@ public class CommentsViewModel : ViewModelBase
                 (obj, list) => obj != null && list.Count > 0)
         );
     }
+    public IReactiveCommand DeleteKetDownCmd { get; }
+    private IReactiveCommand CreateDeleteKetDownCmd()
+    {
+        return ReactiveCommand.Create(
+            async (KeyEventArgs args) =>
+            {
+                if(args.Key == Key.Delete && SelectedItem != null)
+                {
+                    Source.Remove(SelectedItem);
+                    this.RaisePropertyChanged(nameof(IsValid));                    
+                }
+            },
+            this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
+                (obj, list) => obj != null && list.Count > 0)
+        );
+    }    
     #endregion
 
     #region CandidateOnVacancy

@@ -11,6 +11,7 @@ using System.ComponentModel;
 using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.Models;
 using System.Collections.Generic;
+using Avalonia.Input;
 
 namespace MyCandidate.MVVM.ViewModels.Shared;
 
@@ -48,6 +49,19 @@ public class SkillsViewModel : ViewModelBase
                 (obj, list) => obj != null && list.Count > 0)              
         );
 
+        DeleteSkillKeyDownCmd = ReactiveCommand.Create(
+            async (KeyEventArgs args) =>
+            {
+                if(args.Key == Key.Delete && SelectedSkill != null)
+                {
+                    SourceSkills.Remove(SelectedSkill);
+                    this.RaisePropertyChanged(nameof(IsValid));
+                }
+            },
+            this.WhenAnyValue(x => x.SelectedSkill, x => x.Skills,
+                (obj, list) => obj != null && list.Count > 0)              
+        );
+
         CreateSkillCmd = ReactiveCommand.Create(
             async () =>
             {
@@ -68,7 +82,7 @@ public class SkillsViewModel : ViewModelBase
         );            
     }
 
-    private void ItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private async void ItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         this.RaisePropertyChanged(nameof(IsValid));
     }
@@ -76,7 +90,7 @@ public class SkillsViewModel : ViewModelBase
     public bool IsValid
     {
         get => Skills.Select(x => x.Skill.Id).Distinct().Count() == Skills.Count();
-    }    
+    }  
 
     public IProperties? Properties { get; set; }
 
@@ -96,5 +110,6 @@ public class SkillsViewModel : ViewModelBase
     #endregion  
 
     public IReactiveCommand CreateSkillCmd { get; }
-    public IReactiveCommand DeleteSkillCmd { get; }  
+    public IReactiveCommand DeleteSkillCmd { get; }
+    public IReactiveCommand DeleteSkillKeyDownCmd { get; }  
 }

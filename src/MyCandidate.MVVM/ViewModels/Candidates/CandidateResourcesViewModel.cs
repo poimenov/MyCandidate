@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
+using Avalonia.Input;
 using DynamicData;
 using DynamicData.Binding;
 using MyCandidate.Common;
@@ -42,6 +43,18 @@ public class CandidateResourcesViewModel : ViewModelBase
             async (CandidateResourceExt obj) =>
             {
                 SourceCandidateResources.Remove(obj);
+            },
+            this.WhenAnyValue(x => x.SelectedCandidateResource, x => x.CandidateResources,
+                (obj, list) => obj != null && list.Count > 0)             
+        );
+
+        DeleteCandidateResourceKeyDownCmd = ReactiveCommand.Create(
+            async (KeyEventArgs args) =>
+            {
+                if(args.Key == Key.Delete && SelectedCandidateResource != null)
+                {
+                    SourceCandidateResources.Remove(SelectedCandidateResource);
+                }                
             },
             this.WhenAnyValue(x => x.SelectedCandidateResource, x => x.CandidateResources,
                 (obj, list) => obj != null && list.Count > 0)             
@@ -105,4 +118,5 @@ public class CandidateResourcesViewModel : ViewModelBase
 
     public IReactiveCommand CreateCandidateResourceCmd { get; }
     public IReactiveCommand DeleteCandidateResourceCmd { get; }
+    public IReactiveCommand DeleteCandidateResourceKeyDownCmd { get; }
 }

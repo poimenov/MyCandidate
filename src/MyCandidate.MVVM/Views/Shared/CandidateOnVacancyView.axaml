@@ -4,6 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"
+             xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+             xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"               
              xmlns:vm="using:MyCandidate.MVVM.ViewModels.Shared"
              mc:Ignorable="d"
              d:DesignWidth="300" d:DesignHeight="400"
@@ -20,11 +22,22 @@
                 IsReadOnly="True"              
                 SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                 ItemsSource="{Binding ItemList}">
+
+                <i:Interaction.Behaviors>
+                    <ia:EventTriggerBehavior EventName="DoubleTapped">
+                        <ia:InvokeCommandAction Command="{Binding OpenCmd}" />
+                    </ia:EventTriggerBehavior>
+                    <ia:EventTriggerBehavior EventName="KeyDown">
+                        <ia:InvokeCommandAction Command="{Binding DeleteKeyDownCmd}" PassEventArgsToCommand="true" />
+                    </ia:EventTriggerBehavior>                    
+                </i:Interaction.Behaviors>
+
               <DataGrid.Columns>
                 <DataGridTextColumn Header="{ll:Localize Candidate}" Binding="{Binding Candidate.Name}" IsVisible="{Binding CandidateColumnVisible}" Width="340"/>
                 <DataGridTextColumn Header="{ll:Localize Vacancy}" Binding="{Binding Vacancy.Name}" IsVisible="{Binding VacancyColumnVisible}" Width="340"/>
                 <DataGridTextColumn Header="{ll:Localize Selection_Status}" Binding="{Binding SelectionStatus.Name}" Width="140" />
             </DataGrid.Columns>  
+            
         </DataGrid> 
         <StackPanel Margin="4" Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Right">
             <Button Content="{ll:Localize Delete}" Command="{Binding DeleteCmd}" CommandParameter="{Binding SelectedItem}" Margin="4,4,0,4" Width="100" HorizontalContentAlignment="Center" />

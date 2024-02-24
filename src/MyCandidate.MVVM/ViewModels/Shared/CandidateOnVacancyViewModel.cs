@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
+using Avalonia.Input;
 using DynamicData;
 using DynamicData.Binding;
 using MyCandidate.Common;
@@ -33,6 +35,7 @@ public class CandidateOnVacancyViewModel : ViewModelBase
 
         OpenCmd = CreateOpenCmd();
         DeleteCmd = CreateDeleteCmd();
+        DeleteKeyDownCmd = CreateDeleteKeyDownCmd();
 
         LoadCandidateOnVacancy();
     }
@@ -50,6 +53,7 @@ public class CandidateOnVacancyViewModel : ViewModelBase
 
         OpenCmd = CreateOpenCmd();
         DeleteCmd = CreateDeleteCmd();
+        DeleteKeyDownCmd = CreateDeleteKeyDownCmd();
 
         LoadCandidateOnVacancy();
     }
@@ -157,6 +161,21 @@ public class CandidateOnVacancyViewModel : ViewModelBase
                 (obj, list) => obj != null && list.Count > 0)
         );
     }
+    public IReactiveCommand DeleteKeyDownCmd { get; }
+    private IReactiveCommand CreateDeleteKeyDownCmd()
+    {
+        return ReactiveCommand.Create(
+            async (KeyEventArgs args) =>
+            {
+                if(args.Key == Key.Delete && SelectedItem != null && await DeleteCmd.CanExecute.FirstAsync())
+                {
+                    await ((ReactiveCommand<CandidateOnVacancyExt, Task>)DeleteCmd).Execute(SelectedItem);
+                }                
+            },
+            this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
+                (obj, list) => obj != null && list.Count > 0)
+        );
+    }    
     #endregion
 
     #region ItemList

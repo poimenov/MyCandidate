@@ -4,6 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"
+             xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+             xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"             
              xmlns:vm="using:MyCandidate.MVVM.ViewModels.Shared"
              mc:Ignorable="d"
              d:DesignWidth="300" d:DesignHeight="400"
@@ -20,6 +22,11 @@
                 IsReadOnly="True"              
                 SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                 ItemsSource="{Binding ItemList}">
+            <i:Interaction.Behaviors>
+                <ia:EventTriggerBehavior EventName="KeyDown">
+                    <ia:InvokeCommandAction Command="{Binding DeleteKetDownCmd}" PassEventArgsToCommand="true" />
+                </ia:EventTriggerBehavior>
+            </i:Interaction.Behaviors>                 
               <DataGrid.Columns>
                 <DataGridTemplateColumn Header="{ll:Localize Comment}" Width="480" >
                     <DataGridTemplateColumn.CellTemplate>
