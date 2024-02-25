@@ -190,6 +190,7 @@ public class CandidateSearchViewModel : Document
         }
     }
 
+    #region Commands
     public IReactiveCommand OpenCmd { get; }
     private IReactiveCommand CreateOpenCmd()
     {
@@ -251,6 +252,7 @@ public class CandidateSearchViewModel : Document
             }, this.WhenAnyValue(x => x.IsValid, v => v == true)
         );
     }
+    #endregion
 
     public bool AddToVacancyVisible => AddToVacancyCmd != null;
 

@@ -40,6 +40,7 @@
                 SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                 ItemsSource="{Binding ItemList}">
               <DataGrid.Columns>
+                <DataGridTextColumn Header="{ll:Localize Category_Name}"  Binding="{Binding SkillCategory.Name}" Width="200"/>
                 <DataGridTextColumn Header="{ll:Localize Skill_Name}"  Binding="{Binding Name}" Width="300"/>
                 <DataGridCheckBoxColumn Header="{ll:Localize Enabled}" Binding="{Binding Enabled}" Width="120" />
             </DataGrid.Columns>  

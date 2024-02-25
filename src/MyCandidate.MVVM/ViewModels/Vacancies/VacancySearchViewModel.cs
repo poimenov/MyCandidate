@@ -27,7 +27,7 @@ public class VacancySearchViewModel : Document
     public VacancySearchViewModel(IAppServiceProvider appServiceProvider)
     {
         _provider = appServiceProvider;
-
+        //var d = new Document();d.
         Title = LocalizationService.Default["Vacancy_Search"];
         LocalizationService.Default.OnCultureChanged += CultureChanged;
 

@@ -52,7 +52,15 @@ public class FluentThemeManager : IThemeManager
         {
             Source = new Uri("avares://MyCandidate.MVVM/Themes/GroupBoxClassic.axaml")
         }
-    };    
+    };  
+
+    private static readonly Styles DockableHeader = new()
+    {
+        new StyleInclude(BaseUri)
+        {
+            Source = new Uri("avares://MyCandidate.MVVM/Themes/DockableHeader.axaml")
+        }
+    };       
 
     private static readonly Styles Hyperlink = new()
     {
@@ -106,6 +114,7 @@ public class FluentThemeManager : IThemeManager
         application.Styles.Insert(3, FluentLight);
         application.Styles.Insert(4, GroupBoxClassic);
         application.Styles.Insert(5, Hyperlink);
+        application.Styles.Insert(6, DockableHeader);
     }
 }
 

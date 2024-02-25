@@ -25,14 +25,26 @@
         </MenuItem>
         <MenuItem Header="{ll:Localize Vacancies}">
             <MenuItem Header="{ll:Localize Create}" Command="{Binding OpenCreateVacancy}">
+                <MenuItem.Icon>
+                    <Image Source="{SvgImage /Assets/feedback-svgrepo-com.svg}"/>
+                </MenuItem.Icon>            
             </MenuItem>
             <MenuItem Header="{ll:Localize Search}" Command="{Binding OpenSearchVacancy}">
+                <MenuItem.Icon>
+                    <Image Source="{SvgImage /Assets/search-svgrepo-com.svg}"/>
+                </MenuItem.Icon>             
             </MenuItem>             
         </MenuItem>
         <MenuItem Header="{ll:Localize Candidates}">
             <MenuItem Header="{ll:Localize Create}" Command="{Binding OpenCreateCandidate}">
+                <MenuItem.Icon>
+                    <Image Source="{SvgImage /Assets/businessman-svgrepo-com.svg}"/>
+                </MenuItem.Icon>
             </MenuItem>
             <MenuItem Header="{ll:Localize Search}" Command="{Binding OpenSearchCandidate}">
+                <MenuItem.Icon>
+                    <Image Source="{SvgImage /Assets/search-svgrepo-com.svg}"/>
+                </MenuItem.Icon>             
             </MenuItem>            
         </MenuItem>        
         <MenuItem Header="{ll:Localize Dictionary}">
@@ -56,8 +68,16 @@
             </MenuItem>            
         </MenuItem>
         <MenuItem Header="{ll:Localize Options}">
-            <MenuItem Header="{ll:Localize Themes}" DataContext="{Binding MenuThemeViewModel}" ItemsSource="{Binding Items}" />
-            <MenuItem Header="{ll:Localize Languages}" DataContext="{Binding MenuLanguageViewModel}" ItemsSource="{Binding Items}" />
+            <MenuItem Header="{ll:Localize Themes}" DataContext="{Binding MenuThemeViewModel}" ItemsSource="{Binding Items}">
+                <MenuItem.Icon>
+                    <Image Source="{SvgImage /Assets/puppy-theme-daylight-touch-svgrepo-com.svg}"/>
+                </MenuItem.Icon>              
+            </MenuItem>
+            <MenuItem Header="{ll:Localize Languages}" DataContext="{Binding MenuLanguageViewModel}" ItemsSource="{Binding Items}">
+                <MenuItem.Icon>
+                    <Image Source="{SvgImage /Assets/language-svgrepo-com.svg}"/>
+                </MenuItem.Icon>             
+            </MenuItem>
         </MenuItem>
         <MenuItem Header="{ll:Localize Help}">
 
