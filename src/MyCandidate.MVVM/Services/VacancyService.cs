@@ -86,7 +86,6 @@ public class VacancyService : IVacancyService
 
     public IEnumerable<Vacancy> Search(VacancySearch searchParams)
     {
-        //Add logic for sort by count skill found desc
         return _vacancies.Search(searchParams);
     }
 
