@@ -1,11 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace MyCandidate.MVVM.Views.Vacancies;
+namespace MyCandidate.MVVM.Views.Shared;
 
-public partial class VacancyResourcesView : UserControl
+public partial class ResourcesView : UserControl
 {
-    public VacancyResourcesView()
+    public ResourcesView()
     {
         InitializeComponent();
     }

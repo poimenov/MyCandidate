@@ -50,47 +50,18 @@ public static class DataTemplateProvider
             },          
             [!ToolTip.TipProperty] = new Binding(nameof(resourceType.Name))            
         };        
-    }
+    }               
 
-    public static FuncDataTemplate<VacancyResourceExt> VacancyResourceLink { get; }
-            = new FuncDataTemplate<VacancyResourceExt>(
+    public static FuncDataTemplate<ResourceModel> ResourceLink { get; }
+            = new FuncDataTemplate<ResourceModel>(
                 (resource) => resource is not null,
-                BuildVacancyResourceLink);   
+                BuildResourceLink);
 
-    private static Control BuildVacancyResourceLink(VacancyResourceExt resource)
+    private static Control BuildResourceLink(ResourceModel resource)
     {
         ICommand? command = null;
         var content = new Binding(nameof(resource.Value));
-        content.Converter = new CandidateResourceExtValueConverter();
-                command = ReactiveCommand.Create(
-                    () =>
-                    {
-                        Open(resource.Value);
-                    }
-                );
-
-        var retVal = new Button()
-        {
-            [!Button.ContentProperty] = content,
-            Command = command,
-            [!ToolTip.TipProperty] = new Binding(nameof(resource.Value)) 
-        };
-        
-        retVal.Classes.Add("link");
-
-        return retVal;
-    }                 
-
-    public static FuncDataTemplate<CandidateResourceExt> CandidateResourceLink { get; }
-            = new FuncDataTemplate<CandidateResourceExt>(
-                (resource) => resource is not null,
-                BuildCandidateResourceLink);
-
-    private static Control BuildCandidateResourceLink(CandidateResourceExt resource)
-    {
-        ICommand? command = null;
-        var content = new Binding(nameof(resource.Value));
-        content.Converter = new CandidateResourceExtValueConverter();
+        content.Converter = new ResourceValueConverter();
         switch (resource.ResourceType.Name)
         {
             case "Path":

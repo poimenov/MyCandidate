@@ -124,8 +124,8 @@ public class VacancyViewModel : Document
         _initialSet = false;
         SelectedOffice = Offices.First(x => x.Id == _vacancy.OfficeId);
 
-        VacancyResources = new VacancyResourcesViewModel(_vacancy, _provider.Properties);
-        VacancyResources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
+        Resources = new ResourcesViewModel(_vacancy, _provider.Properties);
+        Resources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
         VacancySkills = new SkillsViewModel(_vacancy.VacancySkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _provider.Properties);
         VacancySkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
         CandidatesOnVacancy = new CandidateOnVacancyViewModel(this, _provider);
@@ -151,7 +151,7 @@ public class VacancyViewModel : Document
                         return;
                     }
 
-                    _vacancy.VacancyResources = VacancyResources.VacancyResources.Select(x => x.ToVacancyResource()).ToList();
+                    _vacancy.VacancyResources = Resources.Resources.Select(x => x.ToVacancyResource(Vacancy)).ToList();
                     _vacancy.VacancySkills = VacancySkills.Skills.Select(x => x.ToVacancySkill(_vacancy)).ToList();
                     _vacancy.CandidateOnVacancies = CandidatesOnVacancy.GetCandidateOnVacancies();
                     string message;
@@ -257,7 +257,7 @@ public class VacancyViewModel : Document
         get
         {
             var retVal = Validator.TryValidateObject(this, new ValidationContext(this), null, true)
-            && VacancyResources.IsValid
+            && Resources.IsValid
             && VacancySkills.IsValid
             && Comments.IsValid;
             return retVal;
@@ -389,12 +389,12 @@ public class VacancyViewModel : Document
     }
     #endregion
 
-    #region VacancyResources
-    private VacancyResourcesViewModel _vacancyResources;
-    public VacancyResourcesViewModel VacancyResources
+    #region Resources
+    private ResourcesViewModel _resources;
+    public ResourcesViewModel Resources
     {
-        get => _vacancyResources;
-        set => this.RaiseAndSetIfChanged(ref _vacancyResources, value);
+        get => _resources;
+        set => this.RaiseAndSetIfChanged(ref _resources, value);
     }
     #endregion
 

@@ -45,9 +45,9 @@ class ResourceTypeCellEditFactory : AbstractCellEditFactory
         }
 
         var itemSource = _dataAccess.GetResourceTypes().Where(x => x.Enabled == true).ToList();
-        if(target is VacancyResourceExt)
+        if (target is ResourceModel resourceModel && resourceModel.ResourceModelType == ResourceModelType.VacancyResource)
         {
-            itemSource = itemSource.Where(x => x.Name == ResourceTypeNames.Path 
+            itemSource = itemSource.Where(x => x.Name == ResourceTypeNames.Path
                         || x.Name == ResourceTypeNames.Url).ToList();
         }
 
@@ -80,23 +80,12 @@ class ResourceTypeCellEditFactory : AbstractCellEditFactory
         .Subscribe(
             x =>
             {
-                if (x.Value is ResourceType resourceType)
+                if (x.Value is ResourceType resourceType && target is ResourceModel resourceModel)
                 {
-                    if(target is VacancyResource vacancyResource)
-                    {
-                        vacancyResource.ResourceTypeId = resourceType.Id;
-                        vacancyResource.RaisePropertyChanged(nameof(VacancyResource.ResourceTypeId));
-                        vacancyResource.ResourceType = resourceType;
-                        vacancyResource.RaisePropertyChanged(nameof(VacancyResource.ResourceType));                        
-                    }
-                    else if(target is CandidateResource candidateResource)
-                    {
-                        candidateResource.ResourceTypeId = resourceType.Id;
-                        candidateResource.RaisePropertyChanged(nameof(CandidateResource.ResourceTypeId));
-                        candidateResource.ResourceType = resourceType;
-                        candidateResource.RaisePropertyChanged(nameof(CandidateResource.ResourceType));                        
-                    }
-
+                    resourceModel.ResourceTypeId = resourceType.Id;
+                    resourceModel.RaisePropertyChanged(nameof(ResourceModel.ResourceTypeId));
+                    resourceModel.ResourceType = resourceType;
+                    resourceModel.RaisePropertyChanged(nameof(ResourceModel.ResourceType));
                 }
             }
         );
@@ -117,19 +106,10 @@ class ResourceTypeCellEditFactory : AbstractCellEditFactory
 
         ValidateProperty(control, propertyDescriptor, target);
 
-        if (control is ComboBox cb)
+        if (control is ComboBox cb && target is ResourceModel resourceModel)
         {
-            if(target is CandidateResource candidateResource)
-            {
-                cb.SelectedItem = candidateResource.ResourceType;
-                cb.SelectedIndex = cb.ItemsSource!.OfType<ResourceType>().IndexOf(candidateResource.ResourceType, new ResourceTypeEqualityComparer());
-            }
-            else if(target is VacancyResource vacancyResource)
-            {
-                cb.SelectedItem = vacancyResource.ResourceType;
-                cb.SelectedIndex = cb.ItemsSource!.OfType<ResourceType>().IndexOf(vacancyResource.ResourceType, new ResourceTypeEqualityComparer());                
-            }
-
+            cb.SelectedItem = resourceModel.ResourceType;
+            cb.SelectedIndex = cb.ItemsSource!.OfType<ResourceType>().IndexOf(resourceModel.ResourceType, new ResourceTypeEqualityComparer());
             return true;
         }
 

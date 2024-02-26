@@ -5,7 +5,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ll="clr-namespace:Avalonia.PropertyGrid.Localization;assembly=Avalonia.PropertyGrid"             
              xmlns:vm="using:MyCandidate.MVVM.ViewModels.Candidates" 
-             xmlns:v="using:MyCandidate.MVVM.Views.Candidates" 
              xmlns:sh="using:MyCandidate.MVVM.Views.Shared"           
              xmlns:vw="using:MyCandidate.MVVM.Views.Tools"             
              mc:Ignorable="d"
@@ -41,7 +40,7 @@
                 <CheckBox IsChecked="{Binding Enabled}" Grid.Row="3" Grid.Column="1"></CheckBox>
             </Grid>
             <HeaderedContentControl Grid.Row="1" Grid.Column="0" Header="{ll:Localize Links}" Margin="5,5,5,0">
-                <v:CandidateResourcesView DataContext="{Binding CandidateResources}" Margin="0,5,0,0" />
+                <sh:ResourcesView DataContext="{Binding Resources}" Margin="0,5,0,0" />
             </HeaderedContentControl>
 
             <HeaderedContentControl Grid.Row="2" Grid.Column="0" Header="{ll:Localize Vacancies}" Margin="5,5,5,0">

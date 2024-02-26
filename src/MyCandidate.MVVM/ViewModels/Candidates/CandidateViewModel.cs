@@ -91,8 +91,8 @@ public class CandidateViewModel : Document
             Location = _candidate.Location
         };
 
-        CandidateResources = new CandidateResourcesViewModel(_candidate, _provider.Properties);
-        CandidateResources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
+        Resources = new ResourcesViewModel(_candidate, _provider.Properties);
+        Resources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
         CandidateSkills = new SkillsViewModel(_candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _provider.Properties);
         CandidateSkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
         CandidatesOnVacancy = new CandidateOnVacancyViewModel(this, _provider);
@@ -117,7 +117,7 @@ public class CandidateViewModel : Document
         get
         {
             var retVal = Validator.TryValidateObject(this, new ValidationContext(this), null, true)
-                && CandidateResources.IsValid
+                && Resources.IsValid
                 && CandidateSkills.IsValid
                 && Comments.IsValid;
             return retVal;
@@ -141,7 +141,7 @@ public class CandidateViewModel : Document
                         return;
                     }
 
-                    _candidate.CandidateResources = CandidateResources.CandidateResources.Select(x => x.ToCandidateResource()).ToList();
+                    _candidate.CandidateResources = Resources.Resources.Select(x => x.ToCandidateResource(Candidate)).ToList();
                     _candidate.CandidateSkills = CandidateSkills.Skills.Select(x => x.ToCandidateSkill(_candidate)).ToList();
                     _candidate.CandidateOnVacancies = CandidatesOnVacancy.GetCandidateOnVacancies();
                     string message;
@@ -330,12 +330,12 @@ public class CandidateViewModel : Document
     }
     #endregion
 
-    #region CandidateResources
-    private CandidateResourcesViewModel _candidateResources;
-    public CandidateResourcesViewModel CandidateResources
+    #region Resources
+    private ResourcesViewModel _resources;
+    public ResourcesViewModel Resources
     {
-        get => _candidateResources;
-        set => this.RaiseAndSetIfChanged(ref _candidateResources, value);
+        get => _resources;
+        set => this.RaiseAndSetIfChanged(ref _resources, value);
     }
     #endregion
 

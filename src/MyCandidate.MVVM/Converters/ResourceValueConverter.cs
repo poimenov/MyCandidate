@@ -5,7 +5,7 @@ using Avalonia.Data.Converters;
 
 namespace MyCandidate.MVVM.Converters;
 
-public class CandidateResourceExtValueConverter : IValueConverter
+public class ResourceValueConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
