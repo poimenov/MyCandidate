@@ -109,11 +109,21 @@ public class CandidateSearchViewModel : Document
 
         Enabled = true;
         Pager = new PagerViewModel();
-        Source = new ObservableCollectionExtended<Candidate>();
+        Source = new ObservableCollectionExtended<CandidateModel>();
         Skills.WhenAnyValue(x => x.IsValid).Subscribe(x => { this.RaisePropertyChanged(nameof(IsValid)); });
         this.WhenAnyValue(x => x.FirstName).Subscribe(x => { CandidateSearch.FirstName = x; });
         this.WhenAnyValue(x => x.LastName).Subscribe(x => { CandidateSearch.LastName = x; });
         this.WhenAnyValue(x => x.Enabled).Subscribe(x => { CandidateSearch.Enabled = x; });
+
+        this.WhenAnyValue(x => x.SelectedItem).Subscribe(
+            x => 
+            {
+                if (_provider.Properties != null && x != null)
+                {
+                    _provider.Properties.SelectedItem = x;
+                }
+            }
+        );
 
         this.WhenAnyValue(x => x.City).Subscribe(
             x =>
@@ -197,14 +207,14 @@ public class CandidateSearchViewModel : Document
         return ReactiveCommand.Create(
             async () =>
                 {
-                    var existed = _provider.Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CandidateViewModel) && ((CandidateViewModel)x).CandidateId == SelectedItem.Id);
+                    var existed = _provider.Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CandidateViewModel) && ((CandidateViewModel)x).CandidateId == SelectedItem.Candidate.Id);
                     if (existed != null)
                     {
                         _provider.Factory.SetActiveDockable(existed);
                     }
                     else
                     {
-                        _provider.OpenDock(_provider.GetCandidateViewModel(SelectedItem.Id));
+                        _provider.OpenDock(_provider.GetCandidateViewModel(SelectedItem.Candidate.Id));
                     }
                 }, this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                     (obj, list) => obj != null && list.Count > 0)
@@ -224,8 +234,8 @@ public class CandidateSearchViewModel : Document
                     var status = new SelectionStatus { Id = 1, Name = SelectionStatusNames.SetContact, Enabled = true };
                     var newItem = new CandidateOnVacancy
                     {
-                        Candidate = SelectedItem,
-                        CandidateId = SelectedItem.Id,
+                        Candidate = SelectedItem.Candidate,
+                        CandidateId = SelectedItem.Candidate.Id,
                         Vacancy = VacancyViewModel.Vacancy,
                         VacancyId = VacancyViewModel.Vacancy.Id,
                         SelectionStatus = status,
@@ -237,7 +247,7 @@ public class CandidateSearchViewModel : Document
                     _provider.Factory.SetActiveDockable(VacancyViewModel);
                     VacancyViewModel.CandidatesOnVacancy.Add(newItem);
                 }, this.WhenAnyValue(x => x.SelectedItem, x => x.VacancyViewModel,
-                    (obj, vm) => obj != null && vm != null && !vm.CandidatesOnVacancy.ItemList.Any(y => y.CandidateId == obj.Id))
+                    (obj, vm) => obj != null && vm != null && !vm.CandidatesOnVacancy.ItemList.Any(y => y.CandidateId == obj.Candidate.Id))
             );
     }
     public IReactiveCommand SearchCmd { get; }
@@ -247,7 +257,7 @@ public class CandidateSearchViewModel : Document
             async () =>
             {
                 CandidateSearch.Skills = Skills.Skills.Select(x => x.ToSkillVaue());
-                Source.Load(_provider.CandidateService.Search(CandidateSearch));
+                Source.Load(_provider.CandidateService.Search(CandidateSearch).Select(x => new CandidateModel(x)));
                 Pager.PagingUpdate(Source.Count());
             }, this.WhenAnyValue(x => x.IsValid, v => v == true)
         );
@@ -266,14 +276,14 @@ public class CandidateSearchViewModel : Document
     #endregion
 
     #region ItemList
-    public ObservableCollectionExtended<Candidate> Source;
-    private readonly ReadOnlyObservableCollection<Candidate> _itemList;
-    public ReadOnlyObservableCollection<Candidate> ItemList => _itemList;
+    public ObservableCollectionExtended<CandidateModel> Source;
+    private readonly ReadOnlyObservableCollection<CandidateModel> _itemList;
+    public ReadOnlyObservableCollection<CandidateModel> ItemList => _itemList;
     #endregion
 
     #region SelectedItem
-    private Candidate? _selectedItem;
-    public Candidate? SelectedItem
+    private CandidateModel? _selectedItem;
+    public CandidateModel? SelectedItem
     {
         get => _selectedItem;
         set => this.RaiseAndSetIfChanged(ref _selectedItem, value);

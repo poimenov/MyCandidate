@@ -83,8 +83,8 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="{ll:Localize Last_Name}" Binding="{Binding LastName}" Width="200"/>
                     <DataGridTextColumn Header="{ll:Localize First_Name}" Binding="{Binding FirstName}" Width="200"/>              
-                    <DataGridTextColumn Header="{ll:Localize Country_Name}" Binding="{Binding Location.City.Country.Name}" Width="200"/>
-                    <DataGridTextColumn Header="{ll:Localize City_Name}" Binding="{Binding Location.City.Name}" Width="200"/>
+                    <DataGridTextColumn Header="{ll:Localize Country_Name}" Binding="{Binding CountryName}" Width="200"/>
+                    <DataGridTextColumn Header="{ll:Localize City_Name}" Binding="{Binding CityName}" Width="200"/>
                     <DataGridCheckBoxColumn Header="{ll:Localize Enabled}" Binding="{Binding Enabled}" Width="120" />
                 </DataGrid.Columns>  
                 

@@ -23,5 +23,7 @@ public class ExtendedPropertyGrid : PropertyGrid
         CellEditFactoryService.Default.AddFactory(new SeniorityCellEditFactory(CurrentApplication.GetRequiredService<IDictionariesDataAccess>()));
         CellEditFactoryService.Default.AddFactory(new SkillCellEditFactory(CurrentApplication.GetRequiredService<IDataAccess<SkillCategory>>(),
                                                                                 CurrentApplication.GetRequiredService<IDataAccess<Skill>>()));
+        CellEditFactoryService.Default.AddFactory(new SkillsCellFactory(CurrentApplication.GetRequiredService<IDataAccess<Skill>>(),
+                                                                                CurrentApplication.GetRequiredService<IDictionariesDataAccess>()));
     }
 }

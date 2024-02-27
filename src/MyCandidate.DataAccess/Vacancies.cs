@@ -140,6 +140,7 @@ namespace MyCandidate.DataAccess
                 query = query.Include(x => x.Office)
                     .ThenInclude(x => x.Company)
                     .Include(x => x.VacancyStatus)
+                    .Include(x => x.VacancySkills)
                     .Include(x => x.CandidateOnVacancies);
 
                 if (searchParams.Enabled.HasValue)
@@ -173,8 +174,7 @@ namespace MyCandidate.DataAccess
                         query = query.Where(x => x.VacancySkills.Any(s => s.SkillId == skill.SkillId));
                     }
 
-                    return query.Include(x => x.VacancySkills)
-                        .ToList().OrderDescending(new VacancySkillsComparer(searchParams.Skills));
+                    return query.ToList().OrderDescending(new VacancySkillsComparer(searchParams.Skills));
                 }
 
                 return query.ToList();

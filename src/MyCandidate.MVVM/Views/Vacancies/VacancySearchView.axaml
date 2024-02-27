@@ -90,9 +90,9 @@
 
               <DataGrid.Columns>
                 <DataGridTextColumn Header="{ll:Localize Name}"  Binding="{Binding Name}" Width="330"/>
-                <DataGridTextColumn Header="{ll:Localize Status}"  Binding="{Binding VacancyStatus.Name}" Width="100"/>              
-                <DataGridTextColumn Header="{ll:Localize Company_Name}"  Binding="{Binding Office.Company.Name}" Width="200"/>
-                <DataGridTextColumn Header="{ll:Localize Office_Name}"  Binding="{Binding Office.Name}" Width="300"/>
+                <DataGridTextColumn Header="{ll:Localize Status}"  Binding="{Binding VacancyStatusName}" Width="100"/>              
+                <DataGridTextColumn Header="{ll:Localize Company_Name}"  Binding="{Binding CompanyName}" Width="200"/>
+                <DataGridTextColumn Header="{ll:Localize Office_Name}"  Binding="{Binding OfficeName}" Width="300"/>
                 <DataGridCheckBoxColumn Header="{ll:Localize Enabled}" Binding="{Binding Enabled}" Width="120" />
             </DataGrid.Columns> 
              
