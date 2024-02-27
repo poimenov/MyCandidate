@@ -132,7 +132,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (addNew)
             {
-                _factory?.AddDockable(Documents, dockable);
+                _appServiceProvider.OpenDock(dockable);
             }
 
             _factory?.SetActiveDockable(dockable);

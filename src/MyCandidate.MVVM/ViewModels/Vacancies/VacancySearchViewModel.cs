@@ -186,7 +186,7 @@ public class VacancySearchViewModel : Document
                 {
                     if (!_provider.Documents.VisibleDockables.Any(x => x.GetType() == typeof(CandidateViewModel) && ((CandidateViewModel)x).CandidateId == CandidateViewModel.CandidateId))
                     {
-                        _provider.Factory.AddDockable(_provider.Documents, CandidateViewModel);
+                        _provider.OpenDock(CandidateViewModel);
                     }
 
                     var status = new SelectionStatus { Id = 1, Name = SelectionStatusNames.SetContact, Enabled = true };

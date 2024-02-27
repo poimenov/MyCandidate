@@ -13,6 +13,8 @@ public class PropertiesViewModel : Tool, IProperties
     public PropertiesViewModel()
     {
         CanClose = false;
+        CanFloat = false;
+        CanPin = false;
         _selectedTypeName = "Properties";
 
         LocalizationService.Default.OnCultureChanged += CultureChanged;

@@ -60,7 +60,7 @@ public class SkillService : IDictionaryService<Skill>
         IEnumerable<string> names;
         if (CheckDuplicates(items, out names))
         {
-            message = $"It is impossible to add next officies: {string.Join(", ", names)} because they already exist";
+            message = $"It is impossible to add next skills: {string.Join(", ", names)} because they already exist";
             return false;
         }
 

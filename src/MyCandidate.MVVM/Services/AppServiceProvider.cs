@@ -27,6 +27,7 @@ public class AppServiceProvider : IAppServiceProvider
     {
         if (Documents is { } && Documents?.VisibleDockables != null)
         {
+            dockable.CanFloat = false;
             _factory.AddDockable(Documents, dockable);
             _factory.SetActiveDockable(dockable);
         }

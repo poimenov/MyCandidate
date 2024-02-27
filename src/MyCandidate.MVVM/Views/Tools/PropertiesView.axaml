@@ -10,14 +10,6 @@
              d:DesignWidth="300" d:DesignHeight="400"
              x:DataType="vm:PropertiesViewModel" x:CompileBindings="True">
     <ScrollViewer>
-        <!-- <pgc:PropertyGrid 
-            x:Name="pgProperties"
-            Margin="4" 
-            SelectedObject="{Binding SelectedItem}"
-            ShowTitle="false"
-            AllowQuickFilter="false"
-            AllowFilter="false">                      
-        </pgc:PropertyGrid> -->
         <my:ExtendedPropertyGrid 
             x:Name="pgProperties"
             Margin="4" 
