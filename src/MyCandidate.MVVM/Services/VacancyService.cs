@@ -89,6 +89,11 @@ public class VacancyService : IVacancyService
         return _vacancies.Search(searchParams);
     }
 
+    public IEnumerable<Vacancy> GetRecent(int count)
+    {
+        return _vacancies.GetRecent(count);
+    }
+
     public bool Update(Vacancy item, out string message)
     {
         message = string.Empty;

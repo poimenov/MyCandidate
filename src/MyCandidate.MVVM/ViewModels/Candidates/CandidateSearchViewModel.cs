@@ -116,7 +116,7 @@ public class CandidateSearchViewModel : Document
         this.WhenAnyValue(x => x.Enabled).Subscribe(x => { CandidateSearch.Enabled = x; });
 
         this.WhenAnyValue(x => x.SelectedItem).Subscribe(
-            x => 
+            x =>
             {
                 if (_provider.Properties != null && x != null)
                 {
@@ -207,15 +207,7 @@ public class CandidateSearchViewModel : Document
         return ReactiveCommand.Create(
             async () =>
                 {
-                    var existed = _provider.Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CandidateViewModel) && ((CandidateViewModel)x).CandidateId == SelectedItem.Candidate.Id);
-                    if (existed != null)
-                    {
-                        _provider.Factory.SetActiveDockable(existed);
-                    }
-                    else
-                    {
-                        _provider.OpenDock(_provider.GetCandidateViewModel(SelectedItem.Candidate.Id));
-                    }
+                    _provider.OpenCandidateViewModel(SelectedItem.Candidate.Id);
                 }, this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                     (obj, list) => obj != null && list.Count > 0)
             );

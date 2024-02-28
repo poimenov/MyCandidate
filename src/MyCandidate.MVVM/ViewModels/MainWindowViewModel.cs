@@ -22,6 +22,8 @@ public class MainWindowViewModel : ViewModelBase
     private IRootDock? _layout;
     public MenuThemeViewModel MenuThemeViewModel { get; private set; }
     public MenuLanguageViewModel MenuLanguageViewModel { get; private set; }  
+    public MenuRecentViewModel RecentCandidatesViewModel { get; private set; } 
+    public MenuRecentViewModel RecentVacanciesViewModel { get; private set; } 
 
     public IRootDock? Layout
     {
@@ -36,6 +38,8 @@ public class MainWindowViewModel : ViewModelBase
         LocalizationService.Default.AddExtraService(new AppLocalizationService());
         MenuThemeViewModel = new MenuThemeViewModel(_options.Value);
         MenuLanguageViewModel = new MenuLanguageViewModel(_options.Value);
+        RecentCandidatesViewModel = new MenuRecentViewModel(_appServiceProvider, Models.TargetModelType.Candidate, 10);
+        RecentVacanciesViewModel = new MenuRecentViewModel(_appServiceProvider, Models.TargetModelType.Vacancy, 5);
         _factory = appServiceProvider.Factory;
         Layout = _factory?.CreateLayout();
         if (Layout is { })

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Avalonia;
 using Dock.Model.Controls;
 using Dock.Model.Core;
@@ -265,11 +266,6 @@ public class AppServiceProvider : IAppServiceProvider
         return new VacancyViewModel(this);
     }
 
-    public VacancyViewModel GetVacancyViewModel(int vacancyId)
-    {
-        return new VacancyViewModel(this, vacancyId);
-    }
-
     public VacancySearchViewModel GetVacancySearchViewModel()
     {
         return new VacancySearchViewModel(this);
@@ -285,9 +281,30 @@ public class AppServiceProvider : IAppServiceProvider
         return new CandidateViewModel(this);
     }
 
-    public CandidateViewModel GetCandidateViewModel(int candidateId)
+    public void OpenCandidateViewModel(int candidateId)
     {
-        return new CandidateViewModel(this, candidateId);
+        var existed = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CandidateViewModel) && ((CandidateViewModel)x).CandidateId == candidateId);
+        if (existed != null)
+        {
+            Factory.SetActiveDockable(existed);
+        }
+        else
+        {
+            OpenDock(new CandidateViewModel(this, candidateId));
+        }
+    }
+
+    public void OpenVacancyViewModel(int vacancyId)
+    {
+        var existed = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(VacancyViewModel) && ((VacancyViewModel)x).VacancyId == vacancyId);
+        if (existed != null)
+        {
+            Factory.SetActiveDockable(existed);
+        }
+        else
+        {
+            OpenDock(new VacancyViewModel(this, vacancyId));
+        }
     }
 
     public CandidateSearchViewModel GetCandidateSearchViewModel()

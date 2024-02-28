@@ -27,11 +27,11 @@ public interface IAppServiceProvider
     DictionaryViewModel<Company> GetCompaniesViewModel();
     DictionaryViewModel<Office> GetOfficiesViewModel();
     VacancyViewModel GetVacancyViewModel();
-    VacancyViewModel GetVacancyViewModel(int vacancyId);
+    void OpenVacancyViewModel(int vacancyId);
     VacancySearchViewModel GetVacancySearchViewModel();
     VacancySearchViewModel GetVacancySearchViewModel(CandidateViewModel candidateViewModel);
     CandidateViewModel GetCandidateViewModel();
-    CandidateViewModel GetCandidateViewModel(int candidateId);
+    void OpenCandidateViewModel(int candidateId);
     CandidateSearchViewModel GetCandidateSearchViewModel();
     CandidateSearchViewModel GetCandidateSearchViewModel(VacancyViewModel vacancyViewModel);    
     void OpenDock(IDockable dockable);
@@ -39,5 +39,4 @@ public interface IAppServiceProvider
     IDocumentDock? Documents { get; }
     IProperties? Properties { get; } 
     IFactory Factory { get; } 
-    //IRootDock? Layout { get; }  
 }

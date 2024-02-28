@@ -9,14 +9,14 @@ using PropertyModels.ComponentModel.DataAnnotations;
 
 namespace MyCandidate.MVVM.Models
 {
-    public enum ResourceModelType
+    public enum TargetModelType
     {
-        CandidateResource,
-        VacancyResource
+        Candidate,
+        Vacancy
     }
     public class ResourceModel : ReactiveObject
     {
-        public ResourceModel(ResourceModelType resourceModelType)
+        public ResourceModel(TargetModelType resourceModelType)
         {
             ResourceModelType = resourceModelType;
             ResourceTypeId = 1;
@@ -26,7 +26,7 @@ namespace MyCandidate.MVVM.Models
 
         public ResourceModel(CandidateResource candidateResource)
         {
-            ResourceModelType = ResourceModelType.CandidateResource;
+            ResourceModelType = TargetModelType.Candidate;
             if (candidateResource != null)
             {
                 Id = candidateResource.Id;
@@ -44,7 +44,7 @@ namespace MyCandidate.MVVM.Models
 
     public ResourceModel(VacancyResource vacancyResource)
     {
-        ResourceModelType = ResourceModelType.VacancyResource;
+        ResourceModelType = TargetModelType.Vacancy;
         if (vacancyResource != null)
         {
             Id = vacancyResource.Id;
@@ -61,7 +61,7 @@ namespace MyCandidate.MVVM.Models
     }        
 
         [Browsable(false)]
-        public ResourceModelType ResourceModelType { get; set; }
+        public TargetModelType ResourceModelType { get; set; }
 
         [Browsable(false)]
         public int Id { get; set; }

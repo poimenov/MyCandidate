@@ -113,27 +113,11 @@ public class CandidateOnVacancyViewModel : ViewModelBase
             {
                 if (_isVacancy)
                 {
-                    var existed = _provider.Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CandidateViewModel) && ((CandidateViewModel)x).CandidateId == SelectedItem.CandidateId);
-                    if (existed != null)
-                    {
-                        _provider.Factory.SetActiveDockable(existed);
-                    }
-                    else
-                    {
-                        _provider.OpenDock(_provider.GetCandidateViewModel(SelectedItem.CandidateId));
-                    }
+                    _provider.OpenCandidateViewModel(SelectedItem.CandidateId);
                 }
                 else
                 {
-                    var existed = _provider.Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(VacancyViewModel) && ((VacancyViewModel)x).VacancyId == SelectedItem.VacancyId);
-                    if (existed != null)
-                    {
-                        _provider.Factory.SetActiveDockable(existed);
-                    }
-                    else
-                    {
-                        _provider.OpenDock(_provider.GetVacancyViewModel(SelectedItem.VacancyId));
-                    }
+                    _provider.OpenVacancyViewModel(SelectedItem.VacancyId);
                 }
             },
             this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
@@ -167,15 +151,15 @@ public class CandidateOnVacancyViewModel : ViewModelBase
         return ReactiveCommand.Create(
             async (KeyEventArgs args) =>
             {
-                if(args.Key == Key.Delete && SelectedItem != null && await DeleteCmd.CanExecute.FirstAsync())
+                if (args.Key == Key.Delete && SelectedItem != null && await DeleteCmd.CanExecute.FirstAsync())
                 {
                     await ((ReactiveCommand<CandidateOnVacancyExt, Task>)DeleteCmd).Execute(SelectedItem);
-                }                
+                }
             },
             this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                 (obj, list) => obj != null && list.Count > 0)
         );
-    }    
+    }
     #endregion
 
     #region ItemList

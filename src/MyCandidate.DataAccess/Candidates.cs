@@ -197,6 +197,14 @@ namespace MyCandidate.DataAccess
             }
         }
 
+        public IEnumerable<Candidate> GetRecent(int count)
+        {
+            using (var db = new Database())
+            {
+                return db.Candidates.OrderByDescending(x => x.LastModificationDate).Take(count).ToList();
+            }
+        }
+
         public IEnumerable<Candidate> Search(CandidateSearch searchParams)
         {
             using (var db = new Database())

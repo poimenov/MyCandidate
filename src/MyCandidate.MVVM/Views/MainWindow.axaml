@@ -22,7 +22,18 @@
   <Grid RowDefinitions="Auto,*" Background="Transparent" DragDrop.AllowDrop="True">
     <Menu>
         <MenuItem Header="{ll:Localize File}">
-            <MenuItem Header="{ll:Localize New}" />
+            <MenuItem Header="{ll:Localize Recent}">
+                <MenuItem Header="{ll:Localize Candidates}" DataContext="{Binding RecentCandidatesViewModel}" ItemsSource="{Binding Items}">
+                    <MenuItem.Icon>
+                        <Image Source="{SvgImage /Assets/businessman-svgrepo-com.svg}"/>
+                    </MenuItem.Icon>                
+                </MenuItem>
+                <MenuItem Header="{ll:Localize Vacancies}" DataContext="{Binding RecentVacanciesViewModel}" ItemsSource="{Binding Items}">
+                    <MenuItem.Icon>
+                        <Image Source="{SvgImage /Assets/feedback-svgrepo-com.svg}"/>
+                    </MenuItem.Icon>                 
+                </MenuItem>
+            </MenuItem>
             <Separator />
             <MenuItem Header="{ll:Localize Exit}" Command="{Binding FileExit}" />
         </MenuItem>

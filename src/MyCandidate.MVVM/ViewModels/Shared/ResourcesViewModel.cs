@@ -15,10 +15,10 @@ namespace MyCandidate.MVVM.ViewModels.Shared;
 
 public class ResourcesViewModel : ViewModelBase
 {
-    private readonly ResourceModelType _resourceModelType;
+    private readonly TargetModelType _resourceModelType;
     public ResourcesViewModel(Vacancy vacancy, IProperties properties)
     {
-        _resourceModelType = ResourceModelType.VacancyResource;
+        _resourceModelType = TargetModelType.Vacancy;
         Properties = properties;
         SourceResources = new ObservableCollectionExtended<ResourceModel>(vacancy.VacancyResources.Select(x => new ResourceModel(x)).ToList());
         SourceResources.ToObservableChangeSet()
@@ -35,7 +35,7 @@ public class ResourcesViewModel : ViewModelBase
 
     public ResourcesViewModel(Candidate candidate, IProperties properties)
     {
-        _resourceModelType = ResourceModelType.CandidateResource;
+        _resourceModelType = TargetModelType.Candidate;
         Properties = properties;
         SourceResources = new ObservableCollectionExtended<ResourceModel>(candidate.CandidateResources.Select(x => new ResourceModel(x)).ToList());
         SourceResources.ToObservableChangeSet()

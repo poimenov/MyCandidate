@@ -2,7 +2,8 @@
     "progName" : "Candidate Selection",
 
     //menu
-
+    "Recent": "Recent modified",
+    "Empty": "(empty)",
 
     //properties
     "Resource_Type": "Resource type",

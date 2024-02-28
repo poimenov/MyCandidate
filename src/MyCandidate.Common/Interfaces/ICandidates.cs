@@ -8,6 +8,7 @@ namespace MyCandidate.Common.Interfaces
         bool Create(Candidate candidate, out int id);
         void Update(Candidate candidate);
         IEnumerable<Candidate> Search(CandidateSearch searchParams);
+        IEnumerable<Candidate> GetRecent(int count);
     } 
 
     public class CandidateSearch

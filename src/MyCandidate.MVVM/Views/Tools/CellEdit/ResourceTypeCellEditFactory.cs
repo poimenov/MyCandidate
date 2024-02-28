@@ -45,7 +45,7 @@ class ResourceTypeCellEditFactory : AbstractCellEditFactory
         }
 
         var itemSource = _dataAccess.GetResourceTypes().Where(x => x.Enabled == true).ToList();
-        if (target is ResourceModel resourceModel && resourceModel.ResourceModelType == ResourceModelType.VacancyResource)
+        if (target is ResourceModel resourceModel && resourceModel.ResourceModelType == TargetModelType.Vacancy)
         {
             itemSource = itemSource.Where(x => x.Name == ResourceTypeNames.Path
                         || x.Name == ResourceTypeNames.Url).ToList();

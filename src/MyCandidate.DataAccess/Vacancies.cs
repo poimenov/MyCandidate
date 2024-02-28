@@ -181,6 +181,14 @@ namespace MyCandidate.DataAccess
             }
         }
 
+        public IEnumerable<Vacancy> GetRecent(int count)
+        {
+            using (var db = new Database())
+            {
+                return db.Vacancies.OrderByDescending(x => x.LastModificationDate).Take(count).ToList();
+            }            
+        }
+
         public void Update(Vacancy vacancy)
         {
             using (var db = new Database())

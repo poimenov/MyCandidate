@@ -89,6 +89,11 @@ public class CandidateService : ICandidateService
         return _candidates.Search(searchParams);
     }
 
+    public IEnumerable<Candidate> GetRecent(int count)
+    {
+        return _candidates.GetRecent(count);
+    }
+
     public bool Update(Candidate item, out string message)
     {
         message = string.Empty;
