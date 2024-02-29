@@ -93,7 +93,7 @@ public static class DataTemplateProvider
         return retVal;
     }
 
-    private static void Open(string path)
+    public static void Open(string path)
     {
         if (File.Exists(path) || Uri.IsWellFormedUriString(path, UriKind.Absolute))
         {

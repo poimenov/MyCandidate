@@ -11,6 +11,14 @@ namespace MyCandidate.DataAccess
             //
         }
 
+        public bool Exist(int id)
+        {
+            using (var db = new Database())
+            {
+                return db.Candidates.Any(x => x.Id == id);
+            }
+        }
+
         public bool Exist(string lastName, string firstName, DateTime birthdate)
         {
             using (var db = new Database())
@@ -244,10 +252,11 @@ namespace MyCandidate.DataAccess
                 {
                     foreach (var skill in searchParams.Skills)
                     {
-                        query = query.Where(x => x.CandidateSkills.Any(s => s.SkillId == skill.SkillId));
+                        //query = query.Where(x => x.CandidateSkills.Any(s => s.SkillId == skill.SkillId));
+                        query = query.Where(x => x.CandidateSkills.Any(s => s.SkillId == skill.SkillId && s.SeniorityId == skill.SeniorityId));
                     }
 
-                    return query.ToList().OrderDescending(new CandidateSkillsComparer(searchParams.Skills));
+                    //return query.ToList().OrderDescending(new CandidateSkillsComparer(searchParams.Skills));
                 }
 
                 return query.ToList();

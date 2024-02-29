@@ -117,4 +117,9 @@ public class SkillCategoryService : IDictionaryService<SkillCategory>
             return false;
         }
     }
+
+    public bool Any()
+    {
+        return _categories.Any();
+    }
 }

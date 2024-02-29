@@ -50,6 +50,14 @@
     "Cancel_Text": "Are you sure you want to cancel the changes?",
     "DeleteCandidate_Text": "Are you sure you want to Delete this Candidate?",
     "DeleteVacancy_Text": "Are you sure you want to Delete this Vacancy?",
+    "CommandIsUnawailable": "Command is unawailable",
+    "No_Countries_Text": "There are no available countries. Add a country in the Menu Dictionary > Address > Countries", 
+    "No_SkillCategories_Text": "There are no available skill categories available. Add a category in the Menu Dictionary > Skills > Skill Categories",
+    "No_CompaniesCities_Text": "There are no available companies and/or cities available. Add them in the Dictionary menu",
+    "No_SkillsCities_Text": "There are no available skills and/or cities available. Add them in the Dictionary menu",
+    "No_OfficiesSkills_Text": "There are no available skills and/or officies available. Add them in the Dictionary menu",
+
+    "About_Text": "Test application on Avalonia UI",   
     
     //validation messages
     "BirthdateValidationMessage": "Minimum age must be {0} years"    

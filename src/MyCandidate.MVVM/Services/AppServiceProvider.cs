@@ -24,24 +24,6 @@ public class AppServiceProvider : IAppServiceProvider
         _factory = new DockFactory();
     }
 
-    public void OpenDock(IDockable dockable)
-    {
-        if (Documents is { } && Documents?.VisibleDockables != null)
-        {
-            dockable.CanFloat = false;
-            _factory.AddDockable(Documents, dockable);
-            _factory.SetActiveDockable(dockable);
-        }
-    }
-
-    public void CloseDock(IDockable dockable)
-    {
-        if (dockable != null && Documents is { } && Documents?.VisibleDockables != null)
-        {
-            _factory.CloseDockable(dockable);
-        }
-    }
-
     #region Documents
     private IDocumentDock? _documents;
     public IDocumentDock? Documents
@@ -283,28 +265,34 @@ public class AppServiceProvider : IAppServiceProvider
 
     public void OpenCandidateViewModel(int candidateId)
     {
-        var existed = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CandidateViewModel) && ((CandidateViewModel)x).CandidateId == candidateId);
-        if (existed != null)
+        if (Documents is { } && Documents?.VisibleDockables != null)
         {
-            Factory.SetActiveDockable(existed);
-        }
-        else
-        {
-            OpenDock(new CandidateViewModel(this, candidateId));
+            var existed = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(CandidateViewModel) && ((CandidateViewModel)x).CandidateId == candidateId);
+            if (existed != null)
+            {
+                Factory.SetActiveDockable(existed);
+            }
+            else if(CandidateService.Exist(candidateId))
+            {
+                OpenDock(new CandidateViewModel(this, candidateId));
+            }            
         }
     }
 
     public void OpenVacancyViewModel(int vacancyId)
     {
-        var existed = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(VacancyViewModel) && ((VacancyViewModel)x).VacancyId == vacancyId);
-        if (existed != null)
+        if (Documents is { } && Documents?.VisibleDockables != null)
         {
-            Factory.SetActiveDockable(existed);
-        }
-        else
-        {
-            OpenDock(new VacancyViewModel(this, vacancyId));
-        }
+            var existed = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == typeof(VacancyViewModel) && ((VacancyViewModel)x).VacancyId == vacancyId);
+            if (existed != null)
+            {
+                Factory.SetActiveDockable(existed);
+            }
+            else if(VacancyService.Exist(vacancyId))
+            {
+                OpenDock(new VacancyViewModel(this, vacancyId));
+            }            
+        }        
     }
 
     public CandidateSearchViewModel GetCandidateSearchViewModel()
@@ -316,4 +304,39 @@ public class AppServiceProvider : IAppServiceProvider
     {
         return new CandidateSearchViewModel(vacancyViewModel, this);
     }
+
+    public void OpenDock(IDockable dockable)
+    {
+        if (Documents is { } && Documents?.VisibleDockables != null)
+        {
+            dockable.CanFloat = false;
+            _factory.AddDockable(Documents, dockable);
+            _factory.SetActiveDockable(dockable);
+        }
+    }
+
+    public void OpenSingleDock(IDockable dockable)
+    {
+        if (Documents is { } && Documents?.VisibleDockables != null)
+        {
+            var existed = Documents.VisibleDockables.FirstOrDefault(x => x.GetType() == dockable.GetType());
+            if (existed != null)
+            {
+                Factory.SetActiveDockable(existed);
+            }
+            else
+            {
+                OpenDock(dockable);
+            }             
+        }
+    }
+
+    public void CloseDock(IDockable dockable)
+    {
+        if (dockable != null && Documents is { } && Documents?.VisibleDockables != null)
+        {
+            _factory.CloseDockable(dockable);
+        }
+    }
+
 }

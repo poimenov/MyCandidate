@@ -7,4 +7,5 @@ public interface IDataAccess<T>
     void Delete(IEnumerable<int> itemIds);
     T? Get(int itemId);
     IEnumerable<T> ItemsList { get; }
+    bool Any();
 }

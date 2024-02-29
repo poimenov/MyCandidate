@@ -97,4 +97,12 @@ public class Skills : IDataAccess<Skill>
             }
         }
     }
+
+    public bool Any()
+    {
+        using (var db = new Database())
+        {
+            return db.Skills.Any(x => x.Enabled == true);
+        }
+    }
 }

@@ -15,13 +15,9 @@ namespace MyCandidate.MVVM.ViewModels;
 public class MenuRecentViewModel : ViewModelBase
 {
     private readonly IAppServiceProvider _provider;
-    private readonly TargetModelType _modelType;
-    private readonly int _countItems;
     public MenuRecentViewModel(IAppServiceProvider appServiceProvider, TargetModelType modelType, int countItems)
     {
         _provider = appServiceProvider;
-        _modelType = modelType;
-        _countItems = countItems;
 
         OpenCandidateCmd = ReactiveCommand.Create<int, Unit>(
             (id) =>

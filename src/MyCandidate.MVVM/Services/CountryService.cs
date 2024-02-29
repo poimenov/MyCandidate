@@ -117,4 +117,9 @@ public class CountryService : IDictionaryService<Country>
             return false;
         }
     }
+
+    public bool Any()
+    {
+        return _countries.Any();
+    }
 }

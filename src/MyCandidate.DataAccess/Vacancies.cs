@@ -11,6 +11,14 @@ namespace MyCandidate.DataAccess
             //
         }
 
+        public bool Exist(int id)
+        {
+            using (var db = new Database())
+            {
+                return db.Vacancies.Any(x => x.Id == id);
+            }
+        }
+
         public bool Create(Vacancy vacancy, out int id)
         {
             bool retVal = false;
@@ -171,10 +179,11 @@ namespace MyCandidate.DataAccess
                 {
                     foreach (var skill in searchParams.Skills)
                     {
-                        query = query.Where(x => x.VacancySkills.Any(s => s.SkillId == skill.SkillId));
+                        //query = query.Where(x => x.VacancySkills.Any(s => s.SkillId == skill.SkillId));
+                        query = query.Where(x => x.VacancySkills.Any(s => s.SkillId == skill.SkillId && s.SeniorityId == skill.SeniorityId));
                     }
 
-                    return query.ToList().OrderDescending(new VacancySkillsComparer(searchParams.Skills));
+                    //return query.ToList().OrderDescending(new VacancySkillsComparer(searchParams.Skills));
                 }
 
                 return query.ToList();

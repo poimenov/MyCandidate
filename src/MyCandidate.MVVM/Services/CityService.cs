@@ -77,6 +77,11 @@ public class CityService : IDictionaryService<City>
         }
     }
 
+    public bool Any()
+    {
+        return _cities.Any();
+    }
+
     private bool CheckDuplicates(IEnumerable<City> items, out IEnumerable<string> names)
     {
         names = Enumerable.Empty<string>();

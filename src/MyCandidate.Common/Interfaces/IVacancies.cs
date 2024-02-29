@@ -2,6 +2,7 @@ namespace MyCandidate.Common.Interfaces
 {
     public interface IVacancies
     {
+        bool Exist(int id);
         Vacancy Get(int id);
         void Delete(int id);
         bool Create(Vacancy vacancy, out int id);

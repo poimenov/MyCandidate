@@ -9,4 +9,5 @@ public interface IDictionaryService<T>
     bool Create(IEnumerable<T> items, out string message);
     bool Update(IEnumerable<T> items, out string message);
     bool Delete(IEnumerable<int> itemIds, out string message);
+    bool Any();
 }

@@ -77,6 +77,11 @@ public class SkillService : IDictionaryService<Skill>
         }
     }
 
+    public bool Any()
+    {
+        return _skills.Any();
+    }
+
     private bool CheckDuplicates(IEnumerable<Skill> items, out IEnumerable<string> names)
     {
         names = Enumerable.Empty<string>();

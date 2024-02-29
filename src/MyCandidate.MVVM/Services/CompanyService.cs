@@ -117,4 +117,9 @@ public class CompanyService : IDictionaryService<Company>
             return false;
         }
     }
+
+    public bool Any()
+    {
+        return _companies.Any();
+    }
 }

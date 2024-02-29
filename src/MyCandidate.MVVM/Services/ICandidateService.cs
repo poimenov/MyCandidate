@@ -6,6 +6,7 @@ namespace MyCandidate.MVVM.Services;
 
 public interface ICandidateService
 {
+    bool Exist(int id);
     Candidate Get(int id);
     bool Create (Candidate item, out int id, out string message);
     bool Update (Candidate item, out string message);

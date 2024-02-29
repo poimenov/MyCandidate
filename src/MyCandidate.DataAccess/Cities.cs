@@ -97,4 +97,12 @@ public class Cities : IDataAccess<City>
             }
         }
     }
+
+    public bool Any()
+    {
+        using (var db = new Database())
+        {
+            return db.Cities.Any(x => x.Enabled == true);
+        }
+    }
 }

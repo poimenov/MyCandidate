@@ -92,4 +92,12 @@ public class Countries : IDataAccess<Country>
             }
         }
     }
+
+    public bool Any()
+    {
+        using (var db = new Database())
+        {
+            return db.Countries.Any(x => x.Enabled == true);
+        }
+    }
 }

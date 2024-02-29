@@ -94,4 +94,12 @@ public class Companies : IDataAccess<Company>
             }
         }
     }
+
+    public bool Any()
+    {
+        using (var db = new Database())
+        {
+            return db.Companies.Any(x => x.Enabled == true);
+        }
+    }
 }

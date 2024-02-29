@@ -19,6 +19,7 @@ public class CandidateService : ICandidateService
         _comments = comments;
         _log = log;
     }
+
     public bool Create(Candidate item, out int id, out string message)
     {
         message = string.Empty;
@@ -40,13 +41,13 @@ public class CandidateService : ICandidateService
         {
             message = ex.Message;
             _log.Error(ex);
-            if(ex.InnerException != null)
+            if (ex.InnerException != null)
             {
                 message = ex.InnerException.Message;
                 _log.Error(ex.InnerException);
-            }            
+            }
         }
-        
+
         return retVal;
     }
 
@@ -67,6 +68,11 @@ public class CandidateService : ICandidateService
         }
 
         return retVal;
+    }
+
+    public bool Exist(int id)
+    {
+        return _candidates.Exist(id);
     }
 
     public Candidate Get(int id)
@@ -98,7 +104,7 @@ public class CandidateService : ICandidateService
     {
         message = string.Empty;
         bool retVal = false;
-        
+
         try
         {
             _candidates.Update(item);

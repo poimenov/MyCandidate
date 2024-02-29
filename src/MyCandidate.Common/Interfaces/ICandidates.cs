@@ -2,6 +2,7 @@ namespace MyCandidate.Common.Interfaces
 {
     public interface ICandidates
     {
+        bool Exist(int id);
         bool Exist(string lastName, string firstName, DateTime birthdate);
         Candidate Get(int id);
         void Delete(int id);

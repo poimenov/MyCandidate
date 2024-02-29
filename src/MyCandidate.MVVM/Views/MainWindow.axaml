@@ -35,27 +35,27 @@
                 </MenuItem>
             </MenuItem>
             <Separator />
-            <MenuItem Header="{ll:Localize Exit}" Command="{Binding FileExit}" />
+            <MenuItem Header="{ll:Localize Exit}" Command="{Binding FileExitCmd}" />
         </MenuItem>
         <MenuItem Header="{ll:Localize Vacancies}">
-            <MenuItem Header="{ll:Localize Create}" Command="{Binding OpenCreateVacancy}">
+            <MenuItem Header="{ll:Localize Create}" Command="{Binding OpenCreateVacancyCmd}">
                 <MenuItem.Icon>
                     <Image Source="{SvgImage /Assets/feedback-svgrepo-com.svg}"/>
                 </MenuItem.Icon>            
             </MenuItem>
-            <MenuItem Header="{ll:Localize Search}" Command="{Binding OpenSearchVacancy}">
+            <MenuItem Header="{ll:Localize Search}" Command="{Binding OpenSearchVacancyCmd}">
                 <MenuItem.Icon>
                     <Image Source="{SvgImage /Assets/search-svgrepo-com.svg}"/>
                 </MenuItem.Icon>             
             </MenuItem>             
         </MenuItem>
         <MenuItem Header="{ll:Localize Candidates}">
-            <MenuItem Header="{ll:Localize Create}" Command="{Binding OpenCreateCandidate}">
+            <MenuItem Header="{ll:Localize Create}" Command="{Binding OpenCreateCandidateCmd}">
                 <MenuItem.Icon>
                     <Image Source="{SvgImage /Assets/businessman-svgrepo-com.svg}"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Header="{ll:Localize Search}" Command="{Binding OpenSearchCandidate}">
+            <MenuItem Header="{ll:Localize Search}" Command="{Binding OpenSearchCandidateCmd}">
                 <MenuItem.Icon>
                     <Image Source="{SvgImage /Assets/search-svgrepo-com.svg}"/>
                 </MenuItem.Icon>             
@@ -63,21 +63,21 @@
         </MenuItem>        
         <MenuItem Header="{ll:Localize Dictionary}">
             <MenuItem Header="{ll:Localize Address}">            
-                <MenuItem Header="{ll:Localize Countries}" Command="{Binding OpenCountries}">               
+                <MenuItem Header="{ll:Localize Countries}" Command="{Binding OpenCountriesCmd}">               
                 </MenuItem>
-                <MenuItem Header="{ll:Localize Cities}" Command="{Binding OpenCities}">              
+                <MenuItem Header="{ll:Localize Cities}" Command="{Binding OpenCitiesCmd}">              
                 </MenuItem>                
             </MenuItem>
             <MenuItem Header="{ll:Localize Companies}">            
-                <MenuItem Header="{ll:Localize Companies}" Command="{Binding OpenCompanies}">               
+                <MenuItem Header="{ll:Localize Companies}" Command="{Binding OpenCompaniesCmd}">               
                 </MenuItem>
-                <MenuItem Header="{ll:Localize Officies}" Command="{Binding OpenOfficies}">              
+                <MenuItem Header="{ll:Localize Officies}" Command="{Binding OpenOfficiesCmd}">              
                 </MenuItem>                
             </MenuItem>             
             <MenuItem Header="{ll:Localize Skills}">            
-                <MenuItem Header="{ll:Localize Categories}" Command="{Binding OpenSkillCategories}">               
+                <MenuItem Header="{ll:Localize Categories}" Command="{Binding OpenSkillCategoriesCmd}">               
                 </MenuItem>
-                <MenuItem Header="{ll:Localize Skills}" Command="{Binding OpenSkills}">              
+                <MenuItem Header="{ll:Localize Skills}" Command="{Binding OpenSkillsCmd}">              
                 </MenuItem>                
             </MenuItem>            
         </MenuItem>
@@ -95,7 +95,7 @@
         </MenuItem>
         <MenuItem Header="{ll:Localize Help}">
 
-            <MenuItem Header="{ll:Localize About}" />
+            <MenuItem Header="{ll:Localize About}" Command="{Binding AboutCmd}" />
         </MenuItem>
     </Menu>
     <DockControl Layout="{Binding Layout}" Margin="4" Grid.Row="1" />

@@ -35,6 +35,7 @@ public interface IAppServiceProvider
     CandidateSearchViewModel GetCandidateSearchViewModel();
     CandidateSearchViewModel GetCandidateSearchViewModel(VacancyViewModel vacancyViewModel);    
     void OpenDock(IDockable dockable);
+    void OpenSingleDock(IDockable dockable);
     void CloseDock(IDockable dockable);
     IDocumentDock? Documents { get; }
     IProperties? Properties { get; } 

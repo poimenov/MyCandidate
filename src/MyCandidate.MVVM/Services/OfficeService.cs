@@ -70,6 +70,11 @@ public class OfficeService : IDictionaryService<Office>
         }
     }
 
+    public bool Any()
+    {
+        return _officies.Any();
+    }
+
     private bool CheckDuplicates(IEnumerable<Office> items, out IEnumerable<string> names)
     {
         names = Enumerable.Empty<string>();

@@ -36,10 +36,11 @@ public class Officies : IDataAccess<Office>
             {
                 foreach (var item in items)
                 {
-                    if (!db.Offices.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
+                    if (!db.Offices.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower() && x.CompanyId == item.CompanyId))
                     {
                         item.Company = null;
                         item.Location.City = null;
+                        item.Location.Address = item.Location.Address ?? string.Empty;
                         db.Offices.Add(item);
                     }
                 }
@@ -110,6 +111,14 @@ public class Officies : IDataAccess<Office>
                 db.SaveChanges();
                 transaction.Commit();
             }
+        }
+    }
+
+    public bool Any()
+    {
+        using (var db = new Database())
+        {
+            return db.Offices.Any(x => x.Enabled == true);
         }
     }
 }

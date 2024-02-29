@@ -61,7 +61,7 @@ public class CandidateViewModel : Document
                 Location = new Location
                 {
                     Enabled = true,
-                    CityId = defaultCity.CountryId,
+                    CityId = defaultCity.Id,
                     City = defaultCity
                 },
                 CandidateResources = new List<CandidateResource>(),

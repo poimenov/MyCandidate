@@ -69,6 +69,11 @@ public class VacancyService : IVacancyService
         return retVal;
     }
 
+
+    public bool Exist(int id)
+    {
+        return _vacancies.Exist(id);
+    }
     public Vacancy Get(int id)
     {
         return _vacancies.Get(id);

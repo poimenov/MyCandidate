@@ -6,6 +6,7 @@ namespace MyCandidate.MVVM.Services;
 
 public interface IVacancyService
 {
+    bool Exist(int id);
     Vacancy Get(int id);
     bool Delete(int id, out string message);
     bool Create (Vacancy item, out int id, out string message);
