@@ -28,9 +28,12 @@ namespace MyCandidate.Common
         [DisplayName("LastName")]
         public string LastName { get; set; }
 
-        [Required]
+        [StringLength(250, MinimumLength = 2)]
+        [DisplayName("Title")]
+        public string? Title { get; set; }        
+
         [DisplayName("BirthDate")]
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
 
         [ForeignKey(nameof(LocationId))]
         [Browsable(false)]

@@ -13,7 +13,7 @@ public class BirthDateAttribute : ValidationAttribute
 
     public BirthDateAttribute()
     {
-        _required = true;
+        _required = false;
     }
 
     public BirthDateAttribute(bool required)

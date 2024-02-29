@@ -3,7 +3,7 @@ namespace MyCandidate.Common.Interfaces
     public interface ICandidates
     {
         bool Exist(int id);
-        bool Exist(string lastName, string firstName, DateTime birthdate);
+        bool Exist(string lastName, string firstName, DateTime? birthdate);
         Candidate Get(int id);
         void Delete(int id);
         bool Create(Candidate candidate, out int id);
@@ -32,6 +32,7 @@ namespace MyCandidate.Common.Interfaces
 
         public string LastName {get;set;}
         public string FirstName {get;set;}
+        public string Title {get;set;}
         public IEnumerable<SkillValue> Skills {get;set;}
         public int? CountryId {get;set;}
         public int? CityId {get;set;}     

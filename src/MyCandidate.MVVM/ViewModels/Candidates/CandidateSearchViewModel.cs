@@ -113,6 +113,7 @@ public class CandidateSearchViewModel : Document
         Skills.WhenAnyValue(x => x.IsValid).Subscribe(x => { this.RaisePropertyChanged(nameof(IsValid)); });
         this.WhenAnyValue(x => x.FirstName).Subscribe(x => { CandidateSearch.FirstName = x; });
         this.WhenAnyValue(x => x.LastName).Subscribe(x => { CandidateSearch.LastName = x; });
+        this.WhenAnyValue(x => x.CandidateTitle).Subscribe(x => { CandidateSearch.Title = x; });
         this.WhenAnyValue(x => x.Enabled).Subscribe(x => { CandidateSearch.Enabled = x; });
 
         this.WhenAnyValue(x => x.SelectedItem).Subscribe(
@@ -303,9 +304,19 @@ public class CandidateSearchViewModel : Document
     }
     #endregion    
 
+    #region CandidateTitle
+    private string _candidateTitle;
+    [StringLength(250)]
+    public string CandidateTitle
+    {
+        get => _candidateTitle;
+        set => this.RaiseAndSetIfChanged(ref _candidateTitle, value);
+    }
+    #endregion     
+
     #region Enabled
-    private bool _enabled;
-    public bool Enabled
+    private bool? _enabled;
+    public bool? Enabled
     {
         get => _enabled;
         set => this.RaiseAndSetIfChanged(ref _enabled, value);

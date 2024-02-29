@@ -19,7 +19,7 @@ namespace MyCandidate.DataAccess
             }
         }
 
-        public bool Exist(string lastName, string firstName, DateTime birthdate)
+        public bool Exist(string lastName, string firstName, DateTime? birthdate)
         {
             using (var db = new Database())
             {
@@ -100,6 +100,7 @@ namespace MyCandidate.DataAccess
                         {
                             LastName = candidate.LastName,
                             FirstName = candidate.FirstName,
+                            Title = candidate.Title,
                             BirthDate = candidate.BirthDate,
                             LocationId = newLocation.Id,
                             CreationDate = DateTime.Now,
@@ -160,6 +161,7 @@ namespace MyCandidate.DataAccess
                             entity.LastModificationDate = dateTime;
                             entity.FirstName = candidate.FirstName;
                             entity.LastName = candidate.LastName;
+                            entity.Title = candidate.Title;
                             entity.BirthDate = candidate.BirthDate;
                             entity.Enabled = candidate.Enabled;
 
@@ -238,6 +240,11 @@ namespace MyCandidate.DataAccess
                 {
                     query = query.Where(x => x.FirstName.ToLower().StartsWith(searchParams.FirstName.ToLower()));
                 }
+
+                if (!string.IsNullOrWhiteSpace(searchParams.Title))
+                {
+                    query = query.Where(x => x.Title!.ToLower().Contains(searchParams.Title.ToLower()));
+                }                
 
                 if (searchParams.CityId.HasValue)
                 {

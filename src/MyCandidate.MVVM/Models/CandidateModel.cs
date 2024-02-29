@@ -34,9 +34,13 @@ public class CandidateModel : ReactiveObject, ISkillValueList
     [Category("Main")]
     public string Name => _candidate.Name;
 
+    [DisplayName("Title")]
+    [Category("Main")]
+    public string Title => _candidate.Title;    
+
     [DisplayName("Date_Birth")]
     [Category("Main")]
-    public string BirthDate => _candidate.BirthDate.ToLongDateString();
+    public string BirthDate => _candidate.BirthDate?.ToLongDateString();
 
     [DisplayName("Address")]
     [Category("Main")]

@@ -85,6 +85,7 @@ public class CandidateViewModel : Document
 
         FirstName = _candidate.FirstName;
         LastName = _candidate.LastName;
+        CandidateTitle = _candidate.Title;
         Enabled = _candidate.Enabled;
         Location = new LocationViewModel(_provider.CountryService.ItemsList.Where(x => x.Enabled == true), _provider.CityService.ItemsList.Where(x => x.Enabled == true))
         {
@@ -271,20 +272,30 @@ public class CandidateViewModel : Document
     }
     #endregion
 
+    #region CandidateTitle
+    private string? _candidateTitle;
+    [StringLength(250, MinimumLength = 2)]
+    public string? CandidateTitle
+    {
+        get => _candidateTitle;
+        set
+        {
+            _candidate.Title = value;
+            this.RaiseAndSetIfChanged(ref _candidateTitle, value);
+        }
+    }
+    #endregion    
+
     #region BirthDate
     private DateTime? _birthDate;
 
-    [Required]
     [BirthDate]
     public DateTime? BirthDate
     {
         get => _birthDate;
         set
         {
-            if (value.HasValue)
-            {
-                _candidate.BirthDate = value!.Value;
-            }
+            _candidate.BirthDate = value;
             this.RaiseAndSetIfChanged(ref _birthDate, value);
             this.RaisePropertyChanged(nameof(this.Age));
             this.RaisePropertyChanged(nameof(IsValid));

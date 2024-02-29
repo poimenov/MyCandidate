@@ -71,6 +71,7 @@ namespace TestData
             .RuleFor(x => x.LastName, f => f.Person.LastName)
             .RuleFor(x => x.FirstName, f => f.Person.FirstName)
             .RuleFor(x => x.BirthDate, f => f.Person.DateOfBirth)
+            .RuleFor(x => x.Title, f => f.Name.ItJobTitle())
             .RuleFor(x => x.Enabled, f => true)
             .RuleFor(x => x.CreationDate, f => f.Date.Between(DateTime.Today.AddMinutes(-40), DateTime.Today.AddMinutes(-30)))
             .RuleFor(x => x.LastModificationDate, f => f.Date.Between(DateTime.Today.AddMinutes(-20), DateTime.Today.AddMinutes(-10)))

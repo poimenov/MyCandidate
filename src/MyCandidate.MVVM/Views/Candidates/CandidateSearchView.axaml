@@ -25,17 +25,18 @@
     <Grid RowDefinitions="Auto, *, Auto">
 
         <Grid Grid.Row="0" ColumnDefinitions="520,*">
-            <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="115,170,85,150">
+            <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="90,170,110,150">
                 <Label Grid.Column="0" Grid.Row="0" Content="{ll:Localize Last_Name}" Margin="4,15,4,4" VerticalContentAlignment="Center"/> 
                 <Label Grid.Column="0" Grid.Row="1" Content="{ll:Localize First_Name}" Margin="4" VerticalContentAlignment="Center"/> 
-                <Label Grid.Column="0" Grid.Row="2" Content="{ll:Localize Enabled}" Margin="4" VerticalContentAlignment="Center"/> 
+                <Label Grid.Column="0" Grid.Row="2" Content="{ll:Localize Title}" Margin="4" VerticalContentAlignment="Center"/>
 
                 <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding LastName}" HorizontalAlignment="Stretch" Margin="4,15,4,4"/>
                 <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding FirstName}" HorizontalAlignment="Stretch" Margin="4"/>
-                <CheckBox Grid.Column="1" Grid.Row="2" IsChecked="{Binding Enabled}" IsThreeState="True" Margin="4" />
+                <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding CandidateTitle}" HorizontalAlignment="Stretch" Margin="4"/>
 
                 <Label Grid.Column="2" Grid.Row="0" Content="{ll:Localize Country}" Margin="4,15,4,4" VerticalContentAlignment="Center"/> 
                 <Label Grid.Column="2" Grid.Row="1" Content="{ll:Localize City}" Margin="4" VerticalContentAlignment="Center"/>
+                <Label Grid.Column="2" Grid.Row="2" Content="{ll:Localize Enabled}" Margin="4" VerticalContentAlignment="Center"/> 
 
                 <ComboBox Grid.Column="3" Grid.Row="0" 
                         ItemsSource="{Binding Countries}" 
@@ -47,7 +48,8 @@
                         ItemsSource="{Binding Cities}" 
                         ItemTemplate="{DynamicResource CityTemplate}"
                         SelectedItem="{Binding City}" 
-                        HorizontalAlignment="Stretch" Margin="4"></ComboBox>                                                                               
+                        HorizontalAlignment="Stretch" Margin="4"></ComboBox>  
+                <CheckBox Grid.Column="3" Grid.Row="2" IsChecked="{Binding Enabled}" IsThreeState="True" Margin="4" />                                                                             
             </Grid> 
 
             <StackPanel Grid.Column="1">
@@ -82,9 +84,9 @@
 
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="{ll:Localize Last_Name}" Binding="{Binding LastName}" Width="200"/>
-                    <DataGridTextColumn Header="{ll:Localize First_Name}" Binding="{Binding FirstName}" Width="200"/>              
-                    <DataGridTextColumn Header="{ll:Localize Country_Name}" Binding="{Binding CountryName}" Width="200"/>
-                    <DataGridTextColumn Header="{ll:Localize City_Name}" Binding="{Binding CityName}" Width="200"/>
+                    <DataGridTextColumn Header="{ll:Localize First_Name}" Binding="{Binding FirstName}" Width="150"/>              
+                    <DataGridTextColumn Header="{ll:Localize Title}" Binding="{Binding Title}" Width="200"/>
+                    <DataGridTextColumn Header="{ll:Localize Address}" Binding="{Binding Address}" Width="300"/>
                     <DataGridCheckBoxColumn Header="{ll:Localize Enabled}" Binding="{Binding Enabled}" Width="120" />
                 </DataGrid.Columns>  
                 
