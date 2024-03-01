@@ -108,6 +108,7 @@ public class CandidateSearchViewModel : Document
         }
 
         Enabled = true;
+        SearchStrictBySeniority = true;
         Pager = new PagerViewModel();
         Source = new ObservableCollectionExtended<CandidateModel>();
         Skills.WhenAnyValue(x => x.IsValid).Subscribe(x => { this.RaisePropertyChanged(nameof(IsValid)); });
@@ -115,6 +116,7 @@ public class CandidateSearchViewModel : Document
         this.WhenAnyValue(x => x.LastName).Subscribe(x => { CandidateSearch.LastName = x; });
         this.WhenAnyValue(x => x.CandidateTitle).Subscribe(x => { CandidateSearch.Title = x; });
         this.WhenAnyValue(x => x.Enabled).Subscribe(x => { CandidateSearch.Enabled = x; });
+        this.WhenAnyValue(x => x.SearchStrictBySeniority).Subscribe(x => { CandidateSearch.SearchStrictBySeniority = x; });
 
         this.WhenAnyValue(x => x.SelectedItem).Subscribe(
             x =>
@@ -365,11 +367,20 @@ public class CandidateSearchViewModel : Document
     #endregion
 
     #region Skills
-    private SkillsViewModel _Skills;
+    private SkillsViewModel _skills;
     public SkillsViewModel Skills
     {
-        get => _Skills;
-        set => this.RaiseAndSetIfChanged(ref _Skills, value);
+        get => _skills;
+        set => this.RaiseAndSetIfChanged(ref _skills, value);
+    }
+    #endregion
+
+    #region SearchStrictBySeniority
+    private bool _searchStrictBySeniority;
+    public bool SearchStrictBySeniority
+    {
+        get => _searchStrictBySeniority;
+        set => this.RaiseAndSetIfChanged(ref _searchStrictBySeniority, value);
     }
     #endregion
 }

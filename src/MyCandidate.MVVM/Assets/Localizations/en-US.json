@@ -44,6 +44,7 @@
     "SkillCategories": "Skill categories",
     "SkillCategory": "Skill category",
     "Resource": "Info",
+    "SearchStrictBySeniority": "Search strictly based on skill level",
 
     //Dialog messages
     "Save_Text": "Are you sure you want to save the changes?",

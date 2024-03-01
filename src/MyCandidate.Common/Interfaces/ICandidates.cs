@@ -17,6 +17,7 @@ namespace MyCandidate.Common.Interfaces
         public CandidateSearch()
         {
             Skills = new List<SkillValue>();
+            SearchStrictBySeniority = true;
         }
 
         public CandidateSearch(List<VacancySkill> vacancySkills)
@@ -28,12 +29,14 @@ namespace MyCandidate.Common.Interfaces
             }
             
             Skills = skillsList;
+            SearchStrictBySeniority = true;
         }
 
         public string LastName {get;set;}
         public string FirstName {get;set;}
         public string Title {get;set;}
         public IEnumerable<SkillValue> Skills {get;set;}
+        public bool SearchStrictBySeniority {get;set;}
         public int? CountryId {get;set;}
         public int? CityId {get;set;}     
         public bool? Enabled {get;set;}    

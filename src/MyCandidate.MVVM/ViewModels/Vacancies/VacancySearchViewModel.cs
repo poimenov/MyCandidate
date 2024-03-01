@@ -106,6 +106,7 @@ public class VacancySearchViewModel : Document
         }
 
         Enabled = true;
+        SearchStrictBySeniority = true;
         VacancyStatus = VacancyStatuses.First();
         Pager = new PagerViewModel();
         Source = new ObservableCollectionExtended<VacancyModel>();
@@ -113,6 +114,7 @@ public class VacancySearchViewModel : Document
         this.WhenAnyValue(x => x.Name).Subscribe(x => { VacancySearch.Name = x; });
         this.WhenAnyValue(x => x.VacancyStatus).Subscribe(x => { VacancySearch.VacancyStatusId = (VacancyStatus.Id == 0) ? null : VacancyStatus.Id; });
         this.WhenAnyValue(x => x.Enabled).Subscribe(x => { VacancySearch.Enabled = x; });
+        this.WhenAnyValue(x => x.SearchStrictBySeniority).Subscribe(x => { VacancySearch.SearchStrictBySeniority = x; });
 
         this.WhenAnyValue(x => x.SelectedItem).Subscribe(
             x =>
@@ -372,4 +374,13 @@ public class VacancySearchViewModel : Document
         set => this.RaiseAndSetIfChanged(ref _Skills, value);
     }
     #endregion  
+
+    #region SearchStrictBySeniority
+    private bool _searchStrictBySeniority;
+    public bool SearchStrictBySeniority
+    {
+        get => _searchStrictBySeniority;
+        set => this.RaiseAndSetIfChanged(ref _searchStrictBySeniority, value);
+    }
+    #endregion
 }

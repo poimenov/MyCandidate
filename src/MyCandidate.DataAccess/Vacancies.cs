@@ -179,13 +179,22 @@ namespace MyCandidate.DataAccess
                 {
                     foreach (var skill in searchParams.Skills)
                     {
-                        //query = query.Where(x => x.VacancySkills.Any(s => s.SkillId == skill.SkillId));
-                        query = query.Where(x => x.VacancySkills.Any(s => s.SkillId == skill.SkillId && s.SeniorityId == skill.SeniorityId));
+                        if(searchParams.SearchStrictBySeniority)
+                        {
+                            query = query.Where(x => x.VacancySkills.Any(s => s.SkillId == skill.SkillId && s.SeniorityId == skill.SeniorityId));
+                        }
+                        else
+                        {
+                            query = query.Where(x => x.VacancySkills.Any(s => s.SkillId == skill.SkillId));
+                        }
                     }
 
-                    //return query.ToList().OrderDescending(new VacancySkillsComparer(searchParams.Skills));
+                    if(!searchParams.SearchStrictBySeniority)
+                    {
+                        return query.ToList().OrderDescending(new VacancySkillsComparer(searchParams.Skills));
+                    }
                 }
-
+            
                 return query.ToList();
             }
         }

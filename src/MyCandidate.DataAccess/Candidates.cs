@@ -259,11 +259,20 @@ namespace MyCandidate.DataAccess
                 {
                     foreach (var skill in searchParams.Skills)
                     {
-                        //query = query.Where(x => x.CandidateSkills.Any(s => s.SkillId == skill.SkillId));
-                        query = query.Where(x => x.CandidateSkills.Any(s => s.SkillId == skill.SkillId && s.SeniorityId == skill.SeniorityId));
+                        if(searchParams.SearchStrictBySeniority)
+                        {
+                            query = query.Where(x => x.CandidateSkills.Any(s => s.SkillId == skill.SkillId && s.SeniorityId == skill.SeniorityId));                            
+                        }
+                        else
+                        {
+                            query = query.Where(x => x.CandidateSkills.Any(s => s.SkillId == skill.SkillId));
+                        }                        
                     }
 
-                    //return query.ToList().OrderDescending(new CandidateSkillsComparer(searchParams.Skills));
+                    if(!searchParams.SearchStrictBySeniority)
+                    {
+                        return query.ToList().OrderDescending(new CandidateSkillsComparer(searchParams.Skills));
+                    }
                 }
 
                 return query.ToList();

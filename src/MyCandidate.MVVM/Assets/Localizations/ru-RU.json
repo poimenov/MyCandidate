@@ -89,6 +89,7 @@
     "Comments": "Комментарии",
     "Comment": "Комментарий",
     "Title": "Должность",
+    "SearchStrictBySeniority": "Поиск строго с учётом уровня навыков",
 
     //Dialog messages
     "Save_Text": "Сохранить изменения?",
