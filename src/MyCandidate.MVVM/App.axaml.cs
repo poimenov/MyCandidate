@@ -70,7 +70,7 @@ public partial class App : Application
                     DataContext = service.GetRequiredService<MainWindowViewModel>()
                 })
                 //data access 
-                .AddTransient<IDatabaseCreator, DatabaseCreator>()           
+                .AddTransient<IDatabaseMigrator, DatabaseMigrator>()           
                 .AddTransient<IDataAccess<Country>, Countries>()
                 .AddTransient<IDataAccess<City>, Cities>()
                 .AddTransient<IDataAccess<Skill>, Skills>()
@@ -107,7 +107,7 @@ public partial class App : Application
 
             try
             {
-                GetRequiredService<IDatabaseCreator>().CreateDatabase();
+                GetRequiredService<IDatabaseMigrator>().MigrateDatabase();
                 // set and show
                 desktop.MainWindow = GetRequiredService<MainWindow>();
                 desktop.ShutdownRequested += OnShutdownRequested;

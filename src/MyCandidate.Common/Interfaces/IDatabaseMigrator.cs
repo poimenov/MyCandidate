@@ -1,14 +1,14 @@
 namespace MyCandidate.Common.Interfaces
 {
-    public interface IDatabaseCreator
+    public interface IDatabaseMigrator
     {
-        void CreateDatabase();
-        event EventHandler<DatabaseCreateEventArgs> DatabaseCreate;
+        void MigrateDatabase();
+        event EventHandler<DatabaseMigrateEventArgs> DatabaseMigrate;
     }
 
-    public class DatabaseCreateEventArgs : EventArgs
+    public class DatabaseMigrateEventArgs : EventArgs
     {
-        public DatabaseCreateEventArgs()
+        public DatabaseMigrateEventArgs()
         {
             Countries = new List<Country>();
             SkillCategories = new List<SkillCategory>();

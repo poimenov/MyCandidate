@@ -6,11 +6,11 @@ using TestData;
 
 AppDomain.CurrentDomain.SetData("DataDirectory", AppSettings.AppDataPath);
 
-var dbCreator = new DatabaseCreator(null);
-dbCreator.DatabaseCreate += OnDatabaseCreate;
-dbCreator.CreateDatabase();
+var dbMigrator = new DatabaseMigrator(null);
+dbMigrator.DatabaseMigrate += OnDatabaseMigrate;
+dbMigrator.MigrateDatabase();
 
-void OnDatabaseCreate(object? sender, DatabaseCreateEventArgs e)
+void OnDatabaseMigrate(object? sender, DatabaseMigrateEventArgs e)
 {
     var countryCount = 5;
     var cityCount = 5;

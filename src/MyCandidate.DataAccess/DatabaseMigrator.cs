@@ -6,18 +6,18 @@ using MyCandidate.DataAccess.Migrations;
 
 namespace MyCandidate.DataAccess
 {
-    public class DatabaseCreator : IDatabaseCreator
+    public class DatabaseMigrator : IDatabaseMigrator
     {
-        private readonly ILogger<DatabaseCreator> _logger;
+        private readonly ILogger<DatabaseMigrator> _logger;
         private Database _database;
-        public DatabaseCreator(ILogger<DatabaseCreator> logger)
+        public DatabaseMigrator(ILogger<DatabaseMigrator> logger)
         {
             _logger = logger;
         }
 
-        public event EventHandler<DatabaseCreateEventArgs> DatabaseCreate;
+        public event EventHandler<DatabaseMigrateEventArgs> DatabaseMigrate;
 
-        public void CreateDatabase()
+        public void MigrateDatabase()
         {
             var path = Path.Combine(AppSettings.AppDataPath, Database.DB_FILE_NAME);
             if (!File.Exists(path))
@@ -27,7 +27,7 @@ namespace MyCandidate.DataAccess
                     _database.Database.Migrate();
                     var dictionaryCreator = new DictionaryCreator(_database);
                     dictionaryCreator.Create();
-                    OnDatabaseCreate(new DatabaseCreateEventArgs());
+                    OnDatabaseCreate(new DatabaseMigrateEventArgs());
                 }
 
                 if (_logger != null)
@@ -37,9 +37,9 @@ namespace MyCandidate.DataAccess
             }
         }
 
-        protected virtual void OnDatabaseCreate(DatabaseCreateEventArgs e)
+        protected virtual void OnDatabaseCreate(DatabaseMigrateEventArgs e)
         {
-            EventHandler<DatabaseCreateEventArgs> handler = DatabaseCreate;
+            EventHandler<DatabaseMigrateEventArgs> handler = DatabaseMigrate;
             if (handler != null)
             {
                 handler(this, e);
