@@ -100,7 +100,7 @@ public static class DataTemplateProvider
             path = $"\"{path}\"";
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Process.Start(new ProcessStartInfo("cmd", $"/c start {path}"));
+                Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = path });
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
