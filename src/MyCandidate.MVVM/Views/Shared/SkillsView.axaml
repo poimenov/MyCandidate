@@ -32,7 +32,7 @@
             </ListBox.ItemsPanel>                    
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="m:SkillModel">                            
-                    <Border BorderBrush="{StaticResource DataGridBorderBrush}"
+                    <Border BorderBrush="{DynamicResource SystemBaseLowColor}"
                             BorderThickness="1" CornerRadius="3"> 
                         <StackPanel Orientation="Horizontal">                           
                             <TextBlock Text="{Binding Skill.Name}" ToolTip.Tip="{Binding Seniority.Name}" />

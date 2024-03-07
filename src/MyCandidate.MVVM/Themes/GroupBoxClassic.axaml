@@ -35,7 +35,7 @@
 							Margin="0,10,0,0"
 							Padding="5,10,5,5"
 							CornerRadius="3"
-							BorderBrush="{TemplateBinding Foreground}"
+							BorderBrush="{DynamicResource SystemBaseLowColor}"
 							BorderThickness="1">
                             <Border.Clip>
                                 <MultiBinding Converter="{StaticResource rectConv}">

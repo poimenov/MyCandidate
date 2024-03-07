@@ -1,0 +1,155 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table Candidates {
+  Id int [primary key]
+  FirstName varchar
+  LastName varchar 
+  BirthDate datetime
+  Enabled bool
+  LocationId int
+  CreationDate datetime
+  LastModificationDate datetime
+}
+
+Table CandidateOnVacancies {
+  Id int [primary key]
+  CandidateId int
+  VacancyId varchar
+  SelectionStatusId int
+  CreationDate datetime
+  LastModificationDate datetime
+}
+
+Table Comments{
+  Id int [primary key]
+  CandidateOnVacancyId int
+  Value varchar
+  CreationDate datetime
+  LastModificationDate datetime  
+}
+
+Table SelectionStatuses{
+  Id int [primary key]
+  Name varchar
+  Enabled bool
+}
+
+Table Vacancies {
+  Id int [primary key]
+  Name varchar
+  Description varchar
+  Enabled bool
+  OfficeId int
+  VacancyStatusId int
+  CreationDate datetime
+  LastModificationDate datetime
+}
+
+Table VacancyStatuses{
+  Id int [primary key]
+  Name varchar
+  Enabled bool  
+}
+
+Table Companies{
+  Id int [primary key]
+  Name varchar
+  Enabled bool
+}
+
+Table Offices{
+  Id int [primary key]
+  CompanyId int
+  LocationId int
+  Name varchar
+  Enabled bool
+}
+
+Table Locations{
+  Id int [primary key]
+  CityId int
+  Enabled bool
+  Address varchar
+}
+
+Table Cities{
+  Id int [primary key]
+  CountryId int
+  Name varchar
+  Enabled bool  
+}
+
+Table Countries{
+  Id int [primary key]
+  Name varchar
+  Enabled bool  
+}
+
+Table CandidateResources{
+  Id int [primary key]
+  Value varchar
+  CandidateId int
+  ResourceTypeId int
+}
+
+Table VacancyResources{
+  Id int [primary key]
+  Value varchar
+  VacancyId int
+  ResourceTypeId int
+}
+
+Table ResourceTypes{
+  Id int [primary key]
+  Name varchar
+  Enabled bool   
+}
+
+Table SkillCategories{
+  Id int [primary key]
+  Name varchar
+  Enabled bool  
+}
+
+Table Skills{
+  Id int [primary key]
+  SkillCategoryId int
+  Name varchar
+  Enabled bool   
+}
+
+Table CandidateSkills{
+  Id int [primary key]
+  CandidateId int
+  SkillId int
+}
+
+Table VacancySkills{
+  Id int [primary key]
+  VacancyId int
+  SkillId int
+}
+
+Ref: CandidateOnVacancies.CandidateId > Candidates.Id 
+Ref: CandidateOnVacancies.VacancyId > Vacancies.Id
+Ref: CandidateOnVacancies.SelectionStatusId > SelectionStatuses.Id
+Ref: Comments.CandidateOnVacancyId > CandidateOnVacancies.Id
+Ref: Vacancies.VacancyStatusId > VacancyStatuses.Id
+Ref: Offices.CompanyId > Companies.Id
+Ref: Vacancies.OfficeId > Offices.Id
+Ref: Candidates.LocationId > Locations.Id
+Ref: Offices.LocationId > Locations.Id
+Ref: Locations.CityId > Cities.Id
+Ref: Cities.CountryId > Countries.Id
+Ref: VacancyResources.ResourceTypeId > ResourceTypes.Id
+Ref: CandidateResources.ResourceTypeId > ResourceTypes.Id
+Ref: VacancyResources.VacancyId > Vacancies.Id
+Ref: CandidateResources.CandidateId > Candidates.Id
+Ref: Skills.SkillCategoryId > SkillCategories.Id
+Ref: CandidateSkills.SkillId > Skills.Id
+Ref: VacancySkills.SkillId > Skills.Id
+Ref: CandidateSkills.CandidateId > Candidates.Id
+Ref: VacancySkills.VacancyId > Vacancies.Id
+
+

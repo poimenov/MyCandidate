@@ -14,7 +14,6 @@
     <Grid RowDefinitions="*, Auto">             
         <DataGrid Grid.Row="0" 
                 BorderThickness="1" 
-                BorderBrush="{StaticResource DataGridBorderBrush}"
                 GridLinesVisibility="All"  
                 Margin="4,0,4,0"        
                 Padding="4" 
