@@ -9,10 +9,10 @@ using Avalonia.PropertyGrid.Services;
 using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
 using DynamicData.Binding;
-using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
+using MyCandidate.MVVM.Extensions;
 using MyCandidate.MVVM.Models;
 using MyCandidate.MVVM.Services;
 using MyCandidate.MVVM.ViewModels.Shared;
@@ -142,9 +142,9 @@ public class VacancyViewModel : Document
         return ReactiveCommand.Create(
             async () =>
                 {
-                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
-                                                                            LocalizationService.Default["Save_Text"],
-                                                                            ButtonEnum.YesNo, Icon.Question);
+                    var dialog = this.GetMessageBox(LocalizationService.Default["Save"],
+                                                        LocalizationService.Default["Save_Text"],
+                                                        ButtonEnum.YesNo, Icon.Question);
                     var result = await dialog.ShowAsync();
                     if (result == ButtonResult.No)
                     {
@@ -175,8 +175,8 @@ public class VacancyViewModel : Document
                     }
                     else
                     {
-                        dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
-                                                                            message, ButtonEnum.Ok, Icon.Error);
+                        dialog = this.GetMessageBox(LocalizationService.Default["Save"],
+                                                        message, ButtonEnum.Ok, Icon.Error);
                         await dialog.ShowAsync();
                     }
 
@@ -191,9 +191,9 @@ public class VacancyViewModel : Document
         return ReactiveCommand.Create(
             async () =>
                 {
-                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Cancel"],
-                                                                            LocalizationService.Default["Cancel_Text"],
-                                                                            ButtonEnum.YesNo, Icon.Question);
+                    var dialog = this.GetMessageBox(LocalizationService.Default["Cancel"],
+                                                        LocalizationService.Default["Cancel_Text"],
+                                                        ButtonEnum.YesNo, Icon.Question);
                     var result = await dialog.ShowAsync();
                     if (result == ButtonResult.No)
                     {
@@ -223,9 +223,9 @@ public class VacancyViewModel : Document
         return ReactiveCommand.Create(
             async () =>
                 {
-                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
-                                                                            LocalizationService.Default["DeleteVacancy_Text"],
-                                                                            ButtonEnum.YesNo, Icon.Question);
+                    var dialog = this.GetMessageBox(LocalizationService.Default["Delete"],
+                                                        LocalizationService.Default["DeleteVacancy_Text"],
+                                                        ButtonEnum.YesNo, Icon.Question);
                     var result = await dialog.ShowAsync();
                     if (result == ButtonResult.No)
                     {
@@ -239,8 +239,8 @@ public class VacancyViewModel : Document
                     }
                     else
                     {
-                        dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
-                                                                            message, ButtonEnum.Ok, Icon.Error);
+                        dialog = this.GetMessageBox(LocalizationService.Default["Delete"],
+                                                        message, ButtonEnum.Ok, Icon.Error);
                         await dialog.ShowAsync();
                     }
 

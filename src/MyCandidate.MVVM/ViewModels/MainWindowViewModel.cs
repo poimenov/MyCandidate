@@ -9,6 +9,7 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using MyCandidate.Common;
+using MyCandidate.MVVM.Extensions;
 using MyCandidate.MVVM.Localizations;
 using MyCandidate.MVVM.Services;
 using ReactiveUI;
@@ -167,7 +168,7 @@ public class MainWindowViewModel : ViewModelBase
                 var standardParams = new MessageBoxStandardParams
                 {
 
-                    WindowIcon = AppLogoIcon,
+                    WindowIcon = MessageBoxExtension.AppLogoIcon,
                     ContentTitle = LocalizationService.Default["About"],
                     ContentMessage = LocalizationService.Default["About_Text"],
                     WindowStartupLocation = WindowStartupLocation.CenterOwner,

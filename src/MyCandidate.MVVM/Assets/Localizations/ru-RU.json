@@ -1,7 +1,6 @@
 {
     "progName" : "Подбор  Кандидата",
     
-    //menu
     "File": "Файл",
     "New": "Создать",
     "Exit": "Выход",   
@@ -20,7 +19,6 @@
     "Recent": "Последние изменённые",
     "Empty": "(пусто)",
 
-    //properties
     "Value": "Значение",
     "Resource_Type": "Тип ресурса",
     "Vacancy_Status": "Статус вакансии",
@@ -35,7 +33,6 @@
     "Last_Modification_Date":"Изменён",
     "Main":"Основное",
 
-    //Views
     "Country_Name": "Название страны",
     "City_Name": "Название города",
     "Category_Name": "Название категории",
@@ -68,7 +65,6 @@
     "Description": "Описание",
     "Status": "Статус",
     
-    //ViewModels
     "SkillCategories": "Категории навыков",
     "SkillCategory": "Категория навыков",
     "Category": "Категория",
@@ -91,7 +87,6 @@
     "Title": "Должность",
     "SearchStrictBySeniority": "Поиск строго с учётом уровня навыков",
 
-    //Dialog messages
     "Save_Text": "Сохранить изменения?",
     "Cancel_Text": "Отменить изменения?",
     "DeleteCandidate_Text": "Удалить этого кандидата?",
@@ -102,9 +97,8 @@
     "No_CompaniesCities_Text": "Нет доступных компаний и/или городов. Добавьте их в меню Справочники",
     "No_SkillsCities_Text": "Нет доступных навыков и/или городов. Добавьте их в меню Справочники",
     "No_OfficiesSkills_Text": "Нет доступных навыков и/или офисов. Добавьте их в меню Справочники",
-
+    "Error": "Ошибка",
     "About_Text": "Тестовое приложение на Avalonia UI",
 
-    //validation messages
     "BirthdateValidationMessage": "Минимальный возраст должен быть {0} лет"
 }

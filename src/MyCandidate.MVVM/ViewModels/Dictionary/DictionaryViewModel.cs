@@ -101,8 +101,9 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
             {
                 if (IsValid)
                 {
-                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"], LocalizationService.Default["Save_Text"]
-                                                                                , ButtonEnum.YesNo, Icon.Question);  
+                    var dialog = this.GetMessageBox(LocalizationService.Default["Save"], 
+                                                        LocalizationService.Default["Save_Text"],
+                                                        ButtonEnum.YesNo, Icon.Question);  
                     var result = await dialog.ShowAsync();                
                     if(result == ButtonResult.No)
                     {
@@ -242,8 +243,8 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
 
     private void ShowErrorMessageBox(string message)
     {
-        var messageBoxStandardWindow = MessageBoxManager.GetMessageBoxStandard(
-            "Error", message, ButtonEnum.Ok, Icon.Error);
+        var messageBoxStandardWindow = this.GetMessageBox(LocalizationService.Default["Error"], 
+                                                            message, ButtonEnum.Ok, Icon.Error);
         messageBoxStandardWindow.ShowAsync();
     }
 }

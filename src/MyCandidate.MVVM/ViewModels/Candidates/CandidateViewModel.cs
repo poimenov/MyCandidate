@@ -133,9 +133,9 @@ public class CandidateViewModel : Document
         return ReactiveCommand.Create(
             async () =>
                 {
-                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
-                                                                            LocalizationService.Default["Save_Text"],
-                                                                            ButtonEnum.YesNo, Icon.Question);
+                    var dialog = this.GetMessageBox(LocalizationService.Default["Save"],
+                                                        LocalizationService.Default["Save_Text"],
+                                                        ButtonEnum.YesNo, Icon.Question);
                     var result = await dialog.ShowAsync();
                     if (result == ButtonResult.No)
                     {
@@ -166,8 +166,8 @@ public class CandidateViewModel : Document
                     }
                     else
                     {
-                        dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Save"],
-                                                                            message, ButtonEnum.Ok, Icon.Error);
+                        dialog = this.GetMessageBox(LocalizationService.Default["Save"],
+                                                        message, ButtonEnum.Ok, Icon.Error);
                         await dialog.ShowAsync();
                     }
 
@@ -182,9 +182,9 @@ public class CandidateViewModel : Document
         return ReactiveCommand.Create(
             async () =>
                 {
-                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Cancel"],
-                                                                            LocalizationService.Default["Cancel_Text"],
-                                                                            ButtonEnum.YesNo, Icon.Question);
+                    var dialog = this.GetMessageBox(LocalizationService.Default["Cancel"],
+                                                        LocalizationService.Default["Cancel_Text"],
+                                                        ButtonEnum.YesNo, Icon.Question);
                     var result = await dialog.ShowAsync();
                     if (result == ButtonResult.No)
                     {
@@ -214,9 +214,9 @@ public class CandidateViewModel : Document
         return ReactiveCommand.Create(
             async () =>
                 {
-                    var dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
-                                                                            LocalizationService.Default["DeleteCandidate_Text"],
-                                                                            ButtonEnum.YesNo, Icon.Question);
+                    var dialog = this.GetMessageBox(LocalizationService.Default["Delete"],
+                                                        LocalizationService.Default["DeleteCandidate_Text"],
+                                                        ButtonEnum.YesNo, Icon.Question);
                     var result = await dialog.ShowAsync();
                     if (result == ButtonResult.No)
                     {
@@ -230,8 +230,8 @@ public class CandidateViewModel : Document
                     }
                     else
                     {
-                        dialog = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Default["Delete"],
-                                                                            message, ButtonEnum.Ok, Icon.Error);
+                        dialog = this.GetMessageBox(LocalizationService.Default["Delete"],
+                                                        message, ButtonEnum.Ok, Icon.Error);
                         await dialog.ShowAsync();
                     }
 

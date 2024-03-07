@@ -19,6 +19,7 @@ using MyCandidate.MVVM.ViewModels.Dictionary;
 using log4net;
 using System.Reflection;
 using MyCandidate.MVVM.Services;
+using MyCandidate.MVVM.Extensions;
 
 namespace MyCandidate.MVVM;
 
@@ -160,8 +161,8 @@ public partial class App : Application
 
     private void ShowMessageBox(string title, string message)
     {
-        var messageBoxStandardWindow = MessageBoxManager.GetMessageBoxStandard(
-            title, message, ButtonEnum.Ok, Icon.Stop);
+        var messageBoxStandardWindow = MessageBoxExtension.GetMessageBox(
+                                            title, message, ButtonEnum.Ok, Icon.Stop);
         messageBoxStandardWindow.ShowAsync();
     }
 }
