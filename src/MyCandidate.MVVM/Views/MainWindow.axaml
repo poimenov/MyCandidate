@@ -94,8 +94,11 @@
             </MenuItem>
         </MenuItem>
         <MenuItem Header="{ll:Localize Help}">
-
-            <MenuItem Header="{ll:Localize About}" Command="{Binding AboutCmd}" />
+            <MenuItem Header="{ll:Localize About}" Command="{Binding AboutCmd}">
+                <MenuItem.Icon>
+                    <Image Source="{SvgImage /Assets/info-svgrepo-com.svg}"/>
+                </MenuItem.Icon>             
+            </MenuItem>
         </MenuItem>
     </Menu>
     <DockControl Layout="{Binding Layout}" Margin="4" Grid.Row="1" />
