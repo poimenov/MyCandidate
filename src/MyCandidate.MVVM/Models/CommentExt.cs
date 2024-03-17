@@ -54,6 +54,7 @@ public class CommentExt : Comment
         };
     }
 
+    [Browsable(false)]
     public bool IsValid
     {
         get
