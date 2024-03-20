@@ -203,6 +203,8 @@ namespace MyCandidate.DataAccess
                     .ThenInclude(x => x.ResourceType)
                     .Include(x => x.CandidateOnVacancies)
                     .ThenInclude(x => x.Vacancy)
+                    .Include(x => x.CandidateOnVacancies)
+                    .ThenInclude(x => x.SelectionStatus)               
                     .First(x => x.Id == id);
             }
         }

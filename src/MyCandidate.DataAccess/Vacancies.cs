@@ -127,6 +127,10 @@ namespace MyCandidate.DataAccess
                 return db.Vacancies
                     .Include(x => x.Office)
                     .ThenInclude(x => x.Company)
+                    .Include(x => x.Office)
+                    .ThenInclude(x => x.Location)
+                    .ThenInclude(x => x.City)
+                    .ThenInclude(x => x.Country)
                     .Include(x => x.VacancyStatus)
                     .Include(x => x.VacancyResources)
                     .ThenInclude(x => x.ResourceType)
@@ -136,6 +140,7 @@ namespace MyCandidate.DataAccess
                     .ThenInclude(x => x.Skill)
                     .ThenInclude(x => x.SkillCategory)
                     .Include(x => x.CandidateOnVacancies)
+                    .ThenInclude(x => x.SelectionStatus)
                     .First(x => x.Id == id);
             }
         }

@@ -2,9 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Text;
+using System.Xml;
+using System.Xml.Xsl;
 using Avalonia;
+using Avalonia.Platform;
 using Avalonia.PropertyGrid.Services;
 using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
@@ -12,6 +18,8 @@ using DynamicData.Binding;
 using MsBox.Avalonia.Enums;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
+using MyCandidate.MVVM.Converters;
+using MyCandidate.MVVM.DataTemplates;
 using MyCandidate.MVVM.Extensions;
 using MyCandidate.MVVM.Models;
 using MyCandidate.MVVM.Services;
@@ -43,6 +51,7 @@ public class VacancyViewModel : Document
         SaveCmd = CreateSaveCmd();
         DeleteCmd = CreateDeleteCmd();
         SearchCmd = CreateSearchCmd();
+        ExportCmd = CreateExportCmd();
     }
 
     public VacancyViewModel(IAppServiceProvider appServiceProvider, int vacancyId)
@@ -63,6 +72,7 @@ public class VacancyViewModel : Document
         SaveCmd = CreateSaveCmd();
         DeleteCmd = CreateDeleteCmd();
         SearchCmd = CreateSearchCmd();
+        ExportCmd = CreateExportCmd();
     }
 
     private void CultureChanged(object? sender, EventArgs e)
@@ -91,7 +101,7 @@ public class VacancyViewModel : Document
             };
         }
     }
-    
+
     #region Filter
     private IObservable<Func<Office, bool>>? Filter =>
         this.WhenAnyValue(x => x.SelectedCompany)
@@ -244,6 +254,50 @@ public class VacancyViewModel : Document
                         await dialog.ShowAsync();
                     }
 
+                }, this.WhenAnyValue(x => x.VacancyId, y => y != 0)
+            );
+    }
+
+    public IReactiveCommand ExportCmd { get; }
+
+    private IReactiveCommand CreateExportCmd()
+    {
+        return ReactiveCommand.Create<string, Unit>(
+            (format) =>
+                {
+                    var exportFolder = Path.Combine(AppSettings.AppDataPath, "export");
+                    if (!Directory.Exists(exportFolder))
+                    {
+                        Directory.CreateDirectory(exportFolder);
+                    }
+                    var entityName = "vacancy";
+                    var doc = _provider.VacancyService.GetXml(VacancyId);
+                    var path = Path.Combine(exportFolder, $"{entityName}.{VacancyId}.xml");
+                    switch (format)
+                    {
+                        case "html":
+                            var xslt = XsltExtObject.GetTransform(entityName, format);
+                            var args = new XsltArgumentList();
+                            args.AddExtensionObject("urn:ExtObj", new XsltExtObject());
+                            path = Path.Combine(exportFolder, $"{entityName}.{VacancyId}.html");
+                            XmlWriterSettings settings = new XmlWriterSettings
+                            {
+                                Indent = true,
+                                CloseOutput = true,
+                                OmitXmlDeclaration = true,
+                                Encoding = Encoding.UTF8
+                            };
+                            using (XmlWriter writer = XmlWriter.Create(path, settings))
+                            {
+                                xslt.Transform(doc, args, writer);
+                            }
+                            break;
+                        default:                            
+                            doc.Save(path);                            
+                            break;
+                    }
+                    DataTemplateProvider.Open(path);
+                    return Unit.Default;
                 }, this.WhenAnyValue(x => x.VacancyId, y => y != 0)
             );
     }

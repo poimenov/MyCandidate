@@ -68,6 +68,20 @@
     </Grid>
 
     <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                <SplitButton Content="{ll:Localize ExportToHtml}"
+                            Command="{Binding ExportCmd}"
+                            CommandParameter="html">
+                    <SplitButton.Flyout>
+                        <MenuFlyout Placement="RightEdgeAlignedTop">
+                            <MenuItem Header="{ll:Localize ExportToXml}"
+                                    Command="{Binding ExportCmd}"
+                                    CommandParameter="xml" />
+                            <MenuItem Header="{ll:Localize ExportToHtml}"
+                                    Command="{Binding ExportCmd}"
+                                    CommandParameter="html" />
+                        </MenuFlyout>
+                    </SplitButton.Flyout>
+                </SplitButton>     
             <Button Content="{ll:Localize Vacancy_Search}" Command="{Binding SearchCmd}" Margin="0,4,0,4" Width="140" HorizontalContentAlignment="Center" />
             <Button Content="{ll:Localize Delete}" Command="{Binding DeleteCmd}" Margin="0,4,0,4" Width="100" HorizontalContentAlignment="Center" />
             <Button Content="{ll:Localize Save}" Command="{Binding SaveCmd}"  Margin="4,4,0,4" Width="100" HorizontalContentAlignment="Center" />

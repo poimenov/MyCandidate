@@ -6,15 +6,16 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Base;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
+using MyCandidate.MVVM.Converters;
 using MyCandidate.MVVM.ViewModels;
 
 namespace MyCandidate.MVVM.Extensions;
 
 public static class MessageBoxExtension
 {
-    public const string LOGO_PATH = "avares://MyCandidate.MVVM/Assets/avalonia-logo.ico";
+    private static string LogoPath => $"{ResourceTypeNameToSvgPathConverter.BASE_PATH}/avalonia-logo.ico";
     public static Bitmap GetBitmap(string uri) => new Bitmap(AssetLoader.Open(new System.Uri(uri)));
-    public static WindowIcon AppLogoIcon => new WindowIcon(GetBitmap(LOGO_PATH));
+    public static WindowIcon AppLogoIcon => new WindowIcon(GetBitmap(LogoPath));
     public static IMsBox<ButtonResult> GetMessageBox(this Document obj, string title, string message, ButtonEnum @enum, Icon icon)
     {
         return GetMessageBox(title, message, @enum, icon);

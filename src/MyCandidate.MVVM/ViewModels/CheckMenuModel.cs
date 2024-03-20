@@ -1,11 +1,12 @@
 using Avalonia.Controls;
 using MyCandidate.Common;
+using MyCandidate.MVVM.Converters;
 
 namespace MyCandidate.MVVM.ViewModels;
 
 public class CheckMenuModel : ViewModelBase
 {
-    private const string CHECK_IMAGE_URI = "avares://MyCandidate.MVVM/Assets/pngaaa.com-5178883.png";    
+    private string CheckImageUri => $"{ResourceTypeNameToSvgPathConverter.BASE_PATH}/pngaaa.com-5178883.png";
     protected readonly AppSettings _appSettings;
 
     public CheckMenuModel(AppSettings appSettings)
@@ -17,7 +18,7 @@ public class CheckMenuModel : ViewModelBase
     {
         get
         {
-            return GetAssetImage(CHECK_IMAGE_URI);
+            return GetAssetImage(CheckImageUri);
         }
     }
 }

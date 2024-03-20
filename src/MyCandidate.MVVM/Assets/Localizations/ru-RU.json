@@ -99,6 +99,8 @@
     "No_OfficiesSkills_Text": "Нет доступных навыков и/или офисов. Добавьте их в меню Справочники",
     "Error": "Ошибка",
     "About_Text": "Тестовое приложение на Avalonia UI",
+    "ExportToXml": "Экспорт в XML",
+    "ExportToHtml": "Экспорт в HTML",
 
     "BirthdateValidationMessage": "Минимальный возраст должен быть {0} лет"
 }

@@ -52,7 +52,9 @@
     "No_CompaniesCities_Text": "There are no available companies and/or cities available. Add them in the Dictionary menu",
     "No_SkillsCities_Text": "There are no available skills and/or cities available. Add them in the Dictionary menu",
     "No_OfficiesSkills_Text": "There are no available skills and/or officies available. Add them in the Dictionary menu",
-    "About_Text": "Test application on Avalonia UI",   
+    "About_Text": "Test application on Avalonia UI", 
+    "ExportToXml": "Export to XML",
+    "ExportToHtml": "Export to HTML",      
     
     "BirthdateValidationMessage": "Minimum age must be {0} years"    
 }
