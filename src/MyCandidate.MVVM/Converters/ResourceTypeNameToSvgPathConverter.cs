@@ -11,9 +11,8 @@ public class ResourceTypeNameToSvgPathConverter : IValueConverter
     public const string BASE_PATH = "avares://MyCandidate.MVVM/Assets";
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        var path = string.Empty;
-        
-        switch ((string)value)
+        string path;
+        switch (value as string)
         {
             case ResourceTypeNames.Mobile:
                 path = "mobile-phone-app-svgrepo-com.svg";
@@ -31,13 +30,13 @@ public class ResourceTypeNameToSvgPathConverter : IValueConverter
                 path = "fine-print-svgrepo-com.svg";
                 break;
         }
-        return Path.Combine(BASE_PATH, path);
+        return Path.Combine(BASE_PATH, "svg", path);
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         var resourceTypeName = string.Empty;
-        var fileName = Path.GetFileName((string)value);
+        var fileName = Path.GetFileName(value as string);
         switch (fileName)
         {
             case "mobile-phone-app-svgrepo-com.svg":

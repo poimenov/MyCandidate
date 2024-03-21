@@ -46,8 +46,7 @@ public class XsltExtObject
 
     public string? GetSvg(string svgFileName, int width, int height, bool asCssAttribute)
     {
-        string ns="http://www.w3.org/2000/svg";
-        var path = $"{ResourceTypeNameToSvgPathConverter.BASE_PATH}/{svgFileName}";
+        var path = $"{ResourceTypeNameToSvgPathConverter.BASE_PATH}/svg/{svgFileName}";
         var doc = new XmlDocument();
         using (var stream = AssetLoader.Open(new System.Uri(path)))
         {

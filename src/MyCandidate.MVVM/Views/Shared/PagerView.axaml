@@ -12,10 +12,10 @@
     <Grid>
         <StackPanel Grid.Row="0" Margin="4" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Padding="0" Command="{Binding FirstPageCmd}">
-                <Image Width="24" Height="24" Source="{SvgImage /Assets/skip-backward-fill-svgrepo-com.svg}"/>
+                <Image Width="24" Height="24" Source="{SvgImage /Assets/svg/skip-backward-fill-svgrepo-com.svg}"/>
             </Button>
             <Button Padding="0" Margin="4,0,0,0" Command="{Binding PreviousPageCmd}">
-                <Image Width="24" Height="24" Source="{SvgImage /Assets/skip-previous-play-fill-svgrepo-com.svg}" />
+                <Image Width="24" Height="24" Source="{SvgImage /Assets/svg/skip-previous-play-fill-svgrepo-com.svg}" />
             </Button>
             <TextBlock Margin="8,0" VerticalAlignment="Center">
                 <TextBlock.Text>
@@ -26,10 +26,10 @@
                 </TextBlock.Text>
             </TextBlock>
             <Button Padding="0" Margin="0,0,4,0" Command="{Binding NextPageCmd}">
-                <Image Width="24" Height="24" Source="{SvgImage /Assets/skip-next-play-fill-svgrepo-com.svg}"/>
+                <Image Width="24" Height="24" Source="{SvgImage /Assets/svg/skip-next-play-fill-svgrepo-com.svg}"/>
             </Button>
             <Button Padding="0" Command="{Binding LastPageCmd}">
-                <Image Width="24" Height="24" Source="{SvgImage /Assets/skip-forward-fill-svgrepo-com.svg}"/>                        
+                <Image Width="24" Height="24" Source="{SvgImage /Assets/svg/skip-forward-fill-svgrepo-com.svg}"/>                        
             </Button>
         </StackPanel>
 

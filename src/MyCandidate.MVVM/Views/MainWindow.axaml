@@ -25,12 +25,12 @@
             <MenuItem Header="{ll:Localize Recent}">
                 <MenuItem Header="{ll:Localize Candidates}" DataContext="{Binding RecentCandidatesViewModel}" ItemsSource="{Binding Items}">
                     <MenuItem.Icon>
-                        <Image Source="{SvgImage /Assets/businessman-svgrepo-com.svg}"/>
+                        <Image Source="{SvgImage /Assets/svg/businessman-svgrepo-com.svg}"/>
                     </MenuItem.Icon>                
                 </MenuItem>
                 <MenuItem Header="{ll:Localize Vacancies}" DataContext="{Binding RecentVacanciesViewModel}" ItemsSource="{Binding Items}">
                     <MenuItem.Icon>
-                        <Image Source="{SvgImage /Assets/feedback-svgrepo-com.svg}"/>
+                        <Image Source="{SvgImage /Assets/svg/feedback-svgrepo-com.svg}"/>
                     </MenuItem.Icon>                 
                 </MenuItem>
             </MenuItem>
@@ -40,24 +40,24 @@
         <MenuItem Header="{ll:Localize Vacancies}">
             <MenuItem Header="{ll:Localize Create}" Command="{Binding OpenCreateVacancyCmd}">
                 <MenuItem.Icon>
-                    <Image Source="{SvgImage /Assets/feedback-svgrepo-com.svg}"/>
+                    <Image Source="{SvgImage /Assets/svg/feedback-svgrepo-com.svg}"/>
                 </MenuItem.Icon>            
             </MenuItem>
             <MenuItem Header="{ll:Localize Search}" Command="{Binding OpenSearchVacancyCmd}">
                 <MenuItem.Icon>
-                    <Image Source="{SvgImage /Assets/search-svgrepo-com.svg}"/>
+                    <Image Source="{SvgImage /Assets/svg/search-svgrepo-com.svg}"/>
                 </MenuItem.Icon>             
             </MenuItem>             
         </MenuItem>
         <MenuItem Header="{ll:Localize Candidates}">
             <MenuItem Header="{ll:Localize Create}" Command="{Binding OpenCreateCandidateCmd}">
                 <MenuItem.Icon>
-                    <Image Source="{SvgImage /Assets/businessman-svgrepo-com.svg}"/>
+                    <Image Source="{SvgImage /Assets/svg/businessman-svgrepo-com.svg}"/>
                 </MenuItem.Icon>
             </MenuItem>
             <MenuItem Header="{ll:Localize Search}" Command="{Binding OpenSearchCandidateCmd}">
                 <MenuItem.Icon>
-                    <Image Source="{SvgImage /Assets/search-svgrepo-com.svg}"/>
+                    <Image Source="{SvgImage /Assets/svg/search-svgrepo-com.svg}"/>
                 </MenuItem.Icon>             
             </MenuItem>            
         </MenuItem>        
@@ -84,19 +84,19 @@
         <MenuItem Header="{ll:Localize Options}">
             <MenuItem Header="{ll:Localize Themes}" DataContext="{Binding MenuThemeViewModel}" ItemsSource="{Binding Items}">
                 <MenuItem.Icon>
-                    <Image Source="{SvgImage /Assets/puppy-theme-daylight-touch-svgrepo-com.svg}"/>
+                    <Image Source="{SvgImage /Assets/svg/puppy-theme-daylight-touch-svgrepo-com.svg}"/>
                 </MenuItem.Icon>              
             </MenuItem>
             <MenuItem Header="{ll:Localize Languages}" DataContext="{Binding MenuLanguageViewModel}" ItemsSource="{Binding Items}">
                 <MenuItem.Icon>
-                    <Image Source="{SvgImage /Assets/language-svgrepo-com.svg}"/>
+                    <Image Source="{SvgImage /Assets/svg/language-svgrepo-com.svg}"/>
                 </MenuItem.Icon>             
             </MenuItem>
         </MenuItem>
         <MenuItem Header="{ll:Localize Help}">
             <MenuItem Header="{ll:Localize About}" Command="{Binding AboutCmd}">
                 <MenuItem.Icon>
-                    <Image Source="{SvgImage /Assets/info-svgrepo-com.svg}"/>
+                    <Image Source="{SvgImage /Assets/svg/info-svgrepo-com.svg}"/>
                 </MenuItem.Icon>             
             </MenuItem>
         </MenuItem>

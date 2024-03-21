@@ -5,7 +5,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia.Enums;
-using MsBox.Avalonia;
 using MyCandidate.MVVM.ViewModels;
 using MyCandidate.MVVM.Views;
 using Microsoft.Extensions.Configuration;
