@@ -11,28 +11,28 @@ public class VacancySkill : ReactiveObject
     [ReadOnly(true)]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Browsable(false)]
-    public int Id { get; set; }  
+    public int Id { get; set; }
 
     [ForeignKey(nameof(VacancyId))]
     [Browsable(false)]
-    public int VacancyId { get; set; }  
-    
+    public int VacancyId { get; set; }
+
     [Browsable(false)]
-    public Vacancy Vacancy { get; set; }      
+    public Vacancy? Vacancy { get; set; }
 
     [ForeignKey(nameof(SkillId))]
     [Browsable(false)]
-    public int SkillId { get; set; }  
-    
+    public int SkillId { get; set; }
+
     [Required]
-    [DisplayName("Skill")]  
-    public Skill Skill { get; set; }    
+    [DisplayName("Skill")]
+    public Skill? Skill { get; set; }
 
     [ForeignKey(nameof(SeniorityId))]
     [Browsable(false)]
-    public int SeniorityId { get; set; }  
-    
+    public int SeniorityId { get; set; }
+
     [Required]
-    [DisplayName("Seniority")]  
-    public Seniority Seniority { get; set; }          
+    [DisplayName("Seniority")]
+    public Seniority? Seniority { get; set; }
 }

@@ -19,19 +19,19 @@ public class SelectionStatusCellEditFactory : AbstractCellEditFactory
     private readonly IDictionariesDataAccess _dataAccess;
     public SelectionStatusCellEditFactory()
     {
-        _dataAccess = ((App)Application.Current).GetRequiredService<IDictionariesDataAccess>();
+        _dataAccess = ((App)Application.Current!)!.GetRequiredService<IDictionariesDataAccess>();
     }
 
     public SelectionStatusCellEditFactory(IDictionariesDataAccess dataAccess)
     {
         _dataAccess = dataAccess;
-    }    
+    }
 
     public override bool Accept(object accessToken)
     {
         return accessToken is ExtendedPropertyGrid;
-    }    
-    public override Control HandleNewProperty(PropertyCellContext context)
+    }
+    public override Control? HandleNewProperty(PropertyCellContext context)
     {
         var propertyDescriptor = context.Property;
         var target = context.Target;
@@ -80,7 +80,10 @@ public class SelectionStatusCellEditFactory : AbstractCellEditFactory
             return false;
         }
 
-        ValidateProperty(control, propertyDescriptor, target);
+        if (control != null)
+        {
+            ValidateProperty(control, propertyDescriptor, target);
+        }
 
         if (control is ComboBox cb && target is CandidateOnVacancy candidateOnVacancy)
         {
@@ -89,6 +92,6 @@ public class SelectionStatusCellEditFactory : AbstractCellEditFactory
             return true;
         }
 
-        return false;        
+        return false;
     }
 }

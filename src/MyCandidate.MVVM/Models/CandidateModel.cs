@@ -25,27 +25,24 @@ public class CandidateModel : ReactiveObject, ISkillValueList
     public string LastName => _candidate.LastName;
 
     [Browsable(false)]
-    public string CountryName => _candidate.Location.City.Country.Name;
-
+    public string? CountryName => _candidate.Location?.City?.Country?.Name;
     [Browsable(false)]
-    public string CityName => _candidate.Location.City.Name;
-
+    public string? CityName => _candidate.Location?.City?.Name;
     [DisplayName("Full_Name")]
     [Category("Main")]
     public string Name => _candidate.Name;
 
     [DisplayName("Title")]
     [Category("Main")]
-    public string Title => _candidate.Title;    
+    public string? Title => _candidate.Title;    
 
     [DisplayName("Date_Birth")]
     [Category("Main")]
-    public string BirthDate => _candidate.BirthDate?.ToLongDateString();
+    public string? BirthDate => _candidate.BirthDate?.ToLongDateString();
 
     [DisplayName("Address")]
     [Category("Main")]
-    public string Address => _candidate.Location.Name;
-
+    public string? Address => _candidate.Location?.Name;
     [DisplayName("Enabled")]
     [Category("Main")]
     public bool Enabled => _candidate.Enabled;    

@@ -8,14 +8,14 @@ namespace MyCandidate.DataAccess
 {
     public class DatabaseMigrator : IDatabaseMigrator
     {
-        private readonly ILogger<DatabaseMigrator> _logger;
-        private Database _database;
+        private readonly ILogger<DatabaseMigrator>? _logger;
+        private Database? _database;
         public DatabaseMigrator(ILogger<DatabaseMigrator> logger)
         {
             _logger = logger;
         }
 
-        public event EventHandler<DatabaseMigrateEventArgs> DatabaseMigrate;
+        public event EventHandler<DatabaseMigrateEventArgs>? DatabaseMigrate;
 
         public void MigrateDatabase()
         {
@@ -39,8 +39,8 @@ namespace MyCandidate.DataAccess
 
         protected virtual void OnDatabaseCreate(DatabaseMigrateEventArgs e)
         {
-            EventHandler<DatabaseMigrateEventArgs> handler = DatabaseMigrate;
-            if (handler != null)
+            var handler = DatabaseMigrate;
+            if (handler != null && _database != null)
             {
                 handler(this, e);
                 using (var transaction = _database.Database.BeginTransaction())
@@ -51,16 +51,16 @@ namespace MyCandidate.DataAccess
                         _database.SaveChanges();
 
                         _database.SkillCategories.AddRange(e.SkillCategories);
-                        _database.SaveChanges();  
+                        _database.SaveChanges();
 
                         _database.Companies.AddRange(e.Companies);
-                        _database.SaveChanges();       
+                        _database.SaveChanges();
 
                         _database.Candidates.AddRange(e.Candidates);
-                        _database.SaveChanges();  
+                        _database.SaveChanges();
 
                         _database.Vacancies.AddRange(e.Vacancies);
-                        _database.SaveChanges();                                                                                         
+                        _database.SaveChanges();
 
                         transaction.Commit();
                     }
@@ -69,14 +69,14 @@ namespace MyCandidate.DataAccess
                         if (_logger != null)
                         {
                             _logger.LogError(ex.Message);
-                            if(ex.InnerException != null)
+                            if (ex.InnerException != null)
                             {
-                               _logger.LogError(ex.InnerException.Message); 
+                                _logger.LogError(ex.InnerException.Message);
                             }
                         }
                         transaction.Rollback();
                     }
-                    
+
                 }
 
             }

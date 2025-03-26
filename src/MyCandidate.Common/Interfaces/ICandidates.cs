@@ -10,7 +10,7 @@ namespace MyCandidate.Common.Interfaces
         void Update(Candidate candidate);
         IEnumerable<Candidate> Search(CandidateSearch searchParams);
         IEnumerable<Candidate> GetRecent(int count);
-    } 
+    }
 
     public class CandidateSearch
     {
@@ -23,23 +23,23 @@ namespace MyCandidate.Common.Interfaces
         public CandidateSearch(List<VacancySkill> vacancySkills)
         {
             var skillsList = new List<SkillValue>();
-            if(vacancySkills != null && vacancySkills.Any())
+            if (vacancySkills != null && vacancySkills.Any())
             {
                 skillsList.AddRange(vacancySkills.Select(x => new SkillValue(x.SkillId, x.SeniorityId)));
             }
-            
+
             Skills = skillsList;
             SearchStrictBySeniority = true;
         }
 
-        public string LastName {get;set;}
-        public string FirstName {get;set;}
-        public string Title {get;set;}
-        public IEnumerable<SkillValue> Skills {get;set;}
-        public bool SearchStrictBySeniority {get;set;}
-        public int? CountryId {get;set;}
-        public int? CityId {get;set;}     
-        public bool? Enabled {get;set;}    
-    }  
+        public string LastName { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public IEnumerable<SkillValue> Skills { get; set; }
+        public bool SearchStrictBySeniority { get; set; }
+        public int? CountryId { get; set; }
+        public int? CityId { get; set; }
+        public bool? Enabled { get; set; }
+    }
 }
 

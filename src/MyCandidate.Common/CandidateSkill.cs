@@ -12,28 +12,28 @@ public class CandidateSkill : ReactiveObject
     [ReadOnly(true)]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Browsable(false)]
-    public int Id { get; set; }  
+    public int Id { get; set; }
 
     [ForeignKey(nameof(CandidateId))]
     [Browsable(false)]
-    public int CandidateId { get; set; }  
-    
+    public int CandidateId { get; set; }
+
     [Browsable(false)]
-    public Candidate Candidate { get; set; }      
+    public Candidate? Candidate { get; set; }
 
     [ForeignKey(nameof(SkillId))]
     [Browsable(false)]
-    public int SkillId { get; set; }  
-    
+    public int SkillId { get; set; }
+
     [Required]
-    [DisplayName("Skill")]       
-    public Skill Skill { get; set; }    
+    [DisplayName("Skill")]
+    public Skill? Skill { get; set; }
 
     [ForeignKey(nameof(SeniorityId))]
     [Browsable(false)]
-    public int SeniorityId { get; set; }  
-    
+    public int SeniorityId { get; set; }
+
     [Required]
-    [DisplayName("Seniority")]    
-    public Seniority Seniority { get; set; }   
+    [DisplayName("Seniority")]
+    public Seniority? Seniority { get; set; }
 }

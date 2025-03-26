@@ -21,7 +21,7 @@ public class SkillCellEditFactory : AbstractCellEditFactory
 
     public SkillCellEditFactory()
     {
-        _skillCategories = ((App)Application.Current).GetRequiredService<IDataAccess<SkillCategory>>();
+        _skillCategories = ((App)Application.Current!)!.GetRequiredService<IDataAccess<SkillCategory>>();
         _skills = ((App)Application.Current).GetRequiredService<IDataAccess<Skill>>();
     }
 
@@ -36,7 +36,7 @@ public class SkillCellEditFactory : AbstractCellEditFactory
         return accessToken is ExtendedPropertyGrid;
     }
 
-    public override Control HandleNewProperty(PropertyCellContext context)
+    public override Control? HandleNewProperty(PropertyCellContext context)
     {
         var propertyDescriptor = context.Property;
         var target = context.Target;
@@ -56,12 +56,12 @@ public class SkillCellEditFactory : AbstractCellEditFactory
         .Subscribe(
             x =>
             {
-                if (x.Value is Skill skill)
+                if (x.Value is Skill skill && context.CellEdit != null)
                 {
                     if (target is SkillModel skillModel)
                     {
                         skillModel.RaisePropertyChanged(nameof(SkillModel.Skill));
-                        skillModel.Skill.RaisePropertyChanged(nameof(SkillModel.Skill.Name));
+                        skillModel.Skill!.RaisePropertyChanged(nameof(SkillModel.Skill.Name));
                     }
                     SetAndRaise(context, context.CellEdit, skill);
                 }
@@ -70,7 +70,6 @@ public class SkillCellEditFactory : AbstractCellEditFactory
 
         return control;
     }
-
     public override bool HandlePropertyChanged(PropertyCellContext context)
     {
         var propertyDescriptor = context.Property;
@@ -82,7 +81,10 @@ public class SkillCellEditFactory : AbstractCellEditFactory
             return false;
         }
 
-        ValidateProperty(control, propertyDescriptor, target);
+        if (control != null)
+        {
+            ValidateProperty(control, propertyDescriptor, target);
+        }
 
         if (control is SkillView vw
                 && vw.DataContext is SkillViewModel vm)

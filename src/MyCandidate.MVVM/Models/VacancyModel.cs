@@ -24,15 +24,15 @@ public class VacancyModel : ReactiveObject, ISkillValueList
 
     [DisplayName("Company")]
     [Category("Main")]
-    public string CompanyName => _vacancy.Office.Company.Name; 
-
+    public string CompanyName => _vacancy?.Office?.Company?.Name ?? string.Empty;
+    
     [DisplayName("Office")]
     [Category("Main")]
-    public string OfficeName => _vacancy.Office.Name;   
-
+    public string OfficeName => _vacancy?.Office?.Name ?? string.Empty;   
+    
     [DisplayName("Vacancy_Status")]
     [Category("Main")]
-    public string VacancyStatusName => _vacancy.VacancyStatus.Name;  
+    public string VacancyStatusName => _vacancy?.VacancyStatus?.Name ?? string.Empty;  
 
     [DisplayName("Enabled")]
     [Category("Main")]

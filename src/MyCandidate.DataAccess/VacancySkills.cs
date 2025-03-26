@@ -12,7 +12,7 @@ public class VacancySkills : IVacancySkills
         {
             return db.VacancySkills
                 .Include(x => x.Seniority)
-                .Include(x => x.Skill)
+                .Include(x => x.Skill!)
                 .ThenInclude(x => x.SkillCategory)
                 .First(x => x.Id == id);
         }
@@ -24,7 +24,7 @@ public class VacancySkills : IVacancySkills
         {
             return db.VacancySkills
                 .Include(x => x.Seniority)
-                .Include(x => x.Skill)
+                .Include(x => x.Skill!)
                 .ThenInclude(x => x.SkillCategory)
                 .Where(x => x.VacancyId == vacancyId)
                 .ToList();

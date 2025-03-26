@@ -21,11 +21,11 @@ class LocationCellEditFactory : AbstractCellEditFactory
 
     public LocationCellEditFactory()
     {
-        _countries = ((App)Application.Current).GetRequiredService<IDataAccess<Country>>();
-        _cities = ((App)Application.Current).GetRequiredService<IDataAccess<City>>();
-        _offices = ((App)Application.Current).GetRequiredService<IDataAccess<Office>>();
+        var app = ((App)Application.Current!);
+        _countries = app!.GetRequiredService<IDataAccess<Country>>();
+        _cities = app!.GetRequiredService<IDataAccess<City>>();
+        _offices = app!.GetRequiredService<IDataAccess<Office>>();
     }
-
     public LocationCellEditFactory(IDataAccess<Country> countries, IDataAccess<City> cities, IDataAccess<Office> offices)
     {
         _countries = countries;
@@ -38,7 +38,7 @@ class LocationCellEditFactory : AbstractCellEditFactory
         return accessToken is ExtendedPropertyGrid;
     }
 
-    public override Control HandleNewProperty(PropertyCellContext context)
+    public override Control? HandleNewProperty(PropertyCellContext context)
     {
         var propertyDescriptor = context.Property;
         var target = context.Target;
@@ -58,21 +58,23 @@ class LocationCellEditFactory : AbstractCellEditFactory
             x =>
             {
                 if (x.Value is Common.Location location
-                    && target is Office office)
+                    && target is Office office
+                    && context.CellEdit != null)
                 {
                     if (office.Id != 0)
                     {
                         var originalOffice = _offices.Get(office.Id);
-                        if (originalOffice.Location.CityId != location.CityId || originalOffice.Location.Address != location.Address)
+                        if (originalOffice?.Location != null &&
+                            (originalOffice.Location.CityId != location.CityId || originalOffice.Location.Address != location.Address))
                         {
                             office.RaisePropertyChanged(nameof(Office.Location));
-                            office.Location.RaisePropertyChanged(nameof(Common.Location.Name));
+                            office.Location?.RaisePropertyChanged(nameof(Common.Location.Name));
                         }
                     }
                     else
                     {
                         office.RaisePropertyChanged(nameof(Office.Location));
-                        office.Location.RaisePropertyChanged(nameof(Common.Location.Name));
+                        office.Location?.RaisePropertyChanged(nameof(Common.Location.Name));
                     }
                     SetAndRaise(context, context.CellEdit, location);
                 }
@@ -93,7 +95,10 @@ class LocationCellEditFactory : AbstractCellEditFactory
             return false;
         }
 
-        ValidateProperty(control, propertyDescriptor, target);
+        if (control != null)
+        {
+            ValidateProperty(control, propertyDescriptor, target);
+        }
 
         if (control is LocationView vw
                 && vw.DataContext is LocationViewModel vm

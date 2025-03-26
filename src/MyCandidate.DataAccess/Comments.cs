@@ -11,11 +11,11 @@ public class Comments : IComments
         using (var db = new Database())
         {
             return db.Comments
-                        .Where(x => x.CandidateOnVacancy.CandidateId == candidateId)
-                        .Include(x => x.CandidateOnVacancy)
+                        .Where(x => x.CandidateOnVacancy!.CandidateId == candidateId)
+                        .Include(x => x.CandidateOnVacancy!)
                         .ThenInclude(x => x.Vacancy)
-                        .Include(x => x.CandidateOnVacancy)
-                        .ThenInclude(x => x.Candidate)                         
+                        .Include(x => x.CandidateOnVacancy!)
+                        .ThenInclude(x => x.Candidate)
                         .ToList();
         }
     }
@@ -25,11 +25,11 @@ public class Comments : IComments
         using (var db = new Database())
         {
             return db.Comments
-                        .Where(x => x.CandidateOnVacancy.VacancyId == vacancyId)
-                        .Include(x => x.CandidateOnVacancy)
+                        .Where(x => x.CandidateOnVacancy!.VacancyId == vacancyId)
+                        .Include(x => x.CandidateOnVacancy!)
                         .ThenInclude(x => x.Vacancy)
-                        .Include(x => x.CandidateOnVacancy)
-                        .ThenInclude(x => x.Candidate)                        
+                        .Include(x => x.CandidateOnVacancy!)
+                        .ThenInclude(x => x.Candidate)
                         .ToList();
         }
     }

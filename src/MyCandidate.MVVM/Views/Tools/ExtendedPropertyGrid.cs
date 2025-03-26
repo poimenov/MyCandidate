@@ -9,7 +9,7 @@ namespace MyCandidate.MVVM.Views.Tools;
 
 public class ExtendedPropertyGrid : PropertyGrid
 {
-    private static App CurrentApplication => (App)Application.Current;
+    private static App CurrentApplication => (App)Application.Current!;
     static ExtendedPropertyGrid()
     {
         CellEditFactoryService.Default.AddFactory(new CountryCellEditFactory(CurrentApplication.GetRequiredService<IDataAccess<Country>>()));

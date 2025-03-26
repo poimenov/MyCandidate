@@ -40,7 +40,7 @@ public class VacancyViewModel : Document
         OfficesSource = new ObservableCollectionExtended<Office>(_provider.OfficeService.ItemsList.Where(x => x.Enabled == true));
         OfficesSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Filter(Filter)
+            .Filter(Filter!)
             .Bind(out _offices)
             .Subscribe();
 
@@ -61,7 +61,7 @@ public class VacancyViewModel : Document
         OfficesSource = new ObservableCollectionExtended<Office>(_provider.OfficeService.ItemsList.Where(x => x.Enabled == true));
         OfficesSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Filter(Filter)
+            .Filter(Filter!)
             .Bind(out _offices)
             .Subscribe();
 
@@ -84,8 +84,8 @@ public class VacancyViewModel : Document
     {
         get
         {
-            var vacancyStatus = VacancyStatuses.First(x => x.Name == VacancyStatusNames.New);
-            var office = OfficesSource.First();
+            var vacancyStatus = VacancyStatuses?.First(x => x.Name == VacancyStatusNames.New) ?? throw new InvalidOperationException("VacancyStatuses is null");
+            var office = OfficesSource?.First() ?? throw new InvalidOperationException("OfficesSource is null");
             return new Vacancy
             {
                 Id = 0,
@@ -101,7 +101,6 @@ public class VacancyViewModel : Document
             };
         }
     }
-
     #region Filter
     private IObservable<Func<Office, bool>>? Filter =>
         this.WhenAnyValue(x => x.SelectedCompany)
@@ -130,13 +129,13 @@ public class VacancyViewModel : Document
         Enabled = _vacancy.Enabled;
         SelectedVacancyStatus = VacancyStatuses.First(x => x.Id == _vacancy.VacancyStatusId);
         _initialSet = true;
-        SelectedCompany = Companies.First(x => x.Id == _vacancy.Office.CompanyId);
+        SelectedCompany = Companies.First(x => x.Id == _vacancy.Office!.CompanyId);
         _initialSet = false;
         SelectedOffice = Offices.First(x => x.Id == _vacancy.OfficeId);
 
-        Resources = new ResourcesViewModel(_vacancy, _provider.Properties);
+        Resources = new ResourcesViewModel(_vacancy, _provider.Properties!);
         Resources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
-        VacancySkills = new SkillsViewModel(_vacancy.VacancySkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _provider.Properties);
+        VacancySkills = new SkillsViewModel(_vacancy.VacancySkills.Select(x => new SkillModel(x.Id, x.Skill!, x.Seniority!)), _provider.Properties!);
         VacancySkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
         CandidatesOnVacancy = new CandidateOnVacancyViewModel(this, _provider);
         Comments = new CommentsViewModel(this, _provider);
@@ -161,9 +160,13 @@ public class VacancyViewModel : Document
                         return;
                     }
 
-                    _vacancy.VacancyResources = Resources.Resources.Select(x => x.ToVacancyResource(Vacancy)).ToList();
-                    _vacancy.VacancySkills = VacancySkills.Skills.Select(x => x.ToVacancySkill(_vacancy)).ToList();
-                    _vacancy.CandidateOnVacancies = CandidatesOnVacancy.GetCandidateOnVacancies();
+                    if (Resources?.Resources != null && VacancySkills?.Skills != null && CandidatesOnVacancy != null)
+                    {
+                        _vacancy.VacancyResources = Resources.Resources.Select(x => x.ToVacancyResource(Vacancy)).ToList();
+                        _vacancy.VacancySkills = VacancySkills.Skills.Select(x => x.ToVacancySkill(_vacancy)).ToList();
+                        _vacancy.CandidateOnVacancies = CandidatesOnVacancy.GetCandidateOnVacancies();
+                    }
+
                     string message;
                     int id;
                     bool success;
@@ -193,7 +196,6 @@ public class VacancyViewModel : Document
                 }, this.WhenAnyValue(x => x.IsValid, v => v == true)
             );
     }
-
     public IReactiveCommand CancelCmd { get; }
 
     private IReactiveCommand CreateCancelCmd()
@@ -220,7 +222,7 @@ public class VacancyViewModel : Document
     private IReactiveCommand CreateSearchCmd()
     {
         return ReactiveCommand.Create(
-            async () =>
+            () =>
             {
                 _provider.OpenDock(_provider.GetCandidateSearchViewModel(this));
             }, this.WhenAnyValue(x => x.VacancyId, y => y != 0));
@@ -292,8 +294,8 @@ public class VacancyViewModel : Document
                                 xslt.Transform(doc, args, writer);
                             }
                             break;
-                        default:                            
-                            doc.Save(path);                            
+                        default:
+                            doc.Save(path);
                             break;
                     }
                     DataTemplateProvider.Open(path);
@@ -311,40 +313,46 @@ public class VacancyViewModel : Document
         get
         {
             var retVal = Validator.TryValidateObject(this, new ValidationContext(this), null, true)
-            && Resources.IsValid
-            && VacancySkills.IsValid
-            && Comments.IsValid;
+            && Resources?.IsValid == true
+            && VacancySkills?.IsValid == true
+            && Comments?.IsValid == true;
             return retVal;
         }
     }
 
     #region Name
-    private string _name;
+    private string? _name;
     [Required]
     [StringLength(250, MinimumLength = 3)]
-    public string Name
+    public string? Name
     {
         get => _name;
         set
         {
-            _vacancy.Name = value;
-            this.RaiseAndSetIfChanged(ref _name, value);
-            this.RaisePropertyChanged(nameof(IsValid));
+            if (!string.IsNullOrEmpty(value))
+            {
+                _vacancy.Name = value;
+                this.RaiseAndSetIfChanged(ref _name, value);
+                this.RaisePropertyChanged(nameof(IsValid));
+            }
         }
     }
     #endregion
 
     #region Description
-    private string _description;
+    private string? _description;
     [Required]
-    public string Description
+    public string? Description
     {
         get => _description;
         set
         {
-            _vacancy.Description = value;
-            this.RaiseAndSetIfChanged(ref _description, value);
-            this.RaisePropertyChanged(nameof(IsValid));
+            if (value != null)
+            {
+                _vacancy.Description = value;
+                this.RaiseAndSetIfChanged(ref _description, value);
+                this.RaisePropertyChanged(nameof(IsValid));
+            }
         }
     }
     #endregion
@@ -364,7 +372,7 @@ public class VacancyViewModel : Document
     #endregion
 
     #region VacancyStatus
-    private IEnumerable<VacancyStatus> _vacancyStatuses;
+    private IEnumerable<VacancyStatus>? _vacancyStatuses;
     public IEnumerable<VacancyStatus> VacancyStatuses
     {
         get
@@ -378,21 +386,24 @@ public class VacancyViewModel : Document
         }
     }
 
-    private VacancyStatus _selectedVacancyStatus;
-    public VacancyStatus SelectedVacancyStatus
+    private VacancyStatus? _selectedVacancyStatus;
+    public VacancyStatus? SelectedVacancyStatus
     {
         get => _selectedVacancyStatus;
         set
         {
-            _vacancy.VacancyStatus = value;
-            _vacancy.VacancyStatusId = value.Id;
-            this.RaiseAndSetIfChanged(ref _selectedVacancyStatus, value);
+            if (value != null)
+            {
+                _vacancy.VacancyStatus = value;
+                _vacancy.VacancyStatusId = value.Id;
+                this.RaiseAndSetIfChanged(ref _selectedVacancyStatus, value);
+            }
         }
     }
     #endregion
 
     #region Company
-    private IEnumerable<Company> _companies;
+    private IEnumerable<Company>? _companies;
     public IEnumerable<Company> Companies
     {
         get
@@ -406,16 +417,19 @@ public class VacancyViewModel : Document
         }
     }
 
-    private Company _selectedCompany;
-    public Company SelectedCompany
+    private Company? _selectedCompany;
+    public Company? SelectedCompany
     {
         get => _selectedCompany;
         set
         {
-            this.RaiseAndSetIfChanged(ref _selectedCompany, value);
-            if (!_initialSet)
+            if (value != null)
             {
-                SelectedOffice = Offices.First();
+                this.RaiseAndSetIfChanged(ref _selectedCompany, value);
+                if (!_initialSet)
+                {
+                    SelectedOffice = Offices.First();
+                }
             }
         }
     }
@@ -426,8 +440,8 @@ public class VacancyViewModel : Document
     private readonly ReadOnlyObservableCollection<Office> _offices;
     public ReadOnlyObservableCollection<Office> Offices => _offices;
 
-    private Office _selectedOffice;
-    public Office SelectedOffice
+    private Office? _selectedOffice;
+    public Office? SelectedOffice
     {
         get => _selectedOffice;
         set
@@ -444,8 +458,8 @@ public class VacancyViewModel : Document
     #endregion
 
     #region Resources
-    private ResourcesViewModel _resources;
-    public ResourcesViewModel Resources
+    private ResourcesViewModel? _resources;
+    public ResourcesViewModel? Resources
     {
         get => _resources;
         set => this.RaiseAndSetIfChanged(ref _resources, value);
@@ -453,8 +467,8 @@ public class VacancyViewModel : Document
     #endregion
 
     #region VacancySkills
-    private SkillsViewModel _vacancySkills;
-    public SkillsViewModel VacancySkills
+    private SkillsViewModel? _vacancySkills;
+    public SkillsViewModel? VacancySkills
     {
         get => _vacancySkills;
         set => this.RaiseAndSetIfChanged(ref _vacancySkills, value);
@@ -462,8 +476,8 @@ public class VacancyViewModel : Document
     #endregion
 
     #region CandidatesOnVacancy
-    private CandidateOnVacancyViewModel _candidatesOnVacancy;
-    public CandidateOnVacancyViewModel CandidatesOnVacancy
+    private CandidateOnVacancyViewModel? _candidatesOnVacancy;
+    public CandidateOnVacancyViewModel? CandidatesOnVacancy
     {
         get => _candidatesOnVacancy;
         set => this.RaiseAndSetIfChanged(ref _candidatesOnVacancy, value);
@@ -471,8 +485,8 @@ public class VacancyViewModel : Document
     #endregion
 
     #region Comments
-    private CommentsViewModel _comments;
-    public CommentsViewModel Comments
+    private CommentsViewModel? _comments;
+    public CommentsViewModel? Comments
     {
         get => _comments;
         set => this.RaiseAndSetIfChanged(ref _comments, value);

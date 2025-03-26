@@ -16,7 +16,7 @@ public class Location : Entity
     //[Required]
     [StringLength(250)]
     [DisplayName("Address")]
-    public string Address { get; set; }
+    public string Address { get; set; } = string.Empty;
 
     [NotMapped]
     [DisplayName("Full_Address")]
@@ -33,15 +33,15 @@ public class Location : Entity
     public int CityId { get; set; }
 
     [Required]
-    public City City { get; set; }
+    public City? City { get; set; }
 
     [Required]
     [DefaultValue(true)]
-    public override bool Enabled { get; set; }    
+    public override bool Enabled { get; set; }
 
     [Browsable(false)]
-    public virtual List<Office> Officies { get; set; }    
+    public virtual List<Office> Officies { get; set; } = new List<Office>();
 
     [Browsable(false)]
-    public virtual List<Candidate> Candidates { get; set; }      
+    public virtual List<Candidate> Candidates { get; set; } = new List<Candidate>();
 }

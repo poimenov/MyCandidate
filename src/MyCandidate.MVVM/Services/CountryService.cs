@@ -78,7 +78,7 @@ public class CountryService : IDictionaryService<Country>
         }
     }
 
-    public Country Get(int id)
+    public Country? Get(int id)
     {
         return _countries.Get(id);
     }

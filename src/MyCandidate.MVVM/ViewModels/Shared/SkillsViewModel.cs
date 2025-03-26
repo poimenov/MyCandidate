@@ -40,30 +40,30 @@ public class SkillsViewModel : ViewModelBase
             );
 
         DeleteSkillCmd = ReactiveCommand.Create(
-            async (SkillModel obj) =>
+            (SkillModel obj) =>
             {
                 SourceSkills.Remove(obj);
                 this.RaisePropertyChanged(nameof(IsValid));
             },
             this.WhenAnyValue(x => x.SelectedSkill, x => x.Skills,
-                (obj, list) => obj != null && list.Count > 0)              
+                (obj, list) => obj != null && list.Count > 0)
         );
 
         DeleteSkillKeyDownCmd = ReactiveCommand.Create(
-            async (KeyEventArgs args) =>
+            (KeyEventArgs args) =>
             {
-                if(args.Key == Key.Delete && SelectedSkill != null)
+                if (args.Key == Key.Delete && SelectedSkill != null)
                 {
                     SourceSkills.Remove(SelectedSkill);
                     this.RaisePropertyChanged(nameof(IsValid));
                 }
             },
             this.WhenAnyValue(x => x.SelectedSkill, x => x.Skills,
-                (obj, list) => obj != null && list.Count > 0)              
+                (obj, list) => obj != null && list.Count > 0)
         );
 
         CreateSkillCmd = ReactiveCommand.Create(
-            async () =>
+            () =>
             {
                 var _newSkill = new SkillModel
                 {
@@ -71,26 +71,26 @@ public class SkillsViewModel : ViewModelBase
                     {
                         Id = 1,
                         Name = SeniorityNames.Unknown,
-                        Enabled =true
-                    }                                        
+                        Enabled = true
+                    }
                 };
                 SourceSkills.Add(_newSkill);
                 _newSkill.PropertyChanged += ItemPropertyChanged;
                 SelectedSkill = _newSkill;
                 this.RaisePropertyChanged(nameof(IsValid));
-            }          
-        );            
+            }
+        );
     }
 
-    private async void ItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void ItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         this.RaisePropertyChanged(nameof(IsValid));
     }
 
     public bool IsValid
     {
-        get => Skills.Select(x => x.Skill.Id).Distinct().Count() == Skills.Count();
-    }  
+        get => Skills.Select(x => x.Skill!.Id).Distinct().Count() == Skills.Count();
+    }
 
     public IProperties? Properties { get; set; }
 
@@ -111,5 +111,5 @@ public class SkillsViewModel : ViewModelBase
 
     public IReactiveCommand CreateSkillCmd { get; }
     public IReactiveCommand DeleteSkillCmd { get; }
-    public IReactiveCommand DeleteSkillKeyDownCmd { get; }  
+    public IReactiveCommand DeleteSkillKeyDownCmd { get; }
 }

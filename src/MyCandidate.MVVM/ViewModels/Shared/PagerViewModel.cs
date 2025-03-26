@@ -13,25 +13,25 @@ public class PagerViewModel : ViewModelBase
     public PagerViewModel()
     {
         FirstPageCmd = ReactiveCommand.Create(
-                    async () =>
+                    () =>
                     {
                         CurrentPage = FIRST_PAGE;
                     }, this.WhenAnyValue(x => x.PreviousPageEnabled, y => y == true)
                 );
         PreviousPageCmd = ReactiveCommand.Create(
-                    async () =>
+                    () =>
                     {
                         CurrentPage = CurrentPage - 1;
                     }, this.WhenAnyValue(x => x.PreviousPageEnabled, y => y == true)
                 );
         NextPageCmd = ReactiveCommand.Create(
-                    async () =>
+                    () =>
                     {
                         CurrentPage = CurrentPage + 1;
                     }, this.WhenAnyValue(x => x.NextPageEnabled, y => y == true)
                 );
         LastPageCmd = ReactiveCommand.Create(
-                    async () =>
+                    () =>
                     {
                         CurrentPage = TotalPages;
                     }, this.WhenAnyValue(x => x.NextPageEnabled, y => y == true)

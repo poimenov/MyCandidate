@@ -20,7 +20,7 @@ class CountryCellEditFactory : AbstractCellEditFactory
 
     public CountryCellEditFactory()
     {
-        _dataAccess = ((App)Application.Current).GetRequiredService<IDataAccess<Country>>();
+        _dataAccess = ((App)Application.Current!)!.GetRequiredService<IDataAccess<Country>>();
     }
 
     public CountryCellEditFactory(IDataAccess<Country> dataAccess)
@@ -32,7 +32,7 @@ class CountryCellEditFactory : AbstractCellEditFactory
     {
         return accessToken is ExtendedPropertyGrid;
     }
-    public override Control HandleNewProperty(PropertyCellContext context)
+    public override Control? HandleNewProperty(PropertyCellContext context)
     {
         var propertyDescriptor = context.Property;
         var target = context.Target;
@@ -82,7 +82,10 @@ class CountryCellEditFactory : AbstractCellEditFactory
             return false;
         }
 
-        ValidateProperty(control, propertyDescriptor, target);
+        if (control != null)
+        {
+            ValidateProperty(control, propertyDescriptor, target);
+        }
 
         if (control is ComboBox cb && target is City city)
         {

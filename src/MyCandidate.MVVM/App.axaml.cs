@@ -5,19 +5,15 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia.Enums;
-using MyCandidate.MVVM.ViewModels;
 using MyCandidate.MVVM.Views;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading;
 using MyCandidate.Common;
-using MyCandidate.DataAccess;
 using MyCandidate.MVVM.Themes;
 using MyCandidate.Common.Interfaces;
-using MyCandidate.MVVM.ViewModels.Dictionary;
 using log4net;
 using System.Reflection;
-using MyCandidate.MVVM.Services;
 using MyCandidate.MVVM.Extensions;
 
 namespace MyCandidate.MVVM;
@@ -64,43 +60,7 @@ public partial class App : Application
             services
                 .Configure<AppSettings>(builder.Configuration)
                 .AddSingleton<ILog>(LogManager.GetLogger(MethodBase.GetCurrentMethod()!.DeclaringType))
-                .AddSingleton<MainWindowViewModel>()
-                .AddSingleton<MainWindow>(service => new MainWindow
-                {
-                    DataContext = service.GetRequiredService<MainWindowViewModel>()
-                })
-                //data access 
-                .AddTransient<IDatabaseMigrator, DatabaseMigrator>()           
-                .AddTransient<IDataAccess<Country>, Countries>()
-                .AddTransient<IDataAccess<City>, Cities>()
-                .AddTransient<IDataAccess<Skill>, Skills>()
-                .AddTransient<IDataAccess<SkillCategory>, SkillCategories>()
-                .AddTransient<IDataAccess<Company>, Companies>()
-                .AddTransient<IDataAccess<Office>, Officies>()
-                .AddTransient<ICandidates, Candidates>()
-                .AddTransient<IDictionariesDataAccess, Dictionaries>()
-                .AddTransient<IVacancies, Vacancies>()
-                .AddTransient<ICandidateSkills, CandidateSkills>()
-                .AddTransient<IVacancySkills, VacancySkills>()
-                .AddTransient<ICandidateOnVacancies, CandidateOnVacancies>()
-                .AddTransient<IComments, Comments>()
-                //services
-                .AddTransient<IDictionaryService<Country>, CountryService>()
-                .AddTransient<IDictionaryService<City>, CityService>()
-                .AddTransient<IDictionaryService<Skill>, SkillService>()
-                .AddTransient<IDictionaryService<SkillCategory>, SkillCategoryService>()
-                .AddTransient<IDictionaryService<Company>, CompanyService>()
-                .AddTransient<IDictionaryService<Office>, OfficeService>()
-                .AddTransient<ICandidateService, CandidateService>()
-                .AddTransient<IVacancyService, VacancyService>()
-                .AddTransient<IAppServiceProvider, AppServiceProvider>()
-                //ViewModels
-                .AddTransient<DictionaryViewModel<Country>, CountriesViewModel>()
-                .AddTransient<DictionaryViewModel<City>, CitiesViewModel>()
-                .AddTransient<DictionaryViewModel<Skill>, SkillsViewModel>()
-                .AddTransient<DictionaryViewModel<SkillCategory>, CategoriesViewModel>()
-                .AddTransient<DictionaryViewModel<Company>, CompaniesViewModel>()
-                .AddTransient<DictionaryViewModel<Office>, OfficiesViewModel>();
+                .AddApplicationServices();
 
             _host = builder.Build();
             _cancellationTokenSource = new();
@@ -146,8 +106,7 @@ public partial class App : Application
     }
     #endregion
 
-    public T GetRequiredService<T>() => _host!.Services.GetRequiredService<T>();
-
+    public T GetRequiredService<T>() where T : notnull => _host!.Services.GetRequiredService<T>();
     private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
         => _ = _host!.StopAsync(_cancellationTokenSource!.Token);
 

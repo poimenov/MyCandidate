@@ -9,19 +9,21 @@ public class ResourceValueConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        var sValue = (string)value;
+        if (value == null)
+            return null;
+            
+        var sValue = value.ToString();
         if(File.Exists(sValue))
         {
             return Path.GetFileName(sValue);
         }
         else if(Uri.IsWellFormedUriString(sValue, UriKind.Absolute))
         {
-            return new Uri((string)value).Host;
+            return new Uri(sValue).Host;
         }
         
         return sValue;
     }
-
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         return value;

@@ -18,8 +18,8 @@ namespace MyCandidate.MVVM.ViewModels.Shared;
 
 public class CandidateOnVacancyViewModel : ViewModelBase
 {
-    private readonly CandidateViewModel _candidateViewModel;
-    private readonly VacancyViewModel _vacancyViewModel;
+    private readonly CandidateViewModel? _candidateViewModel;
+    private readonly VacancyViewModel? _vacancyViewModel;
     private readonly IAppServiceProvider _provider;
     private bool _isVacancy;
     public CandidateOnVacancyViewModel(CandidateViewModel candidateViewModel, IAppServiceProvider appServiceProvider)
@@ -92,11 +92,11 @@ public class CandidateOnVacancyViewModel : ViewModelBase
         List<Comment> comments;
         if (_isVacancy)
         {
-            comments = _vacancyViewModel.Comments.GetAllComments();
+            comments = _vacancyViewModel!.Comments!.GetAllComments();
         }
         else
         {
-            comments = _candidateViewModel.Comments.GetAllComments();
+            comments = _candidateViewModel!.Comments!.GetAllComments();
         }
 
         retVal.ForEach(x => x.Comments = comments.Where(c => c.CandidateOnVacancyId == x.Id).ToList());
@@ -109,15 +109,15 @@ public class CandidateOnVacancyViewModel : ViewModelBase
     private IReactiveCommand CreateOpenCmd()
     {
         return ReactiveCommand.Create(
-            async (CandidateOnVacancyExt item) =>
+            (CandidateOnVacancyExt item) =>
             {
                 if (_isVacancy)
                 {
-                    _provider.OpenCandidateViewModel(SelectedItem.CandidateId);
+                    _provider.OpenCandidateViewModel(SelectedItem!.CandidateId);
                 }
                 else
                 {
-                    _provider.OpenVacancyViewModel(SelectedItem.VacancyId);
+                    _provider.OpenVacancyViewModel(SelectedItem!.VacancyId);
                 }
             },
             this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
@@ -128,15 +128,15 @@ public class CandidateOnVacancyViewModel : ViewModelBase
     private IReactiveCommand CreateDeleteCmd()
     {
         return ReactiveCommand.Create(
-            async (CandidateOnVacancyExt item) =>
+            (CandidateOnVacancyExt item) =>
             {
                 if (_isVacancy)
                 {
-                    _vacancyViewModel.Comments.DeleteByCandidateOnVacancyId(item.Id);
+                    _vacancyViewModel!.Comments!.DeleteByCandidateOnVacancyId(item.Id);
                 }
                 else
                 {
-                    _candidateViewModel.Comments.DeleteByCandidateOnVacancyId(item.Id);
+                    _candidateViewModel!.Comments!.DeleteByCandidateOnVacancyId(item.Id);
                 }
 
                 Source.Remove(item);
@@ -169,8 +169,8 @@ public class CandidateOnVacancyViewModel : ViewModelBase
     #endregion
 
     #region SelectedItem
-    private CandidateOnVacancyExt _selectedItem;
-    public CandidateOnVacancyExt SelectedItem
+    private CandidateOnVacancyExt? _selectedItem;
+    public CandidateOnVacancyExt? SelectedItem
     {
         get => _selectedItem;
         set => this.RaiseAndSetIfChanged(ref _selectedItem, value);

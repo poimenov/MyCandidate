@@ -11,10 +11,10 @@
              mc:Ignorable="d"
              d:DesignWidth="300" d:DesignHeight="400"
              x:DataType="vm:SkillsViewModel" x:CompileBindings="True">
-
+    
     <StackPanel>
         <ListBox ItemsSource="{Binding Skills}" Height="60"
-            SelectedItem="{Binding SelectedSkill, Mode=TwoWay}"> 
+                 SelectedItem="{Binding SelectedSkill, Mode=TwoWay}"> 
             <i:Interaction.Behaviors>
                 <ia:EventTriggerBehavior EventName="KeyDown">
                     <ia:InvokeCommandAction Command="{Binding DeleteSkillKeyDownCmd}" PassEventArgsToCommand="true" />
@@ -23,6 +23,10 @@
             <ListBox.Styles>
                 <Style Selector="ListBoxItem">
                     <Setter Property="Padding" Value="2"/>
+                    <Setter Property="Margin" Value="2"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseLowColor}"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="CornerRadius" Value="3"/>                    
                 </Style>
             </ListBox.Styles>                                    
             <ListBox.ItemsPanel>
@@ -32,20 +36,17 @@
             </ListBox.ItemsPanel>                    
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="m:SkillModel">                            
-                    <Border BorderBrush="{DynamicResource SystemBaseLowColor}"
-                            BorderThickness="1" CornerRadius="3"> 
-                        <StackPanel Orientation="Horizontal">                           
-                            <TextBlock Text="{Binding Skill.Name}" ToolTip.Tip="{Binding Seniority.Name}" />
-                        </StackPanel>
-                    </Border>                            
+                    <StackPanel Orientation="Horizontal">                           
+                        <TextBlock Text="{Binding Skill.Name}" ToolTip.Tip="{Binding Seniority.Name}" />
+                    </StackPanel>                                               
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
         <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="{ll:Localize Delete}" Command="{Binding DeleteSkillCmd}" 
-                CommandParameter="{Binding SelectedSkill}" Margin="4" />        
+                    CommandParameter="{Binding SelectedSkill}" Margin="4" />        
             <Button Content="{ll:Localize Create}" Command="{Binding CreateSkillCmd}" Margin="4" />
         </StackPanel>
     </StackPanel>              
-             
+    
 </UserControl>             

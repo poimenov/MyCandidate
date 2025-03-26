@@ -17,7 +17,7 @@ namespace MyCandidate.Common
         [Required]
         [StringLength(250)]
         [Display(Name = "Name", Order = 3)]
-        public override string Name { get; set; }
+        public override string Name { get; set; } = string.Empty;
 
         [Required]
         [DefaultValue(true)]
@@ -25,7 +25,7 @@ namespace MyCandidate.Common
         public override bool Enabled { get; set; }
     }
 
-    public class SeniorityEqualityComparer : IEqualityComparer<Seniority>
+    public class SeniorityEqualityComparer : IEqualityComparer<Seniority?>
     {
         public bool Equals(Seniority? x, Seniority? y)
         {

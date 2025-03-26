@@ -21,16 +21,16 @@ namespace MyCandidate.Common
         [Required]
         [StringLength(250, MinimumLength = 2)]
         [DisplayName("FirstName")]
-        public string FirstName { get; set; }
+        public required string FirstName { get; set; }
 
         [Required]
         [StringLength(250, MinimumLength = 2)]
         [DisplayName("LastName")]
-        public string LastName { get; set; }
+        public required string LastName { get; set; }
 
         [StringLength(250, MinimumLength = 2)]
         [DisplayName("Title")]
-        public string? Title { get; set; }        
+        public string? Title { get; set; }
 
         [DisplayName("BirthDate")]
         public DateTime? BirthDate { get; set; }
@@ -40,7 +40,7 @@ namespace MyCandidate.Common
         public int LocationId { get; set; }
 
         [DisplayName("Address")]
-        public Location Location { get; set; }
+        public Location? Location { get; set; }
 
         [Required]
         [DisplayName("CreationDate")]
@@ -54,13 +54,13 @@ namespace MyCandidate.Common
         public override bool Enabled { get; set; }
 
         [Browsable(false)]
-        public virtual List<CandidateSkill> CandidateSkills { get; set; }
+        public virtual List<CandidateSkill> CandidateSkills { get; set; } = new List<CandidateSkill>();
 
         [Browsable(false)]
-        public virtual List<CandidateResource> CandidateResources { get; set; }
+        public virtual List<CandidateResource> CandidateResources { get; set; } = new List<CandidateResource>();
 
         [Browsable(false)]
-        public virtual List<CandidateOnVacancy> CandidateOnVacancies { get; set; }
+        public virtual List<CandidateOnVacancy> CandidateOnVacancies { get; set; } = new List<CandidateOnVacancy>();
     }
 
     public class CandidateEqualityComparer : IEqualityComparer<Candidate>
@@ -84,11 +84,11 @@ namespace MyCandidate.Common
 
         public int GetHashCode([DisallowNull] Candidate obj)
         {
-            return HashCode.Combine(obj.Id.GetHashCode(), 
-                obj.FirstName.GetHashCode(), 
+            return HashCode.Combine(obj.Id.GetHashCode(),
+                obj.FirstName.GetHashCode(),
                 obj.LastName.GetHashCode(),
                 obj.BirthDate.GetHashCode(),
                 obj.Enabled.GetHashCode());
         }
-    }     
+    }
 }

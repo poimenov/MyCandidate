@@ -112,7 +112,7 @@ public class ResourcesViewModel : ViewModelBase
     private IReactiveCommand CreateCreateResourceCmd()
     {
         return ReactiveCommand.Create(
-            async () =>
+            () =>
             {
                 var _newResource = new ResourceModel(_resourceModelType);
                 SourceResources.Add(_newResource);
@@ -124,7 +124,7 @@ public class ResourcesViewModel : ViewModelBase
     private IReactiveCommand CreateDeleteResourceCmd()
     {
         return ReactiveCommand.Create(
-            async (ResourceModel obj) =>
+            (ResourceModel obj) =>
             {
                 SourceResources.Remove(obj);
             },
@@ -136,7 +136,7 @@ public class ResourcesViewModel : ViewModelBase
     private IReactiveCommand CreateDeleteResourceKeyDownCmd()
     {
         return ReactiveCommand.Create(
-            async (KeyEventArgs args) =>
+            (KeyEventArgs args) =>
             {
                 if (args.Key == Key.Delete && SelectedResource != null)
                 {

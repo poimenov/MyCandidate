@@ -22,9 +22,8 @@ class ResourceTypeCellEditFactory : AbstractCellEditFactory
 
     public ResourceTypeCellEditFactory()
     {
-        _dataAccess = ((App)Application.Current).GetRequiredService<IDictionariesDataAccess>();
+        _dataAccess = ((App)Application.Current!)!.GetRequiredService<IDictionariesDataAccess>();
     }
-
     public ResourceTypeCellEditFactory(IDictionariesDataAccess dataAccess)
     {
         _dataAccess = dataAccess;
@@ -35,7 +34,7 @@ class ResourceTypeCellEditFactory : AbstractCellEditFactory
         return accessToken is ExtendedPropertyGrid;
     }
 
-    public override Control HandleNewProperty(PropertyCellContext context)
+    public override Control? HandleNewProperty(PropertyCellContext context)
     {
         var propertyDescriptor = context.Property;
         var target = context.Target;
@@ -63,14 +62,24 @@ class ResourceTypeCellEditFactory : AbstractCellEditFactory
                     Orientation = Avalonia.Layout.Orientation.Horizontal
                 };
 
-                retVal.Children.Add(new ContentControl
+                var contentControl = new ContentControl
                 {
                     ContentTemplate = DataTemplateProvider.ResourceTypeImage,
                     Content = value,
                     Margin = new Thickness(4, 0)
-                });
+                };
 
-                retVal.Children.Add(DataTemplateProvider.ResourceTypeName.Build(value));
+                var resourceTypeName = DataTemplateProvider.ResourceTypeName.Build(value);
+
+                if (contentControl != null)
+                {
+                    retVal.Children.Add(contentControl);
+                }
+
+                if (resourceTypeName != null)
+                {
+                    retVal.Children.Add(resourceTypeName);
+                }
 
                 return retVal;
             })
@@ -92,7 +101,6 @@ class ResourceTypeCellEditFactory : AbstractCellEditFactory
 
         return control;
     }
-
     public override bool HandlePropertyChanged(PropertyCellContext context)
     {
         var propertyDescriptor = context.Property;
@@ -104,7 +112,10 @@ class ResourceTypeCellEditFactory : AbstractCellEditFactory
             return false;
         }
 
-        ValidateProperty(control, propertyDescriptor, target);
+        if (control != null)
+        {
+            ValidateProperty(control, propertyDescriptor, target);
+        }
 
         if (control is ComboBox cb && target is ResourceModel resourceModel)
         {

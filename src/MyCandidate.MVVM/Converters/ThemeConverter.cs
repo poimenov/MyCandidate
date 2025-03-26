@@ -16,7 +16,7 @@ public static class ThemeConverter
             dockable =>
             {
 
-                var targetType = dockable.GetType();
+                var targetType = dockable?.GetType();
                 var baseUri = new Uri(ResourceTypeNameToSvgPathConverter.BASE_PATH);
                 var svgPath = "/Assets/svg/accessories-dictionary-svgrepo-com.svg";
                 var typeDictionary = new Dictionary<Type, string> {
@@ -25,7 +25,7 @@ public static class ThemeConverter
                             { typeof(VacancySearchViewModel), "/Assets/svg/search-svgrepo-com.svg" },
                             { typeof(VacancyViewModel), "/Assets/svg/feedback-svgrepo-com.svg" },
                         };
-                if (typeDictionary.ContainsKey(targetType))
+                if (targetType != null && typeDictionary.ContainsKey(targetType))
                 {
                     svgPath = typeDictionary[targetType];
                 }

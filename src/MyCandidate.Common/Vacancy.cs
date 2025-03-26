@@ -16,7 +16,7 @@ public class Vacancy : Entity
     [Required]
     [StringLength(250, MinimumLength = 3)]
     [DisplayName("Name")]
-    public override string Name { get; set; }
+    public override string Name { get; set; } = string.Empty;
 
     [Required]
     [DefaultValue(true)]
@@ -24,7 +24,7 @@ public class Vacancy : Entity
     public override bool Enabled { get; set; }
 
     [DisplayName("Description")]
-    public string Description { get; set; }
+    public string Description { get; set; } = string.Empty;
 
     [ForeignKey(nameof(OfficeId))]
     [Browsable(false)]
@@ -32,7 +32,7 @@ public class Vacancy : Entity
 
     [Required]
     [DisplayName("Office")]
-    public Office Office { get; set; }
+    public Office? Office { get; set; }
 
     [ForeignKey(nameof(VacancyStatusId))]
     [Browsable(false)]
@@ -40,7 +40,7 @@ public class Vacancy : Entity
 
     [Required]
     [DisplayName("Vacancy_Status")]
-    public VacancyStatus VacancyStatus { get; set; }
+    public VacancyStatus? VacancyStatus { get; set; }
 
     [Required]
     [DisplayName("CreationDate")]
@@ -50,11 +50,11 @@ public class Vacancy : Entity
     public DateTime LastModificationDate { get; set; }
 
     [Browsable(false)]
-    public virtual List<VacancySkill> VacancySkills { get; set; }
+    public virtual List<VacancySkill> VacancySkills { get; set; } = new List<VacancySkill>();
 
     [Browsable(false)]
-    public virtual List<VacancyResource> VacancyResources { get; set; }
+    public virtual List<VacancyResource> VacancyResources { get; set; } = new List<VacancyResource>();
 
     [Browsable(false)]
-    public virtual List<CandidateOnVacancy> CandidateOnVacancies { get; set; }
+    public virtual List<CandidateOnVacancy> CandidateOnVacancies { get; set; } = new List<CandidateOnVacancy>();
 }

@@ -49,7 +49,7 @@ public class OfficeService : IDictionaryService<Office>
         return true;
     }
 
-    public Office Get(int id)
+    public Office? Get(int id)
     {
         return _officies.Get(id);
     }

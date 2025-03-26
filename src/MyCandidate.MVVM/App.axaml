@@ -3,20 +3,19 @@
              x:Class="MyCandidate.MVVM.App"
              xmlns:local="using:MyCandidate.MVVM"
              xmlns:ids="using:Dock.Settings"
-             xmlns:idc="using:Dock.Avalonia.Controls"
-             xmlns:idcr="using:Dock.Avalonia.Controls.Recycling"
+             xmlns:idc="using:Dock.Avalonia.Controls"               
              xmlns:core="using:Dock.Model.Core" 
              Name = "Recruiting"           
              RequestedThemeVariant="Default">
-
-    <Application.DataTemplates>
-        <local:ViewLocator/>
-    </Application.DataTemplates>
-
+  
+  <Application.DataTemplates>
+    <local:ViewLocator/>
+  </Application.DataTemplates>
+  
   <Application.Resources>
-    <idcr:ControlRecycling x:Key="ControlRecyclingKey" />
+    <ControlRecycling x:Key="ControlRecyclingKey" />
   </Application.Resources>  
-
+  
   <Application.Styles>
     <FluentTheme>
       <FluentTheme.Palettes>

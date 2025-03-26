@@ -92,11 +92,14 @@ public class VacancyService : IVacancyService
         var candidateOnVacancies = new XElement("CandidateOnVacancies");
         foreach (var item in vacancy.CandidateOnVacancies)
         {
-            var candidateOnVacancy = new XElement("CandidateOnVacancy", new XAttribute("status", item.SelectionStatus.Name),
-                                                                        new XAttribute("created", item.CreationDate),
-                                                                        new XAttribute("modified", item.LastModificationDate));
-            candidateOnVacancy.Add(_candidates.Get(item.CandidateId).ToXml());
-            candidateOnVacancies.Add(candidateOnVacancy);
+            if (item.SelectionStatus != null && !string.IsNullOrEmpty(item.SelectionStatus.Name))
+            {
+                var candidateOnVacancy = new XElement("CandidateOnVacancy", new XAttribute("status", item.SelectionStatus.Name),
+                                                                            new XAttribute("created", item.CreationDate),
+                                                                            new XAttribute("modified", item.LastModificationDate));
+                candidateOnVacancy.Add(_candidates.Get(item.CandidateId).ToXml());
+                candidateOnVacancies.Add(candidateOnVacancy);
+            }
         }
         root.Add(candidateOnVacancies);
 

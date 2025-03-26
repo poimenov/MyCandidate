@@ -78,7 +78,7 @@ public class CompanyService : IDictionaryService<Company>
         }
     }
 
-    public Company Get(int id)
+    public Company? Get(int id)
     {
         return _companies.Get(id);
     }

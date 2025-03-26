@@ -16,19 +16,19 @@ public class City : Entity
     [Required]
     [StringLength(250, MinimumLength = 2)]
     [DisplayName("City")]
-    public override string Name { get; set; }
+    public override string Name { get; set; } = string.Empty;
 
     [ForeignKey(nameof(CountryId))]
     [Browsable(false)]
     public int CountryId { get; set; }
 
     [Required]
-    public Country Country { get; set; }
+    public Country? Country { get; set; }
 
     [Required]
     [DefaultValue(true)]
-    public override bool Enabled { get; set; }    
+    public override bool Enabled { get; set; }
 
     [Browsable(false)]
-    public virtual List<Location> Locations { get; set; }    
+    public virtual List<Location> Locations { get; set; } = new List<Location>();
 }

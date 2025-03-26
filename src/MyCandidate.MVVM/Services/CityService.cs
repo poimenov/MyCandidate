@@ -49,7 +49,7 @@ public class CityService : IDictionaryService<City>
         return true;
     }
 
-    public City Get(int id)
+    public City? Get(int id)
     {
         return _cities.Get(id);
     }

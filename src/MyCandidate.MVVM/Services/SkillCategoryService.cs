@@ -78,7 +78,7 @@ public class SkillCategoryService : IDictionaryService<SkillCategory>
         }
     }
 
-    public SkillCategory Get(int id)
+    public SkillCategory? Get(int id)
     {
         return _categories.Get(id);
     }

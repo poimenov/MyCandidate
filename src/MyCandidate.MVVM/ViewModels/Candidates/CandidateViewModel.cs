@@ -10,7 +10,6 @@ using System.Xml;
 using System.Xml.Xsl;
 using Avalonia.PropertyGrid.Services;
 using Dock.Model.ReactiveUI.Controls;
-using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using MyCandidate.Common;
 using MyCandidate.MVVM.DataAnnotations;
@@ -100,9 +99,9 @@ public class CandidateViewModel : Document
             Location = _candidate.Location
         };
 
-        Resources = new ResourcesViewModel(_candidate, _provider.Properties);
+        Resources = new ResourcesViewModel(_candidate, _provider.Properties!);
         Resources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
-        CandidateSkills = new SkillsViewModel(_candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill, x.Seniority)), _provider.Properties);
+        CandidateSkills = new SkillsViewModel(_candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill!, x.Seniority!)), _provider.Properties!);
         CandidateSkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
         CandidatesOnVacancy = new CandidateOnVacancyViewModel(this, _provider);
         Comments = new CommentsViewModel(this, _provider);
@@ -126,13 +125,12 @@ public class CandidateViewModel : Document
         get
         {
             var retVal = Validator.TryValidateObject(this, new ValidationContext(this), null, true)
-                && Resources.IsValid
-                && CandidateSkills.IsValid
-                && Comments.IsValid;
+                && Resources?.IsValid == true
+                && CandidateSkills?.IsValid == true
+                && Comments?.IsValid == true;
             return retVal;
         }
     }
-
     #region Commands
     public IReactiveCommand SaveCmd { get; }
 
@@ -150,9 +148,9 @@ public class CandidateViewModel : Document
                         return;
                     }
 
-                    _candidate.CandidateResources = Resources.Resources.Select(x => x.ToCandidateResource(Candidate)).ToList();
-                    _candidate.CandidateSkills = CandidateSkills.Skills.Select(x => x.ToCandidateSkill(_candidate)).ToList();
-                    _candidate.CandidateOnVacancies = CandidatesOnVacancy.GetCandidateOnVacancies();
+                    _candidate.CandidateResources = Resources?.Resources?.Select(x => x.ToCandidateResource(Candidate))?.ToList() ?? new List<CandidateResource>();
+                    _candidate.CandidateSkills = CandidateSkills?.Skills?.Select(x => x.ToCandidateSkill(_candidate))?.ToList() ?? new List<CandidateSkill>();
+                    _candidate.CandidateOnVacancies = CandidatesOnVacancy?.GetCandidateOnVacancies() ?? new List<CandidateOnVacancy>();
                     string message;
                     int id;
                     bool success;
@@ -182,7 +180,6 @@ public class CandidateViewModel : Document
                 }, this.WhenAnyValue(x => x.IsValid, v => v == true)
             );
     }
-
     public IReactiveCommand CancelCmd { get; }
 
     private IReactiveCommand CreateCancelCmd()
@@ -209,7 +206,7 @@ public class CandidateViewModel : Document
     private IReactiveCommand CreateSearchCmd()
     {
         return ReactiveCommand.Create(
-            async () =>
+            () =>
             {
                 _provider.OpenDock(_provider.GetVacancySearchViewModel(this));
             }, this.WhenAnyValue(x => x.CandidateId, y => y != 0));
@@ -246,7 +243,7 @@ public class CandidateViewModel : Document
                 }, this.WhenAnyValue(x => x.CandidateId, y => y != 0)
             );
     }
-    
+
     public IReactiveCommand ExportCmd { get; }
 
     private IReactiveCommand CreateExportCmd()
@@ -281,45 +278,51 @@ public class CandidateViewModel : Document
                                 xslt.Transform(doc, args, writer);
                             }
                             break;
-                        default:                            
-                            doc.Save(path);                            
+                        default:
+                            doc.Save(path);
                             break;
                     }
                     DataTemplateProvider.Open(path);
                     return Unit.Default;
                 }, this.WhenAnyValue(x => x.CandidateId, y => y != 0)
             );
-    }    
+    }
     #endregion
 
     #region FirstName
-    private string _firstName;
+    private string? _firstName;
     [Required]
     [StringLength(250, MinimumLength = 2)]
-    public string FirstName
+    public string? FirstName
     {
         get => _firstName;
         set
         {
-            _candidate.FirstName = value;
-            this.RaiseAndSetIfChanged(ref _firstName, value);
-            this.RaisePropertyChanged(nameof(IsValid));
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                _candidate.FirstName = value;
+                this.RaiseAndSetIfChanged(ref _firstName, value);
+                this.RaisePropertyChanged(nameof(IsValid));
+            }
         }
     }
     #endregion
 
     #region LastName
-    private string _lastName;
+    private string? _lastName;
     [Required]
     [StringLength(250, MinimumLength = 2)]
-    public string LastName
+    public string? LastName
     {
         get => _lastName;
         set
         {
-            _candidate.LastName = value;
-            this.RaiseAndSetIfChanged(ref _lastName, value);
-            this.RaisePropertyChanged(nameof(IsValid));
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                _candidate.LastName = value;
+                this.RaiseAndSetIfChanged(ref _lastName, value);
+                this.RaisePropertyChanged(nameof(IsValid));
+            }
         }
     }
     #endregion
@@ -366,15 +369,18 @@ public class CandidateViewModel : Document
     }
 
     #region Location
-    private LocationViewModel _location;
-    public LocationViewModel Location
+    private LocationViewModel? _location;
+    public LocationViewModel? Location
     {
         get => _location;
         set
         {
-            _candidate.Location = value.Location;
-            this.RaiseAndSetIfChanged(ref _location, value);
-            this.RaisePropertyChanged(nameof(IsValid));
+            if (value != null)
+            {
+                _candidate.Location = value.Location;
+                this.RaiseAndSetIfChanged(ref _location, value);
+                this.RaisePropertyChanged(nameof(IsValid));
+            }
         }
     }
     #endregion
@@ -394,8 +400,8 @@ public class CandidateViewModel : Document
     #endregion
 
     #region Resources
-    private ResourcesViewModel _resources;
-    public ResourcesViewModel Resources
+    private ResourcesViewModel? _resources;
+    public ResourcesViewModel? Resources
     {
         get => _resources;
         set => this.RaiseAndSetIfChanged(ref _resources, value);
@@ -403,8 +409,8 @@ public class CandidateViewModel : Document
     #endregion
 
     #region CandidateSkills
-    private SkillsViewModel _candidateSkills;
-    public SkillsViewModel CandidateSkills
+    private SkillsViewModel? _candidateSkills;
+    public SkillsViewModel? CandidateSkills
     {
         get => _candidateSkills;
         set => this.RaiseAndSetIfChanged(ref _candidateSkills, value);
@@ -412,8 +418,8 @@ public class CandidateViewModel : Document
     #endregion
 
     #region CandidatesOnVacancy
-    private CandidateOnVacancyViewModel _candidatesOnVacancy;
-    public CandidateOnVacancyViewModel CandidatesOnVacancy
+    private CandidateOnVacancyViewModel? _candidatesOnVacancy;
+    public CandidateOnVacancyViewModel? CandidatesOnVacancy
     {
         get => _candidatesOnVacancy;
         set => this.RaiseAndSetIfChanged(ref _candidatesOnVacancy, value);
@@ -421,8 +427,8 @@ public class CandidateViewModel : Document
     #endregion
 
     #region Comments
-    private CommentsViewModel _comments;
-    public CommentsViewModel Comments
+    private CommentsViewModel? _comments;
+    public CommentsViewModel? Comments
     {
         get => _comments;
         set => this.RaiseAndSetIfChanged(ref _comments, value);

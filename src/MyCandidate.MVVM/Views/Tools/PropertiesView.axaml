@@ -13,7 +13,7 @@
         <my:ExtendedPropertyGrid 
             x:Name="pgProperties"
             Margin="4" 
-            SelectedObject="{Binding SelectedItem}"
+            DataContext="{Binding SelectedItem}"
             ShowTitle="false"
             AllowQuickFilter="false"
             AllowFilter="false">                      

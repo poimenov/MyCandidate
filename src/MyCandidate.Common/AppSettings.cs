@@ -6,8 +6,8 @@ public class AppSettings
 {
     public const string APPLICATION_NAME = "MyCandidate";
     public const string JSON_FILE_NAME = "appsettings.json";
-    public string DefaultLanguage { get; set; }
-    public string DefaultTheme { get; set; }
+    public string DefaultLanguage { get; set; } = "en-US";
+    public string DefaultTheme { get; set; } = "Dark";
 
     public static string AppDataPath
     {

@@ -27,10 +27,11 @@ public class CommentsViewModel : ViewModelBase
         _vacancyViewModel = vacancyViewModel;
         _provider = appServiceProvider;
         _isVacancy = true;
+        _selectedItem = null!;
 
         Source = new ObservableCollectionExtended<CommentExt>(_provider.VacancyService.GetComments(vacancyViewModel.VacancyId).Select(x => new CommentExt(x)));
         Source.ToObservableChangeSet()
-            .Filter(VacancyFilter)
+            .Filter(VacancyFilter ?? Observable.Return<Func<CommentExt, bool>>(x => true))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _itemList)
             .Subscribe();
@@ -41,22 +42,22 @@ public class CommentsViewModel : ViewModelBase
 
         LoadComments();
 
-        _vacancyViewModel.WhenAnyValue(x => x.CandidatesOnVacancy.SelectedItem)
+        _vacancyViewModel.WhenAnyValue(x => x.CandidatesOnVacancy!.SelectedItem)
             .Subscribe(x =>
             {
                 CandidateOnVacancy = x;
             });
     }
-
     public CommentsViewModel(CandidateViewModel candidateViewModel, IAppServiceProvider appServiceProvider)
     {
         _candidateViewModel = candidateViewModel;
         _provider = appServiceProvider;
         _isVacancy = false;
+        _selectedItem = null!;
 
         Source = new ObservableCollectionExtended<CommentExt>(_provider.CandidateService.GetComments(candidateViewModel.CandidateId).Select(x => new CommentExt(x)));
         Source.ToObservableChangeSet()
-            .Filter(CandidateFilter)
+            .Filter(CandidateFilter ?? Observable.Return<Func<CommentExt, bool>>(x => true))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _itemList)
             .Subscribe();
@@ -67,29 +68,27 @@ public class CommentsViewModel : ViewModelBase
 
         LoadComments();
 
-        _candidateViewModel.WhenAnyValue(x => x.CandidatesOnVacancy.SelectedItem)
+        _candidateViewModel.WhenAnyValue(x => x.CandidatesOnVacancy!.SelectedItem)
             .Subscribe(x =>
             {
                 CandidateOnVacancy = x;
             });
     }
-
     public bool IsValid
     {
         get
-        {            
-            return ItemList.Any() ? !ItemList.Any(x => x.IsValid == false) : true;            
+        {
+            return ItemList.Any() ? !ItemList.Any(x => x.IsValid == false) : true;
         }
     }
 
     #region Filter
     private IObservable<Func<CommentExt, bool>>? VacancyFilter =>
-        _vacancyViewModel.WhenAnyValue(x => x.CandidatesOnVacancy.SelectedItem)
-            .Select((x) => MakeFilter(x));
-
+        _vacancyViewModel.WhenAnyValue(x => x.CandidatesOnVacancy!.SelectedItem)
+            .Select((x) => MakeFilter(x!));
     private IObservable<Func<CommentExt, bool>>? CandidateFilter =>
-        _candidateViewModel.WhenAnyValue(x => x.CandidatesOnVacancy.SelectedItem)
-            .Select((x) => MakeFilter(x));
+        _candidateViewModel.WhenAnyValue(x => x.CandidatesOnVacancy!.SelectedItem)
+            .Select((x) => MakeFilter(x!));
 
     private Func<CommentExt, bool> MakeFilter(CandidateOnVacancyExt candidateOnVacancy)
     {
@@ -144,7 +143,7 @@ public class CommentsViewModel : ViewModelBase
     private IReactiveCommand CreateAddCmd()
     {
         return ReactiveCommand.Create(
-            async () =>
+            () =>
             {
                 if (CandidateOnVacancy != null)
                 {
@@ -176,7 +175,7 @@ public class CommentsViewModel : ViewModelBase
     private IReactiveCommand CreateDeleteCmd()
     {
         return ReactiveCommand.Create(
-            async (CommentExt item) =>
+            (CommentExt item) =>
             {
                 Source.Remove(item);
                 this.RaisePropertyChanged(nameof(IsValid));
@@ -189,18 +188,18 @@ public class CommentsViewModel : ViewModelBase
     private IReactiveCommand CreateDeleteKetDownCmd()
     {
         return ReactiveCommand.Create(
-            async (KeyEventArgs args) =>
+            (KeyEventArgs args) =>
             {
-                if(args.Key == Key.Delete && SelectedItem != null)
+                if (args.Key == Key.Delete && SelectedItem != null)
                 {
                     Source.Remove(SelectedItem);
-                    this.RaisePropertyChanged(nameof(IsValid));                    
+                    this.RaisePropertyChanged(nameof(IsValid));
                 }
             },
             this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                 (obj, list) => obj != null && list.Count > 0)
         );
-    }    
+    }
     #endregion
 
     #region CandidateOnVacancy

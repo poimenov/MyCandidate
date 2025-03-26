@@ -16,19 +16,19 @@ public class Skill : Entity
     [Required]
     [StringLength(250)]
     [DisplayName("Skill")]
-    public override string Name { get; set; }
+    public override string Name { get; set; } = string.Empty;
 
     [ForeignKey(nameof(SkillCategoryId))]
     [Browsable(false)]
     public int SkillCategoryId { get; set; }
 
     [Required]
-    public SkillCategory SkillCategory { get; set; }
+    public SkillCategory? SkillCategory { get; set; }
 
     [Required]
     [DefaultValue(true)]
-    public override bool Enabled { get; set; }    
+    public override bool Enabled { get; set; }
 
     [Browsable(false)]
-    public virtual List<VacancySkill> VacancySkills { get; set; }    
+    public virtual List<VacancySkill> VacancySkills { get; set; } = new List<VacancySkill>();
 }

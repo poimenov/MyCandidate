@@ -19,22 +19,27 @@ public class SkillsViewModel : DictionaryViewModel<Skill>
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         Title = LocalizationService.Default["Skills"];
         var categories = new List<SkillCategory>() { new SkillCategory() { Id = 0, Name = string.Empty } };
-        categories.AddRange(ItemList.Select(x => x.SkillCategory).Distinct().ToList());
-        SkillCategories = categories;        
+        var skillCategoriesList = ItemList.Where(x => x.SkillCategory != null).Select(x => x.SkillCategory!).Distinct().ToList();
+        if (skillCategoriesList.Any())
+        {
+            categories.AddRange(skillCategoriesList);
+        }
+
+        SkillCategories = categories;
     }
 
     protected override IObservable<Func<Skill, bool>>? Filter =>
         this.WhenAnyValue(x => x.Enabled, x => x.Name, x => x.SelectedSkillCategory)
-            .Select((x) => MakeFilter(x.Item1, x.Item2, x.Item3));    
+            .Select((x) => MakeFilter(x.Item1, x.Item2, x.Item3));
 
     private void CultureChanged(object? sender, EventArgs e)
     {
         Title = LocalizationService.Default["Skills"];
-    }  
+    }
 
     #region SkillCategories
-    private IEnumerable<SkillCategory> _skillCategories;
-    public IEnumerable<SkillCategory> SkillCategories
+    private IEnumerable<SkillCategory>? _skillCategories;
+    public IEnumerable<SkillCategory>? SkillCategories
     {
         get => _skillCategories;
         set => this.RaiseAndSetIfChanged(ref _skillCategories, value);
@@ -55,7 +60,7 @@ public class SkillsViewModel : DictionaryViewModel<Skill>
         return item =>
         {
             var byCountry = true;
-            if(category != null && category.Id != 0)
+            if (category != null && category.Id != 0)
             {
                 byCountry = item.SkillCategoryId == category.Id;
             }
@@ -74,5 +79,5 @@ public class SkillsViewModel : DictionaryViewModel<Skill>
                 return byName && byCountry;
             }
         };
-    }          
+    }
 }

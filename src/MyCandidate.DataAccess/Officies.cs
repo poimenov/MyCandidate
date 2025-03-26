@@ -18,8 +18,8 @@ public class Officies : IDataAccess<Office>
             using (var db = new Database())
             {
                 return db.Offices.Include(x => x.Company)
-                    .Include(x => x.Location)
-                    .ThenInclude(x => x.City)
+                    .Include(x => x.Location!)
+                    .ThenInclude(x => x.City!)
                     .ThenInclude(x => x.Country)
                     .ToList();
             }
@@ -39,8 +39,12 @@ public class Officies : IDataAccess<Office>
                     if (!db.Offices.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower() && x.CompanyId == item.CompanyId))
                     {
                         item.Company = null;
-                        item.Location.City = null;
-                        item.Location.Address = item.Location.Address ?? string.Empty;
+                        if (item.Location != null)
+                        {
+                            item.Location.City = null;
+                            item.Location.Address = item.Location.Address ?? string.Empty;
+                        }
+
                         db.Offices.Add(item);
                     }
                 }
@@ -79,8 +83,8 @@ public class Officies : IDataAccess<Office>
         using (var db = new Database())
         {
             return db.Offices.Include(x => x.Company)
-                .Include(x => x.Location)
-                .ThenInclude(x => x.City)
+                .Include(x => x.Location!)
+                .ThenInclude(x => x.City!)
                 .ThenInclude(x => x.Country)
                 .FirstOrDefault(x => x.Id == itemId);
         }
@@ -104,8 +108,8 @@ public class Officies : IDataAccess<Office>
                         entity.Enabled = item.Enabled;
 
                         var entityLocation = db.Locations.First(x => x.Id == entity.LocationId);
-                        entityLocation.Address = item.Location.Address;
-                        entityLocation.CityId = item.Location.CityId;
+                        entityLocation.Address = item.Location!.Address;
+                        entityLocation.CityId = item.Location!.CityId;
                     }
                 }
                 db.SaveChanges();

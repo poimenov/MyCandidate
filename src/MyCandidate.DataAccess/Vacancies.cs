@@ -125,11 +125,11 @@ namespace MyCandidate.DataAccess
             using (var db = new Database())
             {
                 return db.Vacancies
-                    .Include(x => x.Office)
+                    .Include(x => x.Office!)
                     .ThenInclude(x => x.Company)
-                    .Include(x => x.Office)
-                    .ThenInclude(x => x.Location)
-                    .ThenInclude(x => x.City)
+                    .Include(x => x.Office!)
+                    .ThenInclude(x => x.Location!)
+                    .ThenInclude(x => x.City!)
                     .ThenInclude(x => x.Country)
                     .Include(x => x.VacancyStatus)
                     .Include(x => x.VacancyResources)
@@ -137,7 +137,7 @@ namespace MyCandidate.DataAccess
                     .Include(x => x.VacancySkills)
                     .ThenInclude(x => x.Seniority)
                     .Include(x => x.VacancySkills)
-                    .ThenInclude(x => x.Skill)
+                    .ThenInclude(x => x.Skill!)
                     .ThenInclude(x => x.SkillCategory)
                     .Include(x => x.CandidateOnVacancies)
                     .ThenInclude(x => x.SelectionStatus)
@@ -150,7 +150,7 @@ namespace MyCandidate.DataAccess
             using (var db = new Database())
             {
                 var query = db.Vacancies.AsQueryable();
-                query = query.Include(x => x.Office)
+                query = query.Include(x => x.Office!)
                     .ThenInclude(x => x.Company)
                     .Include(x => x.VacancyStatus)
                     .Include(x => x.VacancySkills)
@@ -177,14 +177,14 @@ namespace MyCandidate.DataAccess
                 }
                 else if (searchParams.CompanyId.HasValue)
                 {
-                    query = query.Where(x => x.Office.CompanyId == searchParams.CompanyId.Value);
+                    query = query.Where(x => x.Office!.CompanyId == searchParams.CompanyId.Value);
                 }
 
                 if (searchParams.Skills.Any())
                 {
                     foreach (var skill in searchParams.Skills)
                     {
-                        if(searchParams.SearchStrictBySeniority)
+                        if (searchParams.SearchStrictBySeniority)
                         {
                             query = query.Where(x => x.VacancySkills.Any(s => s.SkillId == skill.SkillId && s.SeniorityId == skill.SeniorityId));
                         }
@@ -194,12 +194,12 @@ namespace MyCandidate.DataAccess
                         }
                     }
 
-                    if(!searchParams.SearchStrictBySeniority)
+                    if (!searchParams.SearchStrictBySeniority)
                     {
                         return query.ToList().OrderDescending(new VacancySkillsComparer(searchParams.Skills));
                     }
                 }
-            
+
                 return query.ToList();
             }
         }
@@ -209,7 +209,7 @@ namespace MyCandidate.DataAccess
             using (var db = new Database())
             {
                 return db.Vacancies.OrderByDescending(x => x.LastModificationDate).Take(count).ToList();
-            }            
+            }
         }
 
         public void Update(Vacancy vacancy)

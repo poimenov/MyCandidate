@@ -17,17 +17,17 @@ namespace MyCandidate.Common
         [Required]
         [StringLength(250, MinimumLength = 3)]
         [DisplayName("Category_Name")]
-        public override string Name { get; set; }
+        public override string Name { get; set; } = string.Empty;
 
         [Required]
         [DefaultValue(true)]
         public override bool Enabled { get; set; }
 
         [Browsable(false)]
-        public virtual List<Skill> Skills { get; set; }
+        public virtual List<Skill> Skills { get; set; } = new List<Skill>();
     }
 
-    public class SkillCategoryEqualityComparer : IEqualityComparer<SkillCategory>
+    public class SkillCategoryEqualityComparer : IEqualityComparer<SkillCategory?>
     {
         public bool Equals(SkillCategory? x, SkillCategory? y)
         {
@@ -45,5 +45,5 @@ namespace MyCandidate.Common
         }
 
         public int GetHashCode([DisallowNull] SkillCategory obj) => HashCode.Combine(obj.Id.GetHashCode(), obj.Name.GetHashCode(), obj.Enabled.GetHashCode());
-    }    
+    }
 }

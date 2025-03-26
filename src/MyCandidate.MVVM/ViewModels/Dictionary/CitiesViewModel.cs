@@ -19,7 +19,7 @@ public class CitiesViewModel : DictionaryViewModel<City>
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         Title = LocalizationService.Default["Cities"];
         var countries = new List<Country>() { new Country() { Id = 0, Name = string.Empty } };
-        countries.AddRange(ItemList.Select(x => x.Country).Distinct().ToList());
+        countries.AddRange(ItemList.Select(x => x.Country!).Distinct().ToList());
         Countries = countries;
     }
 
@@ -33,8 +33,8 @@ public class CitiesViewModel : DictionaryViewModel<City>
     }
 
     #region Countries
-    private IEnumerable<Country> _countries;
-    public IEnumerable<Country> Countries
+    private IEnumerable<Country>? _countries;
+    public IEnumerable<Country>? Countries
     {
         get => _countries;
         set => this.RaiseAndSetIfChanged(ref _countries, value);

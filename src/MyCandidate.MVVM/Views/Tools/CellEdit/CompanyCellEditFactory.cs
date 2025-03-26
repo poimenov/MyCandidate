@@ -20,7 +20,7 @@ class CompanyCellEditFactory : AbstractCellEditFactory
 
     public CompanyCellEditFactory()
     {
-        _dataAccess = ((App)Application.Current).GetRequiredService<IDataAccess<Company>>();
+        _dataAccess = ((App)Application.Current!)!.GetRequiredService<IDataAccess<Company>>();
     }
 
     public CompanyCellEditFactory(IDataAccess<Company> dataAccess)
@@ -32,7 +32,7 @@ class CompanyCellEditFactory : AbstractCellEditFactory
     {
         return accessToken is ExtendedPropertyGrid;
     }
-    public override Control HandleNewProperty(PropertyCellContext context)
+    public override Control? HandleNewProperty(PropertyCellContext context)
     {
         var propertyDescriptor = context.Property;
         var target = context.Target;
@@ -83,7 +83,10 @@ class CompanyCellEditFactory : AbstractCellEditFactory
             return false;
         }
 
-        ValidateProperty(control, propertyDescriptor, target);
+        if (control != null)
+        {
+            ValidateProperty(control, propertyDescriptor, target);
+        }
 
         if (control is ComboBox cb && target is Office office)
         {

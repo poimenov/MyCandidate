@@ -49,7 +49,7 @@ public class SkillService : IDictionaryService<Skill>
         return true;
     }
 
-    public Skill Get(int id)
+    public Skill? Get(int id)
     {
         return _skills.Get(id);
     }

@@ -16,7 +16,7 @@ public class VacancyStatus : Entity
     [Required]
     [StringLength(250)]
     [Display(Name = "Name", Order = 3)]
-    public override string Name { get; set; }
+    public override string Name { get; set; } = string.Empty;
 
     [Required]
     [DefaultValue(true)]
@@ -24,5 +24,5 @@ public class VacancyStatus : Entity
     public override bool Enabled { get; set; }
 
     [Browsable(false)]
-    public virtual List<Vacancy> Vacancies { get; set; }      
+    public virtual List<Vacancy> Vacancies { get; set; } = new List<Vacancy>();
 }

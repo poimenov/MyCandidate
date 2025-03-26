@@ -16,14 +16,14 @@ public class Office : Entity
     [Required]
     [StringLength(250, MinimumLength = 2)]
     [DisplayName("Office")]
-    public override string Name { get; set; }
+    public override string Name { get; set; } = string.Empty;
 
     [ForeignKey(nameof(CompanyId))]
     [Browsable(false)]
     public int CompanyId { get; set; }
 
     [Required]
-    public Company Company { get; set; }
+    public Company? Company { get; set; }
 
     [ForeignKey(nameof(LocationId))]
     [Browsable(false)]
@@ -31,12 +31,12 @@ public class Office : Entity
 
     [Required]
     [DisplayName("Address")]
-    public Location Location { get; set; }  
+    public Location? Location { get; set; }
 
     [Required]
     [DefaultValue(true)]
-    public override bool Enabled { get; set; }      
+    public override bool Enabled { get; set; }
 
     [Browsable(false)]
-    public virtual List<Vacancy> Vacancies { get; set; }    
+    public virtual List<Vacancy> Vacancies { get; set; } = new List<Vacancy>();
 }

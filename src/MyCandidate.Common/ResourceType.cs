@@ -17,7 +17,7 @@ namespace MyCandidate.Common
         [Required]
         [StringLength(250)]
         [Display(Name = "Name", Order = 3)]
-        public override string Name { get; set; }
+        public override string Name { get; set; } = string.Empty;
 
         [Required]
         [DefaultValue(true)]
@@ -25,13 +25,13 @@ namespace MyCandidate.Common
         public override bool Enabled { get; set; }
 
         [Browsable(false)]
-        public virtual List<CandidateResource> CandidateResources { get; set; }
+        public virtual List<CandidateResource> CandidateResources { get; set; } = new List<CandidateResource>();
 
         [Browsable(false)]
-        public virtual List<VacancyResource> VacancyResources { get; set; }        
+        public virtual List<VacancyResource> VacancyResources { get; set; } = new List<VacancyResource>();
     }
 
-    public class ResourceTypeEqualityComparer : IEqualityComparer<ResourceType>
+    public class ResourceTypeEqualityComparer : IEqualityComparer<ResourceType?>
     {
         public bool Equals(ResourceType? x, ResourceType? y)
         {

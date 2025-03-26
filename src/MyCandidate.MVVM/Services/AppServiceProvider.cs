@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Avalonia;
 using Dock.Model.Controls;
@@ -15,7 +14,7 @@ namespace MyCandidate.MVVM.Services;
 
 public class AppServiceProvider : IAppServiceProvider
 {
-    private App CurrentApplication => (App)Application.Current;
+    private App CurrentApplication => (App)Application.Current!;
     private readonly DockFactory _factory;
     public IFactory Factory => _factory;
 
@@ -57,7 +56,7 @@ public class AppServiceProvider : IAppServiceProvider
     #endregion    
 
     #region CandidateService
-    private ICandidateService _candidateService;
+    private ICandidateService? _candidateService;
     public ICandidateService CandidateService
     {
         get
@@ -73,7 +72,7 @@ public class AppServiceProvider : IAppServiceProvider
     #endregion
 
     #region VacancyService
-    private IVacancyService _vacancyService;
+    private IVacancyService? _vacancyService;
     public IVacancyService VacancyService
     {
         get
@@ -89,7 +88,7 @@ public class AppServiceProvider : IAppServiceProvider
     #endregion
 
     #region CountryService
-    private IDictionaryService<Country> _countryService;
+    private IDictionaryService<Country>? _countryService;
     public IDictionaryService<Country> CountryService
     {
         get
@@ -105,7 +104,7 @@ public class AppServiceProvider : IAppServiceProvider
     #endregion
 
     #region CityService
-    private IDictionaryService<City> _cityService;
+    private IDictionaryService<City>? _cityService;
     public IDictionaryService<City> CityService
     {
         get
@@ -121,7 +120,7 @@ public class AppServiceProvider : IAppServiceProvider
     #endregion
 
     #region CompanyService
-    private IDictionaryService<Company> _companyService;
+    private IDictionaryService<Company>? _companyService;
     public IDictionaryService<Company> CompanyService
     {
         get
@@ -137,7 +136,7 @@ public class AppServiceProvider : IAppServiceProvider
     #endregion
 
     #region OfficeService
-    private IDictionaryService<Office> _officeService;
+    private IDictionaryService<Office>? _officeService;
     public IDictionaryService<Office> OfficeService
     {
         get
@@ -153,7 +152,7 @@ public class AppServiceProvider : IAppServiceProvider
     #endregion
 
     #region SkillCategoryService
-    private IDictionaryService<SkillCategory> _skillCategoryService;
+    private IDictionaryService<SkillCategory>? _skillCategoryService;
     public IDictionaryService<SkillCategory> SkillCategoryService
     {
         get
@@ -169,7 +168,7 @@ public class AppServiceProvider : IAppServiceProvider
     #endregion
 
     #region SkillService
-    private IDictionaryService<Skill> _skillService;
+    private IDictionaryService<Skill>? _skillService;
     public IDictionaryService<Skill> SkillService
     {
         get
@@ -186,7 +185,7 @@ public class AppServiceProvider : IAppServiceProvider
     #endregion
 
     #region DictionariesDataAccess
-    private IDictionariesDataAccess _dictionariesDataAccess;
+    private IDictionariesDataAccess? _dictionariesDataAccess;
     public IDictionariesDataAccess DictionariesDataAccess
     {
         get
@@ -272,10 +271,10 @@ public class AppServiceProvider : IAppServiceProvider
             {
                 Factory.SetActiveDockable(existed);
             }
-            else if(CandidateService.Exist(candidateId))
+            else if (CandidateService.Exist(candidateId))
             {
                 OpenDock(new CandidateViewModel(this, candidateId));
-            }            
+            }
         }
     }
 
@@ -288,11 +287,11 @@ public class AppServiceProvider : IAppServiceProvider
             {
                 Factory.SetActiveDockable(existed);
             }
-            else if(VacancyService.Exist(vacancyId))
+            else if (VacancyService.Exist(vacancyId))
             {
                 OpenDock(new VacancyViewModel(this, vacancyId));
-            }            
-        }        
+            }
+        }
     }
 
     public CandidateSearchViewModel GetCandidateSearchViewModel()
@@ -327,7 +326,7 @@ public class AppServiceProvider : IAppServiceProvider
             else
             {
                 OpenDock(dockable);
-            }             
+            }
         }
     }
 

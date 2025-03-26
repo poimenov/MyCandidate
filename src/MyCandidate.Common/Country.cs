@@ -17,17 +17,17 @@ namespace MyCandidate.Common
         [Required]
         [StringLength(250, MinimumLength = 3)]
         [DisplayName("Country")]
-        public override string Name { get; set; }
+        public override string Name { get; set; } = string.Empty;
 
         [Required]
         [DefaultValue(true)]
         public override bool Enabled { get; set; }
 
         [Browsable(false)]
-        public virtual List<City> Cities { get; set; }
+        public virtual List<City> Cities { get; set; } = new List<City>();
     }
 
-    public class CountryEqualityComparer : IEqualityComparer<Country>
+    public class CountryEqualityComparer : IEqualityComparer<Country?>
     {
         public bool Equals(Country? x, Country? y)
         {
@@ -45,6 +45,6 @@ namespace MyCandidate.Common
         }
 
         public int GetHashCode([DisallowNull] Country obj) => HashCode.Combine(obj.Id.GetHashCode(), obj.Name.GetHashCode(), obj.Enabled.GetHashCode());
-    }    
+    }
 }
 

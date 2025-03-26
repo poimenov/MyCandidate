@@ -16,6 +16,9 @@ namespace MyCandidate.MVVM.Models
     }
     public class ResourceModel : ReactiveObject
     {
+        private string _value = string.Empty;
+        private ResourceType _resourceType = new() { Id = 1, Name = ResourceTypeNames.Path, Enabled = true };
+
         public ResourceModel(TargetModelType resourceModelType)
         {
             ResourceModelType = resourceModelType;
@@ -24,10 +27,10 @@ namespace MyCandidate.MVVM.Models
             Value = string.Empty;
         }
 
-        public ResourceModel(CandidateResource candidateResource)
+        public ResourceModel(CandidateResource? candidateResource)
         {
             ResourceModelType = TargetModelType.Candidate;
-            if (candidateResource != null)
+            if (candidateResource != null && candidateResource.ResourceType != null)
             {
                 Id = candidateResource.Id;
                 ResourceTypeId = candidateResource.ResourceTypeId;
@@ -42,23 +45,23 @@ namespace MyCandidate.MVVM.Models
             }
         }
 
-    public ResourceModel(VacancyResource vacancyResource)
-    {
-        ResourceModelType = TargetModelType.Vacancy;
-        if (vacancyResource != null)
+        public ResourceModel(VacancyResource? vacancyResource)
         {
-            Id = vacancyResource.Id;
-            ResourceTypeId = vacancyResource.ResourceTypeId;
-            ResourceType = vacancyResource.ResourceType;
-            Value = vacancyResource.Value;
+            ResourceModelType = TargetModelType.Vacancy;
+            if (vacancyResource != null && vacancyResource.ResourceType != null)
+            {
+                Id = vacancyResource.Id;
+                ResourceTypeId = vacancyResource.ResourceTypeId;
+                ResourceType = vacancyResource.ResourceType;
+                Value = vacancyResource.Value;
+            }
+            else
+            {
+                ResourceTypeId = 1;
+                ResourceType = new ResourceType { Id = 1, Name = ResourceTypeNames.Path, Enabled = true };
+                Value = string.Empty;
+            }
         }
-        else
-        {
-            ResourceTypeId = 1;
-            ResourceType = new ResourceType { Id = 1, Name = ResourceTypeNames.Path, Enabled = true };
-            Value = string.Empty;
-        }        
-    }        
 
         [Browsable(false)]
         public TargetModelType ResourceModelType { get; set; }
@@ -69,7 +72,6 @@ namespace MyCandidate.MVVM.Models
         [Browsable(false)]
         public int ResourceTypeId { get; set; }
 
-        private string _value;
         [Required]
         [StringLength(500, MinimumLength = 2)]
         [Browsable(false)]
@@ -149,7 +151,6 @@ namespace MyCandidate.MVVM.Models
             }
         }
 
-        private ResourceType _resourceType;
         [Required]
         [ConditionTarget]
         [DisplayName("Resource_Type")]

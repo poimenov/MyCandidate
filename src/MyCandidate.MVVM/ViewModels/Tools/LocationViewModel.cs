@@ -7,7 +7,6 @@ using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
 using MyCandidate.Common;
-using MyCandidate.Common.Interfaces;
 using PropertyModels.ComponentModel;
 using ReactiveUI;
 
@@ -22,7 +21,7 @@ public class LocationViewModel : ViewModelBase
         CitiesSource = new ObservableCollectionExtended<City>(cities);
         CitiesSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Filter(Filter)
+            .Filter(Filter!)
             .Bind(out _citiesList)
             .Subscribe();
 
@@ -48,7 +47,7 @@ public class LocationViewModel : ViewModelBase
             (
                 x =>
                 {
-                    if (x != null && Location.Address != x)
+                    if (x != null && Location!.Address != x)
                     {
                         Location.Address = x;
                         this.RaisePropertyChanged(nameof(this.Location));
@@ -61,7 +60,7 @@ public class LocationViewModel : ViewModelBase
             (
                 x =>
                 {
-                    if (x != null && Location.CityId != x.Id)
+                    if (x != null && Location!.CityId != x.Id)
                     {
                         Location.CityId = x.Id;
                         Location.City = x;
@@ -86,38 +85,38 @@ public class LocationViewModel : ViewModelBase
     private readonly ReadOnlyObservableCollection<City> _citiesList;
     public ReadOnlyObservableCollection<City> Cities => _citiesList;
 
-    private IEnumerable<Country> _countriesList;
-    public IEnumerable<Country> Countries
+    private IEnumerable<Country>? _countriesList;
+    public IEnumerable<Country>? Countries
     {
         get => _countriesList;
         set => _countriesList = value;
     }
 
-    private Location _location;
-    public Location Location
+    private Location? _location;
+    public Location? Location
     {
         get => _location;
         set => this.RaiseAndSetIfChanged(ref _location, value);
     }
 
-    private Country _country;
-    public Country Country
+    private Country? _country;
+    public Country? Country
     {
         get => _country;
         set => this.RaiseAndSetIfChanged(ref _country, value);
     }
 
-    private City _city;
-    public City City
+    private City? _city;
+    public City? City
     {
         get => _city;
         set => this.RaiseAndSetIfChanged(ref _city, value);
     }
 
-    private String _address;
+    private String? _address;
     //[Required]
     [StringLength(250)]
-    public String Address
+    public String? Address
     {
         get => _address;
         set => this.RaiseAndSetIfChanged(ref _address, value);

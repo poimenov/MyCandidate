@@ -17,17 +17,17 @@ namespace MyCandidate.Common
         [Required]
         [StringLength(250, MinimumLength = 2)]
         [DisplayName("Company")]
-        public override string Name { get; set; }
+        public override string Name { get; set; } = string.Empty;
 
         [Required]
         [DefaultValue(true)]
         public override bool Enabled { get; set; }
 
         [Browsable(false)]
-        public virtual List<Office> Officies { get; set; }
+        public virtual List<Office> Officies { get; set; } = new List<Office>();
     }
 
-    public class CompanyEqualityComparer : IEqualityComparer<Company>
+    public class CompanyEqualityComparer : IEqualityComparer<Company?>
     {
         public bool Equals(Company? x, Company? y)
         {
@@ -45,6 +45,6 @@ namespace MyCandidate.Common
         }
 
         public int GetHashCode([DisallowNull] Company obj) => HashCode.Combine(obj.Id.GetHashCode(), obj.Name.GetHashCode(), obj.Enabled.GetHashCode());
-    }    
+    }
 }
 

@@ -89,17 +89,29 @@ public class CandidateService : ICandidateService
     public XmlDocument GetXml(int id)
     {
         var candidate = _candidates.Get(id);
+        if (candidate == null)
+        {
+            return new XmlDocument();
+        }
+
         var root = candidate.ToXml();
         var candidateOnVacancies = new XElement("CandidateOnVacancies");
-        foreach(var item in  candidate.CandidateOnVacancies)
+        foreach (var item in candidate.CandidateOnVacancies)
         {
-            var candidateOnVacancy = new XElement("CandidateOnVacancy", new XAttribute("status", item.SelectionStatus.Name),
+            if (item.SelectionStatus != null && !string.IsNullOrEmpty(item.SelectionStatus.Name))
+            {
+                var candidateOnVacancy = new XElement("CandidateOnVacancy", new XAttribute("status", item.SelectionStatus.Name),
                                                                         new XAttribute("created", item.CreationDate),
                                                                         new XAttribute("modified", item.LastModificationDate));
-            candidateOnVacancy.Add(_vacancies.Get(item.VacancyId).ToXml());            
-            candidateOnVacancies.Add(candidateOnVacancy);
-        }  
-        root.Add(candidateOnVacancies);      
+                var vacancy = _vacancies.Get(item.VacancyId);
+                if (vacancy != null)
+                {
+                    candidateOnVacancy.Add(vacancy.ToXml());
+                    candidateOnVacancies.Add(candidateOnVacancy);
+                }
+            }
+        }
+        root.Add(candidateOnVacancies);
 
         StringBuilder sb = new StringBuilder();
         using (var writer = XmlWriter.Create(sb))
@@ -109,9 +121,8 @@ public class CandidateService : ICandidateService
 
         var retVal = new XmlDocument();
         retVal.LoadXml(sb.ToString());
-        return retVal; 
-    }    
-
+        return retVal;
+    }
     public IEnumerable<CandidateOnVacancy> GetCandidateOnVacancies(int candidateId)
     {
         return _candidateOnVacancies.GetListByCandidateId(candidateId);

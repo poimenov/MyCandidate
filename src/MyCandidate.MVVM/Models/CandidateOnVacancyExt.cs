@@ -21,15 +21,13 @@ public class CandidateOnVacancyExt : CandidateOnVacancy
 
     [DisplayName("Vacancy")]
     [Category("Main")]
-    public string VacancyName => Vacancy.Name;
-
+    public string VacancyName => Vacancy?.Name ?? string.Empty;
     [DisplayName("Candidate")]
     [Category("Main")]
-    public string CandidateName => Candidate.Name;
-
+    public string CandidateName => Candidate?.Name ?? string.Empty;
     [DisplayName("Selection_Status")]
     [Category("Main")]
-    public override SelectionStatus SelectionStatus { get; set; } 
+    public override SelectionStatus? SelectionStatus { get; set; } 
 
     [DisplayName("Creation_Date")]        
     public string Created => CreationDate.ToString("G");

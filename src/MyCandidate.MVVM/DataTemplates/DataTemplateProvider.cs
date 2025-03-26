@@ -27,7 +27,7 @@ public static class DataTemplateProvider
     {
         return new TextBlock
                 {
-                    Text = GetComboBoxItemText(resourceType?.Name),
+                    Text = GetComboBoxItemText(resourceType?.Name ?? string.Empty),
                     Margin = new Thickness(4, 0),
                     VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
                 };

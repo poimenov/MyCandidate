@@ -5,7 +5,7 @@ using PropertyModels.ComponentModel;
 
 namespace MyCandidate.Common;
 
-public class VacancyResource: ReactiveObject
+public class VacancyResource : ReactiveObject
 {
     [Key]
     [ReadOnly(true)]
@@ -16,20 +16,20 @@ public class VacancyResource: ReactiveObject
     [Required]
     [StringLength(500, MinimumLength = 2)]
     [DisplayName("Value")]
-    public virtual string Value { get; set; }   
+    public virtual string Value { get; set; } = string.Empty;
 
     [ForeignKey(nameof(VacancyId))]
     [Browsable(false)]
-    public int VacancyId { get; set; }  
-    
+    public int VacancyId { get; set; }
+
     [Browsable(false)]
-    public Vacancy Vacancy { get; set; }   
-    
+    public Vacancy? Vacancy { get; set; }
+
     [ForeignKey(nameof(ResourceTypeId))]
     [Browsable(false)]
-    public int ResourceTypeId { get; set; }  
-    
+    public int ResourceTypeId { get; set; }
+
     [Required]
     [DisplayName("Resource_Type")]
-    public virtual ResourceType ResourceType { get; set; }           
+    public virtual ResourceType? ResourceType { get; set; }
 }

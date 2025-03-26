@@ -19,8 +19,8 @@ public class SkillsCellFactory : AbstractCellEditFactory
 
     public SkillsCellFactory()
     {
-        //_skillCategories = ((App)Application.Current).GetRequiredService<IDataAccess<SkillCategory>>();
-        _skills = ((App)Application.Current).GetRequiredService<IDataAccess<Skill>>();
+        //_skillCategories = ((App)Application.Current!)!.GetRequiredService<IDataAccess<SkillCategory>>();
+        _skills = ((App)Application.Current!)!.GetRequiredService<IDataAccess<Skill>>();
         _dictionaries = ((App)Application.Current).GetRequiredService<IDictionariesDataAccess>();
     }
 
@@ -36,7 +36,7 @@ public class SkillsCellFactory : AbstractCellEditFactory
         return accessToken is ExtendedPropertyGrid;
     }
 
-    public override Control HandleNewProperty(PropertyCellContext context)
+    public override Control? HandleNewProperty(PropertyCellContext context)
     {
         var propertyDescriptor = context.Property;
         var target = context.Target;
@@ -82,7 +82,10 @@ public class SkillsCellFactory : AbstractCellEditFactory
             return false;
         }
 
-        ValidateProperty(control, propertyDescriptor, target);
+        if (control != null)
+        {
+            ValidateProperty(control, propertyDescriptor, target);
+        }
 
         return false;
     }

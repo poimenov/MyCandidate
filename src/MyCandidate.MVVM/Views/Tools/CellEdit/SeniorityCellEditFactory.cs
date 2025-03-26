@@ -20,7 +20,7 @@ public class SeniorityCellEditFactory : AbstractCellEditFactory
     private readonly IDictionariesDataAccess _dataAccess;
     public SeniorityCellEditFactory()
     {
-        _dataAccess = ((App)Application.Current).GetRequiredService<IDictionariesDataAccess>();
+        _dataAccess = ((App)Application.Current!)!.GetRequiredService<IDictionariesDataAccess>();
     }
 
     public SeniorityCellEditFactory(IDictionariesDataAccess dataAccess)
@@ -33,7 +33,7 @@ public class SeniorityCellEditFactory : AbstractCellEditFactory
         return accessToken is ExtendedPropertyGrid;
     }
 
-    public override Control HandleNewProperty(PropertyCellContext context)
+    public override Control? HandleNewProperty(PropertyCellContext context)
     {
         var propertyDescriptor = context.Property;
         var target = context.Target;
@@ -79,12 +79,15 @@ public class SeniorityCellEditFactory : AbstractCellEditFactory
             return false;
         }
 
-        ValidateProperty(control, propertyDescriptor, target);
+        if (control is not null)
+        {
+            ValidateProperty(control, propertyDescriptor, target);
+        }
 
         if (control is ComboBox cb && target is SkillModel skillModel)
         {
             cb.SelectedItem = skillModel.Seniority;
-            cb.SelectedIndex = cb.ItemsSource!.OfType<Seniority>().IndexOf(skillModel.Seniority, new SeniorityEqualityComparer());
+            cb.SelectedIndex = cb.ItemsSource!.OfType<Seniority?>().IndexOf(skillModel.Seniority, new SeniorityEqualityComparer());
             return true;
         }
 

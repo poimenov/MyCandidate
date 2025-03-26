@@ -20,7 +20,7 @@ public class OfficiesViewModel : DictionaryViewModel<Office>
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         Title = LocalizationService.Default["Officies"];
         var companies = new List<Company>() { new Company() { Id = 0, Name = string.Empty } };
-        companies.AddRange(ItemList.Select(x => x.Company).Distinct().ToList());
+        companies.AddRange(ItemList.Select(x => x.Company!).Distinct().ToList());
         Companies = companies;
     }
 
@@ -30,7 +30,7 @@ public class OfficiesViewModel : DictionaryViewModel<Office>
         {
             foreach (var item in ItemList)
             {
-                if (!item.IsValid() || !item.Location.IsValid())
+                if (!item.IsValid() || !item.Location!.IsValid())
                 {
                     return false;
                 }
@@ -49,8 +49,8 @@ public class OfficiesViewModel : DictionaryViewModel<Office>
     }
 
     #region Companies
-    private IEnumerable<Company> _companies;
-    public IEnumerable<Company> Companies
+    private IEnumerable<Company>? _companies;
+    public IEnumerable<Company>? Companies
     {
         get => _companies;
         set => this.RaiseAndSetIfChanged(ref _companies, value);

@@ -9,7 +9,7 @@ public class CommentExt : Comment
 {
     public CommentExt()
     {
-        //
+        Value = string.Empty;
     }
     public CommentExt(Comment comment)
     {
@@ -22,19 +22,18 @@ public class CommentExt : Comment
     }
     [DisplayName("Vacancy")]
     [Category("Main")]
-    public string VacancyName => CandidateOnVacancy.Vacancy.Name;
+    public string VacancyName => CandidateOnVacancy!.Vacancy!.Name;
 
     [DisplayName("Candidate")]
     [Category("Main")]
-    public string CandidateName => CandidateOnVacancy.Candidate.Name;
+    public string CandidateName => CandidateOnVacancy!.Candidate!.Name;
 
     [Required]
     [StringLength(2000)]
     [MultilineText]
     [DisplayName("Comment")]
     [Category("Main")]
-    public override string Value { get; set; }      
-    
+    public override string Value { get; set; }
     [DisplayName("Creation_Date")]
     public string Created => CreationDate.ToString("G");
 

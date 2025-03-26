@@ -16,20 +16,20 @@ public class Comment : ReactiveObject
     [Required]
     [StringLength(2000)]
     [DisplayName("Comment")]
-    public virtual string Value { get; set; }   
+    public virtual string Value { get; set; } = string.Empty;
 
     [ForeignKey(nameof(CandidateOnVacancyId))]
     [Browsable(false)]
-    public int CandidateOnVacancyId { get; set; }  
-    
+    public int CandidateOnVacancyId { get; set; }
+
     [Browsable(false)]
-    public CandidateOnVacancy CandidateOnVacancy { get; set; } 
+    public CandidateOnVacancy? CandidateOnVacancy { get; set; }
 
     [Required]
     [Browsable(false)]
-    public DateTime CreationDate { get; set; }    
+    public DateTime CreationDate { get; set; }
 
     [Required]
     [Browsable(false)]
-    public DateTime LastModificationDate { get; set; }          
+    public DateTime LastModificationDate { get; set; }
 }

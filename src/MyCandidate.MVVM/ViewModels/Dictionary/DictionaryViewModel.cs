@@ -10,7 +10,6 @@ using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
 using DynamicData.Binding;
 using log4net;
-using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.Extensions;
@@ -37,11 +36,12 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
         _log = log;
         _deletedIds = new List<int>();
         _updatedIds = new List<int>();
+        _name = string.Empty;
 
         Source = new ObservableCollectionExtended<T>(_service!.ItemsList);
         Source.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Filter(Filter)
+            .Filter(Filter ?? Observable.Return<Func<T, bool>>(x => true))
             .Bind(out _itemList)
             .Subscribe();
 
@@ -137,11 +137,8 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
             },
             this.WhenAnyValue(x => x.IsValid, v => v == true)
         );
-    }
 
-    public virtual bool IsValid
-    {
-        get
+    }    public virtual bool IsValid    {        get
         {
             foreach (var item in ItemList)
             {
