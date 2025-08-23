@@ -6,14 +6,15 @@ namespace MyCandidate.DataAccess
 {
     public class Vacancies : IVacancies
     {
-        public Vacancies()
+        private readonly IDatabaseFactory _databaseFactory;
+        public Vacancies(IDatabaseFactory databaseFactory)
         {
-            //
+            _databaseFactory = databaseFactory;
         }
 
         public bool Exist(int id)
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 return db.Vacancies.Any(x => x.Id == id);
             }
@@ -24,7 +25,7 @@ namespace MyCandidate.DataAccess
             bool retVal = false;
             id = 0;
 
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 using (var transaction = db.Database.BeginTransaction())
                 {
@@ -82,7 +83,7 @@ namespace MyCandidate.DataAccess
 
         public void Delete(int id)
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 using (var transaction = db.Database.BeginTransaction())
                 {
@@ -122,7 +123,7 @@ namespace MyCandidate.DataAccess
 
         public Vacancy Get(int id)
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 return db.Vacancies
                     .Include(x => x.Office!)
@@ -147,7 +148,7 @@ namespace MyCandidate.DataAccess
 
         public IEnumerable<Vacancy> Search(VacancySearch searchParams)
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 var query = db.Vacancies.AsQueryable();
                 query = query.Include(x => x.Office!)
@@ -206,7 +207,7 @@ namespace MyCandidate.DataAccess
 
         public IEnumerable<Vacancy> GetRecent(int count)
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 return db.Vacancies.OrderByDescending(x => x.LastModificationDate).Take(count).ToList();
             }
@@ -214,7 +215,7 @@ namespace MyCandidate.DataAccess
 
         public void Update(Vacancy vacancy)
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 using (var transaction = db.Database.BeginTransaction())
                 {

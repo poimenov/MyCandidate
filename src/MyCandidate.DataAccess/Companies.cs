@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
 
@@ -5,16 +6,17 @@ namespace MyCandidate.DataAccess;
 
 public class Companies : IDataAccess<Company>
 {
-    public Companies()
+    private readonly IDatabaseFactory _databaseFactory;
+    public Companies(IDatabaseFactory databaseFactory)
     {
-        //
+        _databaseFactory = databaseFactory;
     }
 
     public IEnumerable<Company> ItemsList
     {
         get
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 return db.Companies.ToList();
             }
@@ -25,7 +27,7 @@ public class Companies : IDataAccess<Company>
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -46,7 +48,7 @@ public class Companies : IDataAccess<Company>
     {
         if (null == itemIds || itemIds.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -66,7 +68,7 @@ public class Companies : IDataAccess<Company>
 
     public Company? Get(int itemId)
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.Companies.FirstOrDefault(x => x.Id == itemId);
         }
@@ -76,7 +78,7 @@ public class Companies : IDataAccess<Company>
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -97,7 +99,7 @@ public class Companies : IDataAccess<Company>
 
     public bool Any()
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.Companies.Any(x => x.Enabled == true);
         }

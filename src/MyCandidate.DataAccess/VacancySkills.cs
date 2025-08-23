@@ -6,9 +6,15 @@ namespace MyCandidate.DataAccess;
 
 public class VacancySkills : IVacancySkills
 {
+    private readonly IDatabaseFactory _databaseFactory;
+    public VacancySkills(IDatabaseFactory databaseFactory)
+    {
+        _databaseFactory = databaseFactory;
+    }
+
     public VacancySkill Get(int id)
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.VacancySkills
                 .Include(x => x.Seniority)
@@ -20,7 +26,7 @@ public class VacancySkills : IVacancySkills
 
     public IEnumerable<VacancySkill> GetVacancySkills(int vacancyId)
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.VacancySkills
                 .Include(x => x.Seniority)

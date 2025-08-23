@@ -6,14 +6,15 @@ namespace MyCandidate.DataAccess;
 
 public class CandidateOnVacancies : ICandidateOnVacancies
 {
-    public CandidateOnVacancies()
+    private readonly IDatabaseFactory _databaseFactory;
+    public CandidateOnVacancies(IDatabaseFactory databaseFactory)
     {
-        //
+        _databaseFactory = databaseFactory;
     }
 
     public IEnumerable<CandidateOnVacancy> GetListByCandidateId(int candidateId)
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.CandidateOnVacancies
                         .Where(x => x.CandidateId == candidateId)
@@ -26,7 +27,7 @@ public class CandidateOnVacancies : ICandidateOnVacancies
 
     public IEnumerable<CandidateOnVacancy> GetListByVacancyId(int vacancyId)
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.CandidateOnVacancies
                         .Where(x => x.VacancyId == vacancyId)

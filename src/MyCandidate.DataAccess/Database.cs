@@ -1,19 +1,20 @@
 namespace MyCandidate.DataAccess;
+
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyCandidate.Common;
 
-internal class Database : DbContext
+public class Database : DbContext
 {
-    public const string DB_FILE_NAME = "MyCandidate.db";
-
-    public Database()
+    public Database(DbContextOptions<Database> options) : base(options)
     {
-        this.Database.Migrate();
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        options.UseSqlite($"Data Source={DB_FILE_NAME}");
+        configurationBuilder
+            .Properties<DateTime>()
+            .HaveConversion<DateTimeUtcConverter>();
     }
 
     public virtual DbSet<Country> Countries { get; set; }
@@ -35,4 +36,13 @@ internal class Database : DbContext
     public virtual DbSet<VacancySkill> VacancySkills { get; set; }
     public virtual DbSet<CandidateOnVacancy> CandidateOnVacancies { get; set; }
     public virtual DbSet<Comment> Comments { get; set; }
+}
+
+public class DateTimeUtcConverter : ValueConverter<DateTime, DateTime>
+{
+    public DateTimeUtcConverter()
+        : base(
+            v => v.ToUniversalTime(),
+            v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
+    { }
 }

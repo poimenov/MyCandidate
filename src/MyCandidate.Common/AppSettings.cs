@@ -6,6 +6,7 @@ public class AppSettings
 {
     public const string APPLICATION_NAME = "MyCandidate";
     public const string JSON_FILE_NAME = "appsettings.json";
+    public const string DB_FILE_NAME = "MyCandidate.db";
     public string DefaultLanguage { get; set; } = "en-US";
     public string DefaultTheme { get; set; } = "Dark";
 
@@ -27,4 +28,24 @@ public class AppSettings
             File.WriteAllText(filePath, jsonString);
         }
     }
+}
+
+public class DatabaseSettings
+{
+    public DatabaseType DatabaseType { get; set; } = DatabaseType.SQLite;
+    public ConnectionStrings ConnectionStrings { get; set; } = new ConnectionStrings();
+}
+
+public class ConnectionStrings
+{
+    public string SqlServer { get; set; } = string.Empty;
+    public string PostgreSQL { get; set; } = string.Empty;
+    public string SQLite { get; set; } = string.Empty;
+}
+
+public enum DatabaseType
+{
+    SqlServer,
+    PostgreSQL,
+    SQLite
 }

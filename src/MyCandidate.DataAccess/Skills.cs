@@ -6,16 +6,17 @@ namespace MyCandidate.DataAccess;
 
 public class Skills : IDataAccess<Skill>
 {
-    public Skills()
+    private readonly IDatabaseFactory _databaseFactory;
+    public Skills(IDatabaseFactory databaseFactory)
     {
-        //
+        _databaseFactory = databaseFactory;
     }
 
     public IEnumerable<Skill> ItemsList
     {
         get
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 return db.Skills.Include(x => x.SkillCategory).ToList();
             }
@@ -26,7 +27,7 @@ public class Skills : IDataAccess<Skill>
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -48,7 +49,7 @@ public class Skills : IDataAccess<Skill>
     {
         if (null == itemIds || itemIds.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -68,7 +69,7 @@ public class Skills : IDataAccess<Skill>
 
     public Skill? Get(int itemId)
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.Skills.FirstOrDefault(x => x.Id == itemId);
         }
@@ -78,7 +79,7 @@ public class Skills : IDataAccess<Skill>
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -100,7 +101,7 @@ public class Skills : IDataAccess<Skill>
 
     public bool Any()
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.Skills.Any(x => x.Enabled == true);
         }

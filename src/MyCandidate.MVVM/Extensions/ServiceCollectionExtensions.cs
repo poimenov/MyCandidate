@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
@@ -11,7 +12,7 @@ namespace MyCandidate.MVVM.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services
             .AddSingleton<MainWindowViewModel>()
@@ -20,7 +21,7 @@ public static class ServiceCollectionExtensions
                 DataContext = service.GetRequiredService<MainWindowViewModel>()
             })
             //data access 
-            .AddTransient<IDatabaseMigrator, DatabaseMigrator>()
+            .AddDatabaseServices(configuration)
             .AddTransient<IDataAccess<Country>, Countries>()
             .AddTransient<IDataAccess<City>, Cities>()
             .AddTransient<IDataAccess<Skill>, Skills>()

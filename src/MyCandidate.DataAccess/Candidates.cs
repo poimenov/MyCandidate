@@ -6,14 +6,15 @@ namespace MyCandidate.DataAccess
 {
     public class Candidates : ICandidates
     {
-        public Candidates()
+        private readonly IDatabaseFactory _databaseFactory;
+        public Candidates(IDatabaseFactory databaseFactory)
         {
-            //
+            _databaseFactory = databaseFactory;
         }
 
         public bool Exist(int id)
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 return db.Candidates.Any(x => x.Id == id);
             }
@@ -21,7 +22,7 @@ namespace MyCandidate.DataAccess
 
         public bool Exist(string lastName, string firstName, DateTime? birthdate)
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 return db.Candidates.Any(x => x.LastName.Trim().ToLower() == lastName.Trim().ToLower()
                                                 && x.FirstName.Trim().ToLower() == firstName.Trim().ToLower()
@@ -31,7 +32,7 @@ namespace MyCandidate.DataAccess
 
         public void Delete(int id)
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 using (var transaction = db.Database.BeginTransaction())
                 {
@@ -82,7 +83,7 @@ namespace MyCandidate.DataAccess
                 return retVal;
             }
 
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 using (var transaction = db.Database.BeginTransaction())
                 {
@@ -148,7 +149,7 @@ namespace MyCandidate.DataAccess
 
         public void Update(Candidate candidate)
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 using (var transaction = db.Database.BeginTransaction())
                 {
@@ -188,7 +189,7 @@ namespace MyCandidate.DataAccess
 
         public Candidate Get(int id)
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 return db.Candidates
                     .Include(x => x.Location!)
@@ -211,7 +212,7 @@ namespace MyCandidate.DataAccess
 
         public IEnumerable<Candidate> GetRecent(int count)
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 return db.Candidates.OrderByDescending(x => x.LastModificationDate).Take(count).ToList();
             }
@@ -219,7 +220,7 @@ namespace MyCandidate.DataAccess
 
         public IEnumerable<Candidate> Search(CandidateSearch searchParams)
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 var query = db.Candidates.AsQueryable();
                 query = query.Include(x => x.Location!)

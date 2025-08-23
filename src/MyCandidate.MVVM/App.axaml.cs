@@ -22,7 +22,7 @@ public partial class App : Application
 {
     private const string DATA_DIRECTORY = "DATA_DIRECTORY";
     private IHost? _host;
-    private CancellationTokenSource? _cancellationTokenSource;    
+    private CancellationTokenSource? _cancellationTokenSource;
     public static IThemeManager? ThemeManager;
     public override void Initialize()
     {
@@ -44,12 +44,19 @@ public partial class App : Application
                 Environment.SetEnvironmentVariable(DATA_DIRECTORY, AppSettings.AppDataPath);
             }
 
-            var builder = Host.CreateApplicationBuilder();
-
-            builder.Configuration
+            var configurationManager = new ConfigurationManager();
+            configurationManager
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile(AppSettings.JSON_FILE_NAME, optional: true, reloadOnChange: true)
+                .AddJsonFile(AppSettings.JSON_FILE_NAME, optional: true, reloadOnChange: false)
                 .AddEnvironmentVariables();
+
+            var settings = new HostApplicationBuilderSettings
+            {
+                ApplicationName = AppSettings.APPLICATION_NAME,
+                Configuration = configurationManager
+            };
+
+            var builder = Host.CreateApplicationBuilder(settings);
 
             builder.Logging
                 .ClearProviders()
@@ -60,7 +67,7 @@ public partial class App : Application
             services
                 .Configure<AppSettings>(builder.Configuration)
                 .AddSingleton<ILog>(LogManager.GetLogger(MethodBase.GetCurrentMethod()!.DeclaringType))
-                .AddApplicationServices();
+                .AddApplicationServices(builder.Configuration);
 
             _host = builder.Build();
             _cancellationTokenSource = new();

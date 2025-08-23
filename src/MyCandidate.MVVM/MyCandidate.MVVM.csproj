@@ -25,7 +25,6 @@
     <PackageReference Include="Dock.Avalonia" Version="11.2.0" />
     <PackageReference Include="Dock.Model.ReactiveUI" Version="11.2.0" />
     <PackageReference Include="DynamicData" Version="9.0.4" />
-    <!-- <PackageReference Include="log4net" Version="2.0.15" /> -->
     <PackageReference Include="MessageBox.Avalonia" Version="3.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
@@ -35,6 +34,9 @@
   <ItemGroup>
     <ProjectReference Include="..\MyCandidate.Common\MyCandidate.Common.csproj" />
     <ProjectReference Include="..\MyCandidate.DataAccess\MyCandidate.DataAccess.csproj" />
+    <ProjectReference Include="..\MyCandidate.Migrations.Sqlite\MyCandidate.Migrations.Sqlite.csproj" />
+    <ProjectReference Include="..\MyCandidate.Migrations.PostgreSql\MyCandidate.Migrations.PostgreSql.csproj" />
+    <ProjectReference Include="..\MyCandidate.Migrations.SqlServer\MyCandidate.Migrations.SqlServer.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="log4net.config">

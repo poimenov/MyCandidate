@@ -1,18 +1,21 @@
+using Microsoft.EntityFrameworkCore;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
 namespace MyCandidate.DataAccess;
 
 public class Countries : IDataAccess<Country>
 {
-    public Countries()
+    private readonly IDatabaseFactory _databaseFactory;
+    public Countries(IDatabaseFactory databaseFactory)
     {
+        _databaseFactory = databaseFactory;
     }
 
     public IEnumerable<Country> ItemsList
     {
         get
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 return db.Countries.ToList();
             }
@@ -23,7 +26,7 @@ public class Countries : IDataAccess<Country>
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -44,7 +47,7 @@ public class Countries : IDataAccess<Country>
     {
         if (null == itemIds || itemIds.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -64,7 +67,7 @@ public class Countries : IDataAccess<Country>
 
     public Country? Get(int itemId)
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.Countries.FirstOrDefault(x => x.Id == itemId);
         }
@@ -74,7 +77,7 @@ public class Countries : IDataAccess<Country>
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -95,7 +98,7 @@ public class Countries : IDataAccess<Country>
 
     public bool Any()
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.Countries.Any(x => x.Enabled == true);
         }

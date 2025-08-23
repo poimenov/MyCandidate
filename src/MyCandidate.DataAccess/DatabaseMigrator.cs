@@ -1,17 +1,19 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
-using MyCandidate.DataAccess.Migrations;
 
 namespace MyCandidate.DataAccess
 {
     public class DatabaseMigrator : IDatabaseMigrator
     {
+        private readonly IDatabaseFactory _databaseFactory;
         private readonly ILogger<DatabaseMigrator>? _logger;
         private Database? _database;
-        public DatabaseMigrator(ILogger<DatabaseMigrator> logger)
+        public DatabaseMigrator(IDatabaseFactory databaseFactory, ILogger<DatabaseMigrator> logger)
         {
+            _databaseFactory = databaseFactory;
             _logger = logger;
         }
 
@@ -19,21 +21,30 @@ namespace MyCandidate.DataAccess
 
         public void MigrateDatabase()
         {
-            var path = Path.Combine(AppSettings.AppDataPath, Database.DB_FILE_NAME);
-            if (!File.Exists(path))
+            if (_databaseFactory.GetDatabaseType() == DatabaseType.SQLite)
             {
-                using (_database = new Database())
+                var dbFileName = _databaseFactory.GetConnectionString().Split('=')[1];
+                var path = Path.Combine(AppSettings.AppDataPath, dbFileName);
+                if (!File.Exists(path))
                 {
-                    _database.Database.Migrate();
-                    var dictionaryCreator = new DictionaryCreator(_database);
-                    dictionaryCreator.Create();
-                    OnDatabaseCreate(new DatabaseMigrateEventArgs());
+                    var directory = Path.GetDirectoryName(path);
+                    if (!Directory.Exists(directory) && directory != null)
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
                 }
+            }
+            using (_database = _databaseFactory.CreateDbContext())
+            {
+                _database.Database.Migrate();
+                var dictionaryCreator = new DictionaryCreator(_database);
+                dictionaryCreator.Create();
+                OnDatabaseCreate(new DatabaseMigrateEventArgs());
+            }
 
-                if (_logger != null)
-                {
-                    _logger.LogInformation("Database created");
-                }
+            if (_logger != null)
+            {
+                _logger.LogInformation("Database created");
             }
         }
 
@@ -64,7 +75,7 @@ namespace MyCandidate.DataAccess
 
                         transaction.Commit();
                     }
-                    catch (System.Exception ex)
+                    catch (Exception ex)
                     {
                         if (_logger != null)
                         {
@@ -76,9 +87,7 @@ namespace MyCandidate.DataAccess
                         }
                         transaction.Rollback();
                     }
-
                 }
-
             }
         }
     }

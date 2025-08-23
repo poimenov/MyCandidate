@@ -1,9 +1,9 @@
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
 
-namespace MyCandidate.DataAccess.Migrations;
+namespace MyCandidate.DataAccess;
 
-internal class DictionaryCreator
+public class DictionaryCreator
 {
     private readonly Database _database;
     public DictionaryCreator(Database database)

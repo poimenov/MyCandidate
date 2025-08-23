@@ -6,9 +6,14 @@ namespace MyCandidate.DataAccess;
 
 public class Comments : IComments
 {
+    private readonly IDatabaseFactory _databaseFactory;
+    public Comments(IDatabaseFactory databaseFactory)
+    {
+        _databaseFactory = databaseFactory;
+    }
     public IEnumerable<Comment> GetCommentsByCandidateId(int candidateId)
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.Comments
                         .Where(x => x.CandidateOnVacancy!.CandidateId == candidateId)
@@ -22,7 +27,7 @@ public class Comments : IComments
 
     public IEnumerable<Comment> GetCommentsByVacancyId(int vacancyId)
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.Comments
                         .Where(x => x.CandidateOnVacancy!.VacancyId == vacancyId)

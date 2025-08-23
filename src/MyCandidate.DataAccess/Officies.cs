@@ -6,16 +6,17 @@ namespace MyCandidate.DataAccess;
 
 public class Officies : IDataAccess<Office>
 {
-    public Officies()
+    private readonly IDatabaseFactory _databaseFactory;
+    public Officies(IDatabaseFactory databaseFactory)
     {
-        //
+        _databaseFactory = databaseFactory;
     }
 
     public IEnumerable<Office> ItemsList
     {
         get
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 return db.Offices.Include(x => x.Company)
                     .Include(x => x.Location!)
@@ -30,7 +31,7 @@ public class Officies : IDataAccess<Office>
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -58,7 +59,7 @@ public class Officies : IDataAccess<Office>
     {
         if (null == itemIds || itemIds.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -80,7 +81,7 @@ public class Officies : IDataAccess<Office>
 
     public Office? Get(int itemId)
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.Offices.Include(x => x.Company)
                 .Include(x => x.Location!)
@@ -94,7 +95,7 @@ public class Officies : IDataAccess<Office>
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -120,7 +121,7 @@ public class Officies : IDataAccess<Office>
 
     public bool Any()
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.Offices.Any(x => x.Enabled == true);
         }

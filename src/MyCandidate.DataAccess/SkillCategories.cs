@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
 
@@ -5,16 +6,17 @@ namespace MyCandidate.DataAccess;
 
 public class SkillCategories : IDataAccess<SkillCategory>
 {
-    public SkillCategories()
+    private readonly IDatabaseFactory _databaseFactory;
+    public SkillCategories(IDatabaseFactory databaseFactory)
     {
-        //
+        _databaseFactory = databaseFactory;
     }
 
     public IEnumerable<SkillCategory> ItemsList
     {
         get
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 return db.SkillCategories.ToList();
             }
@@ -25,7 +27,7 @@ public class SkillCategories : IDataAccess<SkillCategory>
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -46,7 +48,7 @@ public class SkillCategories : IDataAccess<SkillCategory>
     {
         if (null == itemIds || itemIds.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -66,7 +68,7 @@ public class SkillCategories : IDataAccess<SkillCategory>
 
     public SkillCategory? Get(int itemId)
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.SkillCategories.FirstOrDefault(x => x.Id == itemId);
         }
@@ -76,7 +78,7 @@ public class SkillCategories : IDataAccess<SkillCategory>
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -97,7 +99,7 @@ public class SkillCategories : IDataAccess<SkillCategory>
 
     public bool Any()
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.SkillCategories.Any(x => x.Enabled == true);
         }

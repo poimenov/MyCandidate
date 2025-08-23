@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -10,6 +10,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyCandidate.DataAccess", "src\MyCandidate.DataAccess\MyCandidate.DataAccess.csproj", "{00AD7DD2-65FA-470D-B7B3-B6C3E5DC8100}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyCandidate.MVVM", "src\MyCandidate.MVVM\MyCandidate.MVVM.csproj", "{5C51BD86-3EEB-4F9A-AC16-A62AF435E887}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyCandidate.Migrations.Sqlite", "src\MyCandidate.Migrations.Sqlite\MyCandidate.Migrations.Sqlite.csproj", "{588E7A0C-978C-4C00-9628-5E7E239FCC4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyCandidate.Migrations.PostgreSql", "src\MyCandidate.Migrations.PostgreSql\MyCandidate.Migrations.PostgreSql.csproj", "{A72F8729-A9CE-4035-BC3D-23B04E9D9C20}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyCandidate.Migrations.SqlServer", "src\MyCandidate.Migrations.SqlServer\MyCandidate.Migrations.SqlServer.csproj", "{6C114E92-FA84-4209-B7F5-AB5686BBC5BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,10 +38,25 @@ Global
 		{5C51BD86-3EEB-4F9A-AC16-A62AF435E887}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C51BD86-3EEB-4F9A-AC16-A62AF435E887}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C51BD86-3EEB-4F9A-AC16-A62AF435E887}.Release|Any CPU.Build.0 = Release|Any CPU
+		{588E7A0C-978C-4C00-9628-5E7E239FCC4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{588E7A0C-978C-4C00-9628-5E7E239FCC4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{588E7A0C-978C-4C00-9628-5E7E239FCC4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{588E7A0C-978C-4C00-9628-5E7E239FCC4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A72F8729-A9CE-4035-BC3D-23B04E9D9C20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A72F8729-A9CE-4035-BC3D-23B04E9D9C20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A72F8729-A9CE-4035-BC3D-23B04E9D9C20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A72F8729-A9CE-4035-BC3D-23B04E9D9C20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C114E92-FA84-4209-B7F5-AB5686BBC5BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C114E92-FA84-4209-B7F5-AB5686BBC5BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C114E92-FA84-4209-B7F5-AB5686BBC5BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C114E92-FA84-4209-B7F5-AB5686BBC5BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8B10F773-DC67-49B2-BDB9-99A187F49E4B} = {79893321-24E0-4B29-ACC4-D3D61F0B460B}
 		{00AD7DD2-65FA-470D-B7B3-B6C3E5DC8100} = {79893321-24E0-4B29-ACC4-D3D61F0B460B}
 		{5C51BD86-3EEB-4F9A-AC16-A62AF435E887} = {79893321-24E0-4B29-ACC4-D3D61F0B460B}
+		{588E7A0C-978C-4C00-9628-5E7E239FCC4A} = {79893321-24E0-4B29-ACC4-D3D61F0B460B}
+		{A72F8729-A9CE-4035-BC3D-23B04E9D9C20} = {79893321-24E0-4B29-ACC4-D3D61F0B460B}
+		{6C114E92-FA84-4209-B7F5-AB5686BBC5BD} = {79893321-24E0-4B29-ACC4-D3D61F0B460B}
 	EndGlobalSection
 EndGlobal

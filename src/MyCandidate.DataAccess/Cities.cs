@@ -6,16 +6,17 @@ namespace MyCandidate.DataAccess;
 
 public class Cities : IDataAccess<City>
 {
-    public Cities()
+    private readonly IDatabaseFactory _databaseFactory;
+    public Cities(IDatabaseFactory databaseFactory)
     {
-        //
+        _databaseFactory = databaseFactory;
     }
 
     public IEnumerable<City> ItemsList
     {
         get
         {
-            using (var db = new Database())
+            using (var db = _databaseFactory.CreateDbContext())
             {
                 return db.Cities.Include(x => x.Country).ToList();
             }
@@ -26,7 +27,7 @@ public class Cities : IDataAccess<City>
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -48,7 +49,7 @@ public class Cities : IDataAccess<City>
     {
         if (null == itemIds || itemIds.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -68,7 +69,7 @@ public class Cities : IDataAccess<City>
 
     public City? Get(int itemId)
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.Cities.Include(x => x.Country).FirstOrDefault(x => x.Id == itemId);
         }
@@ -78,7 +79,7 @@ public class Cities : IDataAccess<City>
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -100,7 +101,7 @@ public class Cities : IDataAccess<City>
 
     public bool Any()
     {
-        using (var db = new Database())
+        using (var db = _databaseFactory.CreateDbContext())
         {
             return db.Cities.Any(x => x.Enabled == true);
         }

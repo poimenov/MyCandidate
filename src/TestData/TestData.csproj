@@ -1,15 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Bogus" Version="35.4.0" />
+    <PackageReference Include="Bogus" Version="35.6.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyCandidate.Common\MyCandidate.Common.csproj" />
     <ProjectReference Include="..\MyCandidate.DataAccess\MyCandidate.DataAccess.csproj" />
+    <ProjectReference Include="..\MyCandidate.Migrations.Sqlite\MyCandidate.Migrations.Sqlite.csproj" />
+    <ProjectReference Include="..\MyCandidate.Migrations.PostgreSql\MyCandidate.Migrations.PostgreSql.csproj" />
+    <ProjectReference Include="..\MyCandidate.Migrations.SqlServer\MyCandidate.Migrations.SqlServer.csproj" />    
   </ItemGroup>
+  <ItemGroup>
+    <None Update="log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>  
 </Project>
