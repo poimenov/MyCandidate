@@ -11,7 +11,7 @@
         x:Class="MyCandidate.MVVM.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="{ll:Localize progName}">
+        Title="{Binding Title}">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,

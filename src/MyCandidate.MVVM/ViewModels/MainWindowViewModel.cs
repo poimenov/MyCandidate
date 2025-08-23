@@ -27,6 +27,8 @@ public class MainWindowViewModel : ViewModelBase
         _options = options;
 
         LocalizationService.Default.AddExtraService(new AppLocalizationService());
+        LocalizationService.Default.OnCultureChanged += CultureChanged;
+        Title = LocalizationService.Default["progName"];
         MenuThemeViewModel = new MenuThemeViewModel(_options.Value);
         MenuLanguageViewModel = new MenuLanguageViewModel(_options.Value);
         RecentCandidatesViewModel = new MenuRecentViewModel(_provider, Models.TargetModelType.Candidate, 10);
@@ -83,7 +85,7 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_SkillCategories_Text"]);
                     return;
-                } 
+                }
 
                 _provider.OpenSingleDock(_provider.GetSkillsViewModel());
             }
@@ -103,7 +105,7 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_CompaniesCities_Text"]);
                     return;
-                } 
+                }
 
                 _provider.OpenSingleDock(_provider.GetOfficiesViewModel());
             }
@@ -116,7 +118,7 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_SkillsCities_Text"]);
                     return;
-                } 
+                }
 
                 _provider.OpenDock(_provider.GetCandidateViewModel());
             }
@@ -129,7 +131,7 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_SkillsCities_Text"]);
                     return;
-                } 
+                }
 
                 _provider.OpenDock(_provider.GetCandidateSearchViewModel());
             }
@@ -142,7 +144,7 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_OfficiesSkills_Text"]);
                     return;
-                } 
+                }
 
                 _provider.OpenDock(_provider.GetVacancySearchViewModel());
             }
@@ -155,7 +157,7 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_OfficiesSkills_Text"]);
                     return;
-                } 
+                }
 
                 _provider.OpenDock(_provider.GetVacancyViewModel());
             }
@@ -192,6 +194,12 @@ public class MainWindowViewModel : ViewModelBase
         );
     }
 
+    private void CultureChanged(object? sender, EventArgs e)
+    {
+        Title = LocalizationService.Default["progName"];
+        this.RaisePropertyChanged(nameof(Title));
+    }
+
     #region Layout
     private IRootDock? _layout;
     public IRootDock? Layout
@@ -200,6 +208,8 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _layout, value);
     }
     #endregion
+
+    public string Title { get; set; }
 
     public MenuThemeViewModel MenuThemeViewModel { get; private set; }
     public MenuLanguageViewModel MenuLanguageViewModel { get; private set; }
