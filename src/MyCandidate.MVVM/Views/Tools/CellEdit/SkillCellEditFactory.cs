@@ -93,7 +93,7 @@ public class SkillCellEditFactory : AbstractCellEditFactory
             {
                 if (skillModel.Skill == null)
                 {
-                    skillModel.Skill = _skills.ItemsList.First();
+                    skillModel.Skill = _skills.GetItemsListAsync().Result.First();
                 }
 
                 vm.Skill = skillModel.Skill;

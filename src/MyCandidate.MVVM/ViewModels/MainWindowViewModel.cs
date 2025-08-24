@@ -59,9 +59,9 @@ public class MainWindowViewModel : ViewModelBase
         );
 
         OpenCitiesCmd = ReactiveCommand.Create(
-            () =>
+            async () =>
             {
-                if (!_provider.CountryService.Any())
+                if (!await _provider.CountryService.AnyAsync())
                 {
                     ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_Countries_Text"]);
                     return;
@@ -79,9 +79,9 @@ public class MainWindowViewModel : ViewModelBase
         );
 
         OpenSkillsCmd = ReactiveCommand.Create(
-            () =>
+            async () =>
             {
-                if (!_provider.SkillCategoryService.Any())
+                if (!await _provider.SkillCategoryService.AnyAsync())
                 {
                     ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_SkillCategories_Text"]);
                     return;
@@ -99,9 +99,9 @@ public class MainWindowViewModel : ViewModelBase
         );
 
         OpenOfficiesCmd = ReactiveCommand.Create(
-            () =>
+            async () =>
             {
-                if (!(_provider.CompanyService.Any() && _provider.CityService.Any()))
+                if (!(await _provider.CompanyService.AnyAsync() && await _provider.CityService.AnyAsync()))
                 {
                     ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_CompaniesCities_Text"]);
                     return;
@@ -112,9 +112,9 @@ public class MainWindowViewModel : ViewModelBase
         );
 
         OpenCreateCandidateCmd = ReactiveCommand.Create(
-            () =>
+            async () =>
             {
-                if (!(_provider.CityService.Any() && _provider.SkillService.Any()))
+                if (!(await _provider.CityService.AnyAsync() && await _provider.SkillService.AnyAsync()))
                 {
                     ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_SkillsCities_Text"]);
                     return;
@@ -125,9 +125,9 @@ public class MainWindowViewModel : ViewModelBase
         );
 
         OpenSearchCandidateCmd = ReactiveCommand.Create(
-            () =>
+            async () =>
             {
-                if (!(_provider.CityService.Any() && _provider.SkillService.Any()))
+                if (!(await _provider.CityService.AnyAsync() && await _provider.SkillService.AnyAsync()))
                 {
                     ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_SkillsCities_Text"]);
                     return;
@@ -138,9 +138,9 @@ public class MainWindowViewModel : ViewModelBase
         );
 
         OpenSearchVacancyCmd = ReactiveCommand.Create(
-            () =>
+            async () =>
             {
-                if (!(_provider.OfficeService.Any() && _provider.SkillService.Any()))
+                if (!(await _provider.OfficeService.AnyAsync() && await _provider.SkillService.AnyAsync()))
                 {
                     ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_OfficiesSkills_Text"]);
                     return;
@@ -151,9 +151,9 @@ public class MainWindowViewModel : ViewModelBase
         );
 
         OpenCreateVacancyCmd = ReactiveCommand.Create(
-            () =>
+            async () =>
             {
-                if (!(_provider.OfficeService.Any() && _provider.SkillService.Any()))
+                if (!(await _provider.OfficeService.AnyAsync() && await _provider.SkillService.AnyAsync()))
                 {
                     ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_OfficiesSkills_Text"]);
                     return;
@@ -164,7 +164,7 @@ public class MainWindowViewModel : ViewModelBase
         );
 
         AboutCmd = ReactiveCommand.Create(
-            () =>
+            async () =>
             {
                 var projectUrl = "https://github.com/poimenov/MyCandidate";
                 var standardParams = new MessageBoxStandardParams
@@ -189,7 +189,7 @@ public class MainWindowViewModel : ViewModelBase
                     }
                 };
                 var messageBox = MessageBoxManager.GetMessageBoxStandard(standardParams);
-                messageBox.ShowAsync();
+                await messageBox.ShowAsync();
             }
         );
     }

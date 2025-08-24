@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using log4net;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
@@ -15,89 +16,105 @@ public class SkillService : IDictionaryService<Skill>
     {
         _skills = skills;
         _log = log;
-    }    
-    
-    public IEnumerable<Skill> ItemsList => _skills.ItemsList;
+    }
 
-    public bool Create(IEnumerable<Skill> items, out string message)
+    public async Task<IEnumerable<Skill>> GetItemsListAsync()
     {
-        message = string.Empty;
-        IEnumerable<string> names;
-        if (CheckDuplicates(items, out names))
-        {
-            message = $"It is impossible to add next officies: {string.Join(", ", names)} because they already exist";
-            return false;
-        }
+        return await _skills.GetItemsListAsync();
+    }
 
+    public async Task<OperationResult> CreateAsync(IEnumerable<Skill> items)
+    {
+        var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            _skills.Create(items);
-            return true;
+            var duplicatesCheck = await CheckDuplicatesAsync(items);
+            if (duplicatesCheck.Success)
+            {
+                result.Message = $"It is impossible to add next skills: {string.Join(", ", duplicatesCheck.Messages)} because they already exist";
+                return result;
+            }
+
+            await _skills.CreateAsync(items);
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            message = ex.Message;
+            result.Message = ex.Message;
             _log.Error(ex);
-            return false;
+            return result;
         }
     }
 
-    public bool Delete(IEnumerable<int> itemIds, out string message)
+    public async Task<OperationResult> DeleteAsync(IEnumerable<int> itemIds)
     {
-        message = string.Empty;
-        _skills.Delete(itemIds);
-        return true;
-    }
-
-    public Skill? Get(int id)
-    {
-        return _skills.Get(id);
-    }
-
-    public bool Update(IEnumerable<Skill> items, out string message)
-    {
-        message = string.Empty;
-        IEnumerable<string> names;
-        if (CheckDuplicates(items, out names))
-        {
-            message = $"It is impossible to add next skills: {string.Join(", ", names)} because they already exist";
-            return false;
-        }
-
+        var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            _skills.Update(items);
-            return true;
+            await _skills.DeleteAsync(itemIds);
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            message = ex.Message;
+            result.Message = ex.Message;
             _log.Error(ex);
-            return false;
+            return result;
         }
     }
 
-    public bool Any()
+    public async Task<Skill?> GetAsync(int id)
     {
-        return _skills.Any();
+        return await _skills.GetAsync(id);
     }
 
-    private bool CheckDuplicates(IEnumerable<Skill> items, out IEnumerable<string> names)
+    public async Task<OperationResult> UpdateAsync(IEnumerable<Skill> items)
     {
-        names = Enumerable.Empty<string>();
-        var existedItems = ItemsList.Select(x => new KeyValuePair<int, string>(x.SkillCategoryId, x.Name.Trim().ToLower()));
+        var result = new OperationResult { Success = false, Message = string.Empty };
+        try
+        {
+            var duplicatesCheck = await CheckDuplicatesAsync(items);
+            if (duplicatesCheck.Success)
+            {
+                result.Message = $"It is impossible to add next skills: {string.Join(", ", duplicatesCheck.Messages)} because they already exist";
+                return result;
+            }
+
+            await _skills.UpdateAsync(items);
+            result.Success = true;
+            return result;
+        }
+        catch (Exception ex)
+        {
+            result.Message = ex.Message;
+            _log.Error(ex);
+            return result;
+        }
+    }
+
+    public async Task<bool> AnyAsync()
+    {
+        return await _skills.AnyAsync();
+    }
+
+    private async Task<OperationResults> CheckDuplicatesAsync(IEnumerable<Skill> items)
+    {
+        var result = new OperationResults { Success = false, Messages = Enumerable.Empty<string>() };
+        var itemList = await _skills.GetItemsListAsync();
         var newItems = items.Select(x => new KeyValuePair<int, string>(x.SkillCategoryId, x.Name.Trim().ToLower()));
+        var existedItems = itemList.Select(x => new KeyValuePair<int, string>(x.SkillCategoryId, x.Name.Trim().ToLower()));
         var allItems = new List<KeyValuePair<int, string>>();
         allItems.AddRange(existedItems);
         allItems.AddRange(newItems);
         var duplicates = allItems.Select(x => new { SkillCategoryId = x.Key, Name = x.Value })
             .GroupBy(x => new { x.SkillCategoryId, x.Name }).Where(x => x.Count() > 1);
-        if(duplicates.Any())
+        if (duplicates.Any())
         {
-            names = duplicates.Select(x => x.Key.Name);
-            return true;
+            result.Success = true;
+            result.Messages = duplicates.Select(x => x.Key.Name);
         }
 
-        return false;
-    }     
+        return result;
+    }
 }

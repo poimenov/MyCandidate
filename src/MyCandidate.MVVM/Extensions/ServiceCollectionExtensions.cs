@@ -1,3 +1,4 @@
+using log4net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MyCandidate.Common;
@@ -45,7 +46,7 @@ public static class ServiceCollectionExtensions
             .AddTransient<ICandidateService, CandidateService>()
             .AddTransient<IVacancyService, VacancyService>()
             .AddTransient<IAppServiceProvider, AppServiceProvider>()
-            //ViewModels
+            //ViewModels        
             .AddTransient<DictionaryViewModel<Country>, CountriesViewModel>()
             .AddTransient<DictionaryViewModel<City>, CitiesViewModel>()
             .AddTransient<DictionaryViewModel<Skill>, SkillsViewModel>()

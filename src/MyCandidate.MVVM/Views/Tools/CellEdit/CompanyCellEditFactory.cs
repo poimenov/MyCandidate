@@ -44,7 +44,7 @@ class CompanyCellEditFactory : AbstractCellEditFactory
         ComboBox control = new ComboBox
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            ItemsSource = _dataAccess.ItemsList.Where(x => x.Enabled == true),
+            ItemsSource = _dataAccess.GetItemsListAsync().Result.Where(x => x.Enabled == true),
 
             ItemTemplate = new FuncDataTemplate<Company>((value, namescope) =>
             {

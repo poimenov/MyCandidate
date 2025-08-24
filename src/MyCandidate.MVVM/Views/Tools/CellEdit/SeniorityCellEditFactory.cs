@@ -45,7 +45,7 @@ public class SeniorityCellEditFactory : AbstractCellEditFactory
         var control = new ComboBox
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            ItemsSource = _dataAccess.GetSeniorities().Where(x => x.Enabled == true),
+            ItemsSource = _dataAccess.GetSenioritiesAsync().Result.Where(x => x.Enabled == true),
 
             ItemTemplate = new FuncDataTemplate<Seniority>((value, namescope) =>
             {

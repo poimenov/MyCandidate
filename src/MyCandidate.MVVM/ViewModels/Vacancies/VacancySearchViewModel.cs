@@ -31,7 +31,7 @@ public class VacancySearchViewModel : Document
         LocalizationService.Default.OnCultureChanged += CultureChanged;
 
         var _offices = new List<Office>() { new Office() { Id = 0, CompanyId = 0, Name = string.Empty } };
-        _offices.AddRange(_provider.OfficeService.ItemsList.Where(x => x.Enabled == true));
+        _offices.AddRange(_provider.OfficeService.GetItemsListAsync().Result.Where(x => x.Enabled == true));
 
         OfficesSource = new ObservableCollectionExtended<Office>(_offices);
         OfficesSource.ToObservableChangeSet()
@@ -65,7 +65,7 @@ public class VacancySearchViewModel : Document
         LocalizationService.Default.OnCultureChanged += CultureChanged;
 
         var _offices = new List<Office>() { new Office() { Id = 0, CompanyId = 0, Name = string.Empty } };
-        _offices.AddRange(_provider.OfficeService.ItemsList.Where(x => x.Enabled == true));
+        _offices.AddRange(_provider.OfficeService.GetItemsListAsync().Result.Where(x => x.Enabled == true));
 
         OfficesSource = new ObservableCollectionExtended<Office>(_offices);
         Pager = new PagerViewModel();
@@ -325,7 +325,7 @@ public class VacancySearchViewModel : Document
             if (_companiesList == null)
             {
                 var retVal = new List<Company>() { new Company() { Id = 0, Name = string.Empty } };
-                retVal.AddRange(_provider.CompanyService.ItemsList.Where(x => x.Enabled == true));
+                retVal.AddRange(_provider.CompanyService.GetItemsListAsync().Result.Where(x => x.Enabled == true));
                 _companiesList = retVal;
             }
             return _companiesList;
@@ -360,7 +360,7 @@ public class VacancySearchViewModel : Document
             if (_vacancyStatuses == null)
             {
                 var retVal = new List<VacancyStatus>() { new VacancyStatus() { Id = 0, Name = string.Empty } };
-                retVal.AddRange(_provider.DictionariesDataAccess.GetVacancyStatuses().Where(x => x.Enabled == true));
+                retVal.AddRange(_provider.DictionariesDataAccess.GetVacancyStatusesAsync().Result.Where(x => x.Enabled == true));
                 _vacancyStatuses = retVal;
             }
             return _vacancyStatuses;

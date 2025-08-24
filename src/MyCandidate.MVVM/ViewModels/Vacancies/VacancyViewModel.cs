@@ -37,7 +37,7 @@ public class VacancyViewModel : Document
     public VacancyViewModel(IAppServiceProvider appServiceProvider)
     {
         _provider = appServiceProvider;
-        OfficesSource = new ObservableCollectionExtended<Office>(_provider.OfficeService.ItemsList.Where(x => x.Enabled == true));
+        OfficesSource = new ObservableCollectionExtended<Office>(_provider.OfficeService.GetItemsListAsync().Result.Where(x => x.Enabled == true));
         OfficesSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter!)
@@ -57,8 +57,7 @@ public class VacancyViewModel : Document
     public VacancyViewModel(IAppServiceProvider appServiceProvider, int vacancyId)
     {
         _provider = appServiceProvider;
-
-        OfficesSource = new ObservableCollectionExtended<Office>(_provider.OfficeService.ItemsList.Where(x => x.Enabled == true));
+        OfficesSource = new ObservableCollectionExtended<Office>(_provider.OfficeService.GetItemsListAsync().Result.Where(x => x.Enabled == true));
         OfficesSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter!)
@@ -379,7 +378,7 @@ public class VacancyViewModel : Document
         {
             if (_vacancyStatuses == null)
             {
-                _vacancyStatuses = _provider.DictionariesDataAccess.GetVacancyStatuses();
+                _vacancyStatuses = _provider.DictionariesDataAccess.GetVacancyStatusesAsync().Result;
             }
 
             return _vacancyStatuses;
@@ -410,7 +409,7 @@ public class VacancyViewModel : Document
         {
             if (_companies == null)
             {
-                _companies = _provider.CompanyService.ItemsList.Where(x => x.Enabled == Enabled);
+                _companies = _provider.CompanyService.GetItemsListAsync().Result.Where(x => x.Enabled == true);
             }
 
             return _companies;

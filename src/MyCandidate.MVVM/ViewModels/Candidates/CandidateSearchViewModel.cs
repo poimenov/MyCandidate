@@ -32,7 +32,7 @@ public class CandidateSearchViewModel : Document
         LocalizationService.Default.OnCultureChanged += CultureChanged;
 
         var _cities = new List<City>() { new City() { Id = 0, CountryId = 0, Name = string.Empty } };
-        _cities.AddRange(_provider.CityService.ItemsList.Where(x => x.Enabled == true));
+        _cities.AddRange(_provider.CityService.GetItemsListAsync().Result.Where(x => x.Enabled == true));
 
         CitiesSource = new ObservableCollectionExtended<City>(_cities);
         CitiesSource.ToObservableChangeSet()
@@ -65,7 +65,7 @@ public class CandidateSearchViewModel : Document
         LocalizationService.Default.OnCultureChanged += CultureChanged;
 
         var _cities = new List<City>() { new City() { Id = 0, CountryId = 0, Name = string.Empty } };
-        _cities.AddRange(_provider.CityService.ItemsList.Where(x => x.Enabled == true));
+        _cities.AddRange(_provider.CityService.GetItemsListAsync().Result.Where(x => x.Enabled == true));
 
         CitiesSource = new ObservableCollectionExtended<City>(_cities);
         CitiesSource.ToObservableChangeSet()
@@ -346,7 +346,7 @@ public class CandidateSearchViewModel : Document
             if (_countriesList == null)
             {
                 var retVal = new List<Country>() { new Country() { Id = 0, Name = string.Empty } };
-                retVal.AddRange(_provider.CountryService.ItemsList.Where(x => x.Enabled == true));
+                retVal.AddRange(_provider.CountryService.GetItemsListAsync().Result.Where(x => x.Enabled == true));
                 _countriesList = retVal;
             }
             return _countriesList;

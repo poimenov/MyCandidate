@@ -12,96 +12,93 @@ public class Companies : IDataAccess<Company>
         _databaseFactory = databaseFactory;
     }
 
-    public IEnumerable<Company> ItemsList
+    public async Task<IEnumerable<Company>> GetItemsListAsync()
     {
-        get
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            using (var db = _databaseFactory.CreateDbContext())
-            {
-                return db.Companies.ToList();
-            }
+            return await db.Companies.ToListAsync();
         }
     }
 
-    public void Create(IEnumerable<Company> items)
+    public async Task CreateAsync(IEnumerable<Company> items)
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            using (var transaction = db.Database.BeginTransaction())
+            await using (var transaction = await db.Database.BeginTransactionAsync())
             {
                 foreach (var item in items)
                 {
-                    if (!db.Companies.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
+                    if (!await db.Companies.AnyAsync(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
                     {
-                        db.Companies.Add(item);
+                        await db.Companies.AddAsync(item);
                     }
                 }
-                db.SaveChanges();
-                transaction.Commit();
+                await db.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
         }
     }
 
-    public void Delete(IEnumerable<int> itemIds)
+    public async Task DeleteAsync(IEnumerable<int> itemIds)
     {
         if (null == itemIds || itemIds.Count() == 0)
             return;
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            using (var transaction = db.Database.BeginTransaction())
+            await using (var transaction = await db.Database.BeginTransactionAsync())
             {
                 foreach (var id in itemIds)
                 {
-                    if (db.Companies.Any(x => x.Id == id))
+                    if (await db.Companies.AnyAsync(x => x.Id == id))
                     {
-                        var item = db.Companies.First(x => x.Id == id);
+                        var item = await db.Companies.FirstAsync(x => x.Id == id);
                         db.Companies.Remove(item);
                     }
                 }
-                db.SaveChanges();
-                transaction.Commit();
+                await db.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
         }
     }
 
-    public Company? Get(int itemId)
+    public async Task<Company?> GetAsync(int itemId)
     {
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            return db.Companies.FirstOrDefault(x => x.Id == itemId);
+            return await db.Companies.FirstOrDefaultAsync(x => x.Id == itemId);
         }
     }
 
-    public void Update(IEnumerable<Company> items)
+    public async Task UpdateAsync(IEnumerable<Company> items)
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            using (var transaction = db.Database.BeginTransaction())
+            await using (var transaction = await db.Database.BeginTransactionAsync())
             {
                 foreach (var item in items)
                 {
-                    if (db.Companies.Any(x => x.Id == item.Id))
+                    if (await db.Companies.AnyAsync(x => x.Id == item.Id))
                     {
-                        var entity = db.Companies.First(x => x.Id == item.Id);
+                        var entity = await db.Companies.FirstAsync(x => x.Id == item.Id);
                         entity.Name = item.Name;
                         entity.Enabled = item.Enabled;
                     }
                 }
-                db.SaveChanges();
-                transaction.Commit();
+                await db.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
         }
     }
 
-    public bool Any()
+    public async Task<bool> AnyAsync()
     {
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            return db.Companies.Any(x => x.Enabled == true);
+            return await db.Companies.AnyAsync(x => x.Enabled == true);
         }
     }
 }

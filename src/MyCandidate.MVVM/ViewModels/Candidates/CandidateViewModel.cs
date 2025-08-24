@@ -58,7 +58,7 @@ public class CandidateViewModel : Document
     {
         get
         {
-            var defaultCity = _provider.CityService.ItemsList.First();
+            var defaultCity = _provider.CityService.GetItemsListAsync().Result.First();
             return new Candidate
             {
                 Id = 0,
@@ -94,7 +94,8 @@ public class CandidateViewModel : Document
         LastName = _candidate.LastName;
         CandidateTitle = _candidate.Title;
         Enabled = _candidate.Enabled;
-        Location = new LocationViewModel(_provider.CountryService.ItemsList.Where(x => x.Enabled == true), _provider.CityService.ItemsList.Where(x => x.Enabled == true))
+        Location = new LocationViewModel(_provider.CountryService.GetItemsListAsync().Result.Where(x => x.Enabled == true),
+            _provider.CityService.GetItemsListAsync().Result.Where(x => x.Enabled == true))
         {
             Location = _candidate.Location
         };

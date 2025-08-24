@@ -13,20 +13,17 @@ namespace MyCandidate.MVVM.Views.Tools.CellEdit;
 
 public class SkillsCellFactory : AbstractCellEditFactory
 {
-    //private readonly IDataAccess<SkillCategory> _skillCategories;
     private readonly IDataAccess<Skill> _skills;
     private readonly IDictionariesDataAccess _dictionaries;
 
     public SkillsCellFactory()
     {
-        //_skillCategories = ((App)Application.Current!)!.GetRequiredService<IDataAccess<SkillCategory>>();
         _skills = ((App)Application.Current!)!.GetRequiredService<IDataAccess<Skill>>();
         _dictionaries = ((App)Application.Current).GetRequiredService<IDictionariesDataAccess>();
     }
 
-    public SkillsCellFactory(/*IDataAccess<SkillCategory> skillCategories,*/ IDataAccess<Skill> skills, IDictionariesDataAccess dictionaries)
+    public SkillsCellFactory(IDataAccess<Skill> skills, IDictionariesDataAccess dictionaries)
     {
-        //_skillCategories = skillCategories;
         _skills = skills;
         _dictionaries = dictionaries;
     }
@@ -52,8 +49,8 @@ public class SkillsCellFactory : AbstractCellEditFactory
 
         if (target is ISkillValueList obj)
         {
-            var skills = _skills.ItemsList.ToDictionary(x => x.Id);
-            var seniorities = _dictionaries.GetSeniorities().ToDictionary(x => x.Id);
+            var skills = _skills.GetItemsListAsync().Result.ToDictionary(x => x.Id);
+            var seniorities = _dictionaries.GetSenioritiesAsync().Result.ToDictionary(x => x.Id);
             foreach (var item in obj.Skills.OrderByDescending(x => x.SeniorityId))
             {
                 var line = new TextBox

@@ -11,35 +11,28 @@ public class Dictionaries : IDictionariesDataAccess
     {
         _databaseFactory = databaseFactory;
     }
-    public IEnumerable<ResourceType> GetResourceTypes()
+
+    public async Task<IEnumerable<ResourceType>> GetResourceTypesAsync()
     {
-        using (var db = _databaseFactory.CreateDbContext())
-        {
-            return db.ResourceTypes.ToList();
-        }
+        await using var db = _databaseFactory.CreateDbContext();
+        return await db.ResourceTypes.ToListAsync();
     }
 
-    public IEnumerable<SelectionStatus> GetSelectionStatuses()
+    public async Task<IEnumerable<SelectionStatus>> GetSelectionStatusesAsync()
     {
-        using (var db = _databaseFactory.CreateDbContext())
-        {
-            return db.SelectionStatuses.ToList();
-        }
+        await using var db = _databaseFactory.CreateDbContext();
+        return await db.SelectionStatuses.ToListAsync();
     }
 
-    public IEnumerable<Seniority> GetSeniorities()
+    public async Task<IEnumerable<Seniority>> GetSenioritiesAsync()
     {
-        using (var db = _databaseFactory.CreateDbContext())
-        {
-            return db.Seniorities.ToList();
-        }
+        await using var db = _databaseFactory.CreateDbContext();
+        return await db.Seniorities.ToListAsync();
     }
 
-    public IEnumerable<VacancyStatus> GetVacancyStatuses()
+    public async Task<IEnumerable<VacancyStatus>> GetVacancyStatusesAsync()
     {
-        using (var db = _databaseFactory.CreateDbContext())
-        {
-            return db.VacancyStatuses.ToList();
-        }
+        await using var db = _databaseFactory.CreateDbContext();
+        return await db.VacancyStatuses.ToListAsync();
     }
 }

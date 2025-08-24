@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using log4net;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
@@ -16,81 +17,103 @@ public class OfficeService : IDictionaryService<Office>
         _officies = officies;
         _log = log;
     }
-    
-    public IEnumerable<Office> ItemsList => _officies.ItemsList;
 
-    public bool Create(IEnumerable<Office> items, out string message)
+    public async Task<IEnumerable<Office>> GetItemsListAsync()
     {
-        message = string.Empty;
-        IEnumerable<string> names;
-        if (CheckDuplicates(items, out names))
-        {
-            message = $"It is impossible to add next officies: {string.Join(", ", names)} because they already exist";
-            return false;
-        }
+        return await _officies.GetItemsListAsync();
+    }
 
+    public async Task<OperationResult> CreateAsync(IEnumerable<Office> items)
+    {
+        var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            _officies.Create(items);
-            return true;
+            var duplicatesCheck = await CheckDuplicatesAsync(items);
+            if (duplicatesCheck.Success)
+            {
+                result.Message = $"It is impossible to add next officies: {string.Join(", ", duplicatesCheck.Messages)} because they already exist";
+                return result;
+            }
+
+            await _officies.CreateAsync(items);
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            message = ex.Message;
+            result.Message = ex.Message;
             _log.Error(ex);
-            return false;
+            return result;
         }
     }
 
-    public bool Delete(IEnumerable<int> itemIds, out string message)
+    public async Task<OperationResult> DeleteAsync(IEnumerable<int> itemIds)
     {
-        message = string.Empty;
-        _officies.Delete(itemIds);
-        return true;
-    }
-
-    public Office? Get(int id)
-    {
-        return _officies.Get(id);
-    }
-
-    public bool Update(IEnumerable<Office> items, out string message)
-    {
-        message = string.Empty;
+        var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            _officies.Update(items);
-            return true;
+            await _officies.DeleteAsync(itemIds);
+            result.Success = true;
+            return result;
         }
         catch (Exception ex)
         {
-            message = ex.Message;
+            result.Message = ex.Message;
             _log.Error(ex);
-            return false;
+            return result;
         }
     }
 
-    public bool Any()
+    public async Task<Office?> GetAsync(int id)
     {
-        return _officies.Any();
+        return await _officies.GetAsync(id);
     }
 
-    private bool CheckDuplicates(IEnumerable<Office> items, out IEnumerable<string> names)
+    public async Task<OperationResult> UpdateAsync(IEnumerable<Office> items)
     {
-        names = Enumerable.Empty<string>();
-        var existedItems = ItemsList.Select(x => new KeyValuePair<int, string>(x.CompanyId, x.Name.Trim().ToLower()));
+        var result = new OperationResult { Success = false, Message = string.Empty };
+        try
+        {
+            var duplicatesCheck = await CheckDuplicatesAsync(items);
+            if (duplicatesCheck.Success)
+            {
+                result.Message = $"It is impossible to update next officies: {string.Join(", ", duplicatesCheck.Messages)} because they already exist";
+                return result;
+            }
+
+            await _officies.UpdateAsync(items);
+            result.Success = true;
+            return result;
+        }
+        catch (Exception ex)
+        {
+            result.Message = ex.Message;
+            _log.Error(ex);
+            return result;
+        }
+    }
+
+    public async Task<bool> AnyAsync()
+    {
+        return await _officies.AnyAsync();
+    }
+
+    private async Task<OperationResults> CheckDuplicatesAsync(IEnumerable<Office> items)
+    {
+        var result = new OperationResults { Success = false, Messages = Enumerable.Empty<string>() };
+        var existedItems = (await _officies.GetItemsListAsync()).Select(x => new KeyValuePair<int, string>(x.CompanyId, x.Name.Trim().ToLower()));
         var newItems = items.Select(x => new KeyValuePair<int, string>(x.CompanyId, x.Name.Trim().ToLower()));
         var allItems = new List<KeyValuePair<int, string>>();
         allItems.AddRange(existedItems);
         allItems.AddRange(newItems);
         var duplicates = allItems.Select(x => new { CompanyId = x.Key, Name = x.Value })
             .GroupBy(x => new { x.CompanyId, x.Name }).Where(x => x.Count() > 1);
-        if(duplicates.Any())
+        if (duplicates.Any())
         {
-            names = duplicates.Select(x => x.Key.Name);
-            return true;
+            result.Success = true;
+            result.Messages = duplicates.Select(x => x.Key.Name);
         }
 
-        return false;
-    }    
+        return result;
+    }
 }

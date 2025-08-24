@@ -2,8 +2,8 @@ namespace MyCandidate.Common.Interfaces;
 
 public interface IDictionariesDataAccess
 {
-    IEnumerable<ResourceType> GetResourceTypes();
-    IEnumerable<SelectionStatus> GetSelectionStatuses();
-    IEnumerable<VacancyStatus> GetVacancyStatuses();
-    IEnumerable<Seniority> GetSeniorities();
+    Task<IEnumerable<ResourceType>> GetResourceTypesAsync();
+    Task<IEnumerable<SelectionStatus>> GetSelectionStatusesAsync();
+    Task<IEnumerable<VacancyStatus>> GetVacancyStatusesAsync();
+    Task<IEnumerable<Seniority>> GetSenioritiesAsync();
 }

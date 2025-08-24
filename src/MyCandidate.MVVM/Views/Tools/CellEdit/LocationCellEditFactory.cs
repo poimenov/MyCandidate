@@ -47,7 +47,7 @@ class LocationCellEditFactory : AbstractCellEditFactory
             return null;
         }
 
-        var vm = new LocationViewModel(_countries.ItemsList.Where(x => x.Enabled == true), _cities.ItemsList.Where(x => x.Enabled == true));
+        var vm = new LocationViewModel(_countries.GetItemsListAsync().Result.Where(x => x.Enabled == true), _cities.GetItemsListAsync().Result.Where(x => x.Enabled == true));
         var control = new LocationView
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
@@ -63,7 +63,7 @@ class LocationCellEditFactory : AbstractCellEditFactory
                 {
                     if (office.Id != 0)
                     {
-                        var originalOffice = _offices.Get(office.Id);
+                        var originalOffice = _offices.GetAsync(office.Id).Result;
                         if (originalOffice?.Location != null &&
                             (originalOffice.Location.CityId != location.CityId || originalOffice.Location.Address != location.Address))
                         {
@@ -106,10 +106,11 @@ class LocationCellEditFactory : AbstractCellEditFactory
         {
             if (office.Location == null)
             {
+                var city = _cities.GetItemsListAsync().Result.FirstOrDefault();
                 office.Location = new Common.Location
                 {
-                    CityId = _cities.ItemsList.First().Id,
-                    City = _cities.ItemsList.First(),
+                    CityId = city?.Id ?? 0,
+                    City = city,
                     Name = string.Empty,
                     Enabled = true
                 };

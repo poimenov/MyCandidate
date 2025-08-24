@@ -17,8 +17,8 @@ public class SkillViewModel : ViewModelBase
     private bool _skillChanges = false;
     public SkillViewModel(IDataAccess<SkillCategory> skillCategories, IDataAccess<Skill> skills)
     {
-        SkillCategories = skillCategories.ItemsList.Where(x => x.Enabled == true);
-        SkillsSource = new ObservableCollectionExtended<Skill>(skills!.ItemsList.Where(x => x.Enabled == true));
+        SkillCategories = skillCategories.GetItemsListAsync().Result.Where(x => x.Enabled == true);
+        SkillsSource = new ObservableCollectionExtended<Skill>(skills.GetItemsListAsync().Result.Where(x => x.Enabled == true));
         SkillsSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter!)

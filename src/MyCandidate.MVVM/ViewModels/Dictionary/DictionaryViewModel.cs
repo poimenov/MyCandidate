@@ -4,7 +4,11 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Avalonia.PropertyGrid.Services;
 using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
@@ -24,6 +28,7 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
 {
     protected readonly ILog _log;
     protected readonly IDictionaryService<T>? _service;
+    private readonly ObservableAsPropertyHelper<bool> _isLoading;
     protected List<int> _deletedIds;
     protected List<int> _updatedIds;
     protected virtual IObservable<Func<T, bool>>? Filter =>
@@ -38,15 +43,17 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
         _updatedIds = new List<int>();
         _name = string.Empty;
 
-        Source = new ObservableCollectionExtended<T>(_service!.ItemsList);
+        Source = new ObservableCollectionExtended<T>();
         Source.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter ?? Observable.Return<Func<T, bool>>(x => true))
             .Bind(out _itemList)
             .Subscribe();
 
-
-        _itemList.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
+        LoadDataCommand = ReactiveCommand.CreateFromTask(LoadDataAsync);
+        _isLoading = LoadDataCommand.IsExecuting
+            .ToProperty(this, x => x.IsLoading);
+        LoadDataCommand.Execute().Subscribe();
 
         this.WhenAnyValue(x => x.SelectedItem)
             .Subscribe(
@@ -73,7 +80,7 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
             }
         );
 
-        CancelCmd = ReactiveCommand.Create(() => { OnCancel(); });
+        CancelCmd = ReactiveCommand.Create(async () => { await OnCancel(); });
 
         DeleteCmd = ReactiveCommand.Create(
             (object obj) =>
@@ -101,44 +108,68 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
             {
                 if (IsValid)
                 {
-                    var dialog = this.GetMessageBox(LocalizationService.Default["Save"], 
+                    var dialog = this.GetMessageBox(LocalizationService.Default["Save"],
                                                         LocalizationService.Default["Save_Text"],
-                                                        ButtonEnum.YesNo, Icon.Question);  
-                    var result = await dialog.ShowAsync();                
-                    if(result == ButtonResult.No)
+                                                        ButtonEnum.YesNo, Icon.Question);
+                    var result = await dialog.ShowAsync();
+                    if (result == ButtonResult.No)
                     {
                         return;
                     }
-                    
-                    string message;
-                    if(!_service.Delete(_deletedIds, out message))
+
+                    var operationResult = await _service.DeleteAsync(_deletedIds);
+                    if (!operationResult.Success)
                     {
-                        ShowErrorMessageBox(message);
+                        await ShowErrorMessageBox(operationResult.Message ?? string.Empty);
                         return;
                     }
 
                     var newItems = ItemList.Where(x => x.Id == 0).ToList();
-                    if(!_service.Create(newItems, out message))
+                    operationResult = await _service.CreateAsync(newItems);
+                    if (!operationResult.Success)
                     {
-                        ShowErrorMessageBox(message);
+                        await ShowErrorMessageBox(operationResult.Message ?? string.Empty);
                         return;
                     }
 
                     var updatedItems = ItemList.Where(x => _updatedIds.Contains(x.Id)).ToList();
-                    if(!_service.Update(updatedItems, out message))
+                    operationResult = await _service.UpdateAsync(updatedItems);
+                    if (!operationResult.Success)
                     {
-                        ShowErrorMessageBox(message);
-                        return;                        
+                        await ShowErrorMessageBox(operationResult.Message ?? string.Empty);
+                        return;
                     }
 
-                    OnCancel();
+                    await OnCancel();
                 }
 
             },
             this.WhenAnyValue(x => x.IsValid, v => v == true)
         );
+    }
 
-    }    public virtual bool IsValid    {        get
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            var items = await _service!.GetItemsListAsync();
+            RxApp.MainThreadScheduler.Schedule(() =>
+            {
+                Source.Clear();
+                Source.AddRange(items);
+                _itemList.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
+            });
+        }
+        catch (Exception ex)
+        {
+            // Обработка ошибок
+            _log.Error("Ошибка загрузки данных", ex);
+        }
+    }
+
+    public virtual bool IsValid
+    {
+        get
         {
             foreach (var item in ItemList)
             {
@@ -186,10 +217,13 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
     }
     #endregion
 
+    public bool IsLoading => _isLoading.Value;
+
     public IReactiveCommand SaveCmd { get; }
     public IReactiveCommand CancelCmd { get; }
     public IReactiveCommand CreateCmd { get; }
     public IReactiveCommand DeleteCmd { get; }
+    public ReactiveCommand<Unit, Unit> LoadDataCommand { get; }
 
     private Func<T, bool> MakeFilter(bool? enabled, string name)
     {
@@ -225,9 +259,9 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
         this.RaisePropertyChanged(nameof(IsValid));
     }
 
-    private void OnCancel()
+    private async Task OnCancel()
     {
-        Source.Load(_service!.ItemsList);
+        Source = new ObservableCollectionExtended<T>(await _service!.GetItemsListAsync());
         if (ItemList.Count() > 0)
         {
             _itemList.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
@@ -238,10 +272,10 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
         this.RaisePropertyChanged(nameof(IsValid));
     }
 
-    private void ShowErrorMessageBox(string message)
+    private async Task ShowErrorMessageBox(string message)
     {
-        var messageBoxStandardWindow = this.GetMessageBox(LocalizationService.Default["Error"], 
+        var messageBoxStandardWindow = this.GetMessageBox(LocalizationService.Default["Error"],
                                                             message, ButtonEnum.Ok, Icon.Error);
-        messageBoxStandardWindow.ShowAsync();
+        await messageBoxStandardWindow.ShowAsync();
     }
 }

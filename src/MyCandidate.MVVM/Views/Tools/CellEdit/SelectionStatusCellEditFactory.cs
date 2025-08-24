@@ -42,7 +42,7 @@ public class SelectionStatusCellEditFactory : AbstractCellEditFactory
         var control = new ComboBox
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            ItemsSource = _dataAccess.GetSelectionStatuses().Where(x => x.Enabled == true),
+            ItemsSource = _dataAccess.GetSelectionStatusesAsync().Result.Where(x => x.Enabled == true),
 
             ItemTemplate = new FuncDataTemplate<SelectionStatus>((value, namescope) =>
             {

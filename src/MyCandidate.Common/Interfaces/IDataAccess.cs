@@ -2,10 +2,10 @@ namespace MyCandidate.Common.Interfaces;
 
 public interface IDataAccess<T>
 {
-    void Create(IEnumerable<T> items);
-    void Update(IEnumerable<T> items);
-    void Delete(IEnumerable<int> itemIds);
-    T? Get(int itemId);
-    IEnumerable<T> ItemsList { get; }
-    bool Any();
+    Task CreateAsync(IEnumerable<T> items);
+    Task UpdateAsync(IEnumerable<T> items);
+    Task DeleteAsync(IEnumerable<int> itemIds);
+    Task<T?> GetAsync(int itemId);
+    Task<IEnumerable<T>> GetItemsListAsync();
+    Task<bool> AnyAsync();
 }

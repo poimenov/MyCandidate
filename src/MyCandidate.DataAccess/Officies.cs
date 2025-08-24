@@ -12,32 +12,29 @@ public class Officies : IDataAccess<Office>
         _databaseFactory = databaseFactory;
     }
 
-    public IEnumerable<Office> ItemsList
+    public async Task<IEnumerable<Office>> GetItemsListAsync()
     {
-        get
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            using (var db = _databaseFactory.CreateDbContext())
-            {
-                return db.Offices.Include(x => x.Company)
-                    .Include(x => x.Location!)
-                    .ThenInclude(x => x.City!)
-                    .ThenInclude(x => x.Country)
-                    .ToList();
-            }
+            return await db.Offices.Include(x => x.Company)
+                .Include(x => x.Location!)
+                .ThenInclude(x => x.City!)
+                .ThenInclude(x => x.Country)
+                .ToListAsync();
         }
     }
 
-    public void Create(IEnumerable<Office> items)
+    public async Task CreateAsync(IEnumerable<Office> items)
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            using (var transaction = db.Database.BeginTransaction())
+            await using (var transaction = await db.Database.BeginTransactionAsync())
             {
                 foreach (var item in items)
                 {
-                    if (!db.Offices.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower() && x.CompanyId == item.CompanyId))
+                    if (!await db.Offices.AnyAsync(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower() && x.CompanyId == item.CompanyId))
                     {
                         item.Company = null;
                         if (item.Location != null)
@@ -46,84 +43,87 @@ public class Officies : IDataAccess<Office>
                             item.Location.Address = item.Location.Address ?? string.Empty;
                         }
 
-                        db.Offices.Add(item);
+                        await db.Offices.AddAsync(item);
                     }
                 }
-                db.SaveChanges();
-                transaction.Commit();
+                await db.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
         }
     }
 
-    public void Delete(IEnumerable<int> itemIds)
+    public async Task DeleteAsync(IEnumerable<int> itemIds)
     {
         if (null == itemIds || itemIds.Count() == 0)
             return;
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            using (var transaction = db.Database.BeginTransaction())
+            await using (var transaction = await db.Database.BeginTransactionAsync())
             {
                 foreach (var id in itemIds)
                 {
-                    if (db.Offices.Any(x => x.Id == id))
+                    if (await db.Offices.AnyAsync(x => x.Id == id))
                     {
-                        var item = db.Offices.First(x => x.Id == id);
-                        var itemLocation = db.Locations.First(x => x.Id == item.LocationId);
+                        var item = await db.Offices.FirstAsync(x => x.Id == id);
+                        var itemLocation = await db.Locations.FirstAsync(x => x.Id == item.LocationId);
                         db.Offices.Remove(item);
                         db.Locations.Remove(itemLocation);
                     }
                 }
-                db.SaveChanges();
-                transaction.Commit();
+                await db.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
         }
     }
 
-    public Office? Get(int itemId)
+    public async Task<Office?> GetAsync(int itemId)
     {
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            return db.Offices.Include(x => x.Company)
+            return await db.Offices.Include(x => x.Company)
                 .Include(x => x.Location!)
                 .ThenInclude(x => x.City!)
                 .ThenInclude(x => x.Country)
-                .FirstOrDefault(x => x.Id == itemId);
+                .FirstOrDefaultAsync(x => x.Id == itemId);
         }
     }
 
-    public void Update(IEnumerable<Office> items)
+    public async Task UpdateAsync(IEnumerable<Office> items)
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            using (var transaction = db.Database.BeginTransaction())
+            await using (var transaction = await db.Database.BeginTransactionAsync())
             {
                 foreach (var item in items)
                 {
-                    if (db.Offices.Any(x => x.Id == item.Id))
+                    if (await db.Offices.AnyAsync(x => x.Id == item.Id))
                     {
-                        var entity = db.Offices.First(x => x.Id == item.Id);
+                        var entity = await db.Offices.FirstAsync(x => x.Id == item.Id);
                         entity.CompanyId = item.CompanyId;
                         entity.Name = item.Name;
                         entity.Enabled = item.Enabled;
 
-                        var entityLocation = db.Locations.First(x => x.Id == entity.LocationId);
-                        entityLocation.Address = item.Location!.Address;
-                        entityLocation.CityId = item.Location!.CityId;
+                        if (item.Location != null)
+                        {
+                            var entityLocation = await db.Locations.FirstAsync(x => x.Id == entity.LocationId);
+                            entityLocation.Address = item.Location.Address ?? string.Empty;
+                            entityLocation.CityId = item.Location.CityId;
+                        }
                     }
                 }
-                db.SaveChanges();
-                transaction.Commit();
+                await db.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
         }
     }
 
-    public bool Any()
+    public async Task<bool> AnyAsync()
     {
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            return db.Offices.Any(x => x.Enabled == true);
+            return await db.Offices.AnyAsync(x => x.Enabled == true);
         }
     }
 }

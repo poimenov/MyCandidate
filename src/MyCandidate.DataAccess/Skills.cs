@@ -12,98 +12,77 @@ public class Skills : IDataAccess<Skill>
         _databaseFactory = databaseFactory;
     }
 
-    public IEnumerable<Skill> ItemsList
+    public async Task<IEnumerable<Skill>> GetItemsListAsync()
     {
-        get
-        {
-            using (var db = _databaseFactory.CreateDbContext())
-            {
-                return db.Skills.Include(x => x.SkillCategory).ToList();
-            }
-        }
+        await using var db = _databaseFactory.CreateDbContext();
+        return await db.Skills.Include(x => x.SkillCategory).ToListAsync();
     }
 
-    public void Create(IEnumerable<Skill> items)
+    public async Task CreateAsync(IEnumerable<Skill> items)
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = _databaseFactory.CreateDbContext())
+        await using var db = _databaseFactory.CreateDbContext();
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        foreach (var item in items)
         {
-            using (var transaction = db.Database.BeginTransaction())
+            if (!await db.Skills.AnyAsync(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
             {
-                foreach (var item in items)
-                {
-                    if (!db.Skills.Any(x => x.Name.Trim().ToLower() == item.Name.Trim().ToLower()))
-                    {
-                        item.SkillCategory = null;
-                        db.Skills.Add(item);
-                    }
-                }
-                db.SaveChanges();
-                transaction.Commit();
+                item.SkillCategory = null;
+                await db.Skills.AddAsync(item);
             }
         }
+        await db.SaveChangesAsync();
+        await transaction.CommitAsync();
     }
 
-    public void Delete(IEnumerable<int> itemIds)
+    public async Task DeleteAsync(IEnumerable<int> itemIds)
     {
         if (null == itemIds || itemIds.Count() == 0)
             return;
-        using (var db = _databaseFactory.CreateDbContext())
+        await using var db = _databaseFactory.CreateDbContext();
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        foreach (var id in itemIds)
         {
-            using (var transaction = db.Database.BeginTransaction())
+            if (await db.Skills.AnyAsync(x => x.Id == id))
             {
-                foreach (var id in itemIds)
-                {
-                    if (db.Skills.Any(x => x.Id == id))
-                    {
-                        var item = db.Skills.First(x => x.Id == id);
-                        db.Skills.Remove(item);
-                    }
-                }
-                db.SaveChanges();
-                transaction.Commit();
+                var item = await db.Skills.FirstAsync(x => x.Id == id);
+                db.Skills.Remove(item);
             }
         }
+        await db.SaveChangesAsync();
+        await transaction.CommitAsync();
     }
 
-    public Skill? Get(int itemId)
+    public async Task<Skill?> GetAsync(int itemId)
     {
-        using (var db = _databaseFactory.CreateDbContext())
-        {
-            return db.Skills.FirstOrDefault(x => x.Id == itemId);
-        }
+        await using var db = _databaseFactory.CreateDbContext();
+        return await db.Skills.Include(x => x.SkillCategory).FirstOrDefaultAsync(x => x.Id == itemId);
     }
 
-    public void Update(IEnumerable<Skill> items)
+    public async Task UpdateAsync(IEnumerable<Skill> items)
     {
         if (null == items || items.Count() == 0)
             return;
-        using (var db = _databaseFactory.CreateDbContext())
+        await using var db = _databaseFactory.CreateDbContext();
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        foreach (var item in items)
         {
-            using (var transaction = db.Database.BeginTransaction())
+            if (await db.Skills.AnyAsync(x => x.Id == item.Id))
             {
-                foreach (var item in items)
-                {
-                    if (db.Skills.Any(x => x.Id == item.Id))
-                    {
-                        var entity = db.Skills.First(x => x.Id == item.Id);
-                        entity.SkillCategoryId = item.SkillCategoryId;
-                        entity.Name = item.Name;
-                        entity.Enabled = item.Enabled;
-                    }
-                }
-                db.SaveChanges();
-                transaction.Commit();
+                var entity = await db.Skills.FirstAsync(x => x.Id == item.Id);
+                entity.SkillCategoryId = item.SkillCategoryId;
+                entity.Name = item.Name;
+                entity.Enabled = item.Enabled;
             }
         }
+        await db.SaveChangesAsync();
+        await transaction.CommitAsync();
     }
 
-    public bool Any()
+    public async Task<bool> AnyAsync()
     {
-        using (var db = _databaseFactory.CreateDbContext())
-        {
-            return db.Skills.Any(x => x.Enabled == true);
-        }
+        await using var db = _databaseFactory.CreateDbContext();
+        return await db.Skills.AnyAsync(x => x.Enabled == true);
     }
 }
