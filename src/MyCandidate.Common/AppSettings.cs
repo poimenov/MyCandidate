@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MyCandidate.Common;
 
@@ -9,6 +10,7 @@ public class AppSettings
     public const string DB_FILE_NAME = "MyCandidate.db";
     public string DefaultLanguage { get; set; } = "en-US";
     public string DefaultTheme { get; set; } = "Dark";
+    public DatabaseSettings DatabaseSettings { get; set; } = new DatabaseSettings();
 
     public static string AppDataPath
     {
@@ -18,20 +20,21 @@ public class AppSettings
         }
     }
 
-    public void Save()
+    public async Task Save()
     {
         string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, JSON_FILE_NAME);
         if (File.Exists(filePath))
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonString = JsonSerializer.Serialize(this, options);
-            File.WriteAllText(filePath, jsonString);
+            await using var fs = File.Open(filePath, FileMode.Create);
+            await JsonSerializer.SerializeAsync(fs, this, options);
         }
     }
 }
 
 public class DatabaseSettings
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public DatabaseType DatabaseType { get; set; } = DatabaseType.SQLite;
     public ConnectionStrings ConnectionStrings { get; set; } = new ConnectionStrings();
 }

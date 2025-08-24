@@ -1,6 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Reactive;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using MyCandidate.Common;
 using MyCandidate.MVVM.Themes;
@@ -11,7 +11,7 @@ namespace MyCandidate.MVVM.ViewModels;
 public class MenuThemeViewModel : CheckMenuModel
 {
     public ReadOnlyObservableCollection<MenuItem> Items { get; private set; }
-    public ReactiveCommand<ThemeName, Unit> ChangeThemeCmd { get; }
+    public ReactiveCommand<ThemeName, Task> ChangeThemeCmd { get; }
 
     public MenuThemeViewModel(AppSettings appSettings) : base(appSettings)
     {
@@ -19,12 +19,12 @@ public class MenuThemeViewModel : CheckMenuModel
         Enum.TryParse<ThemeName>(_appSettings.DefaultTheme, out defaultTheme);
         App.ThemeManager?.Switch(defaultTheme);
 
-        ChangeThemeCmd = ReactiveCommand.Create<ThemeName, Unit>(
-            (theme) =>
+        ChangeThemeCmd = ReactiveCommand.Create<ThemeName, Task>(
+            async (theme) =>
             {
                 App.ThemeManager?.Switch(theme);
                 _appSettings.DefaultTheme = theme.ToString();
-                _appSettings.Save();
+                await _appSettings.Save();
                 foreach (var item in Items!)
                 {
                     if (item.CommandParameter != null
@@ -38,7 +38,6 @@ public class MenuThemeViewModel : CheckMenuModel
                         item.Icon = null;
                     }
                 }
-                return Unit.Default;
             });
 
         Items = new ReadOnlyObservableCollection<MenuItem>(
