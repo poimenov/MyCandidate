@@ -6,7 +6,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.PropertyGrid.Services;
@@ -69,13 +68,13 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
         CreateCmd = ReactiveCommand.Create(
             () =>
             {
-                var _newT = new T()
+                var item = new T()
                 {
                     Enabled = true
                 };
-                _newT.PropertyChanged += ItemPropertyChanged;
-                Source.Add(_newT);
-                SelectedItem = _newT;
+                item.PropertyChanged += ItemPropertyChanged;
+                Source.Add(item);
+                SelectedItem = item;
                 this.RaisePropertyChanged(nameof(IsValid));
             }
         );
@@ -96,7 +95,8 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
                     _updatedIds.Remove(item.Id);
                 }
 
-                Source.Remove((T)obj);
+                item.PropertyChanged -= ItemPropertyChanged;
+                Source.Remove(item);
                 this.RaisePropertyChanged(nameof(IsValid));
             },
             this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
@@ -162,8 +162,7 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
         }
         catch (Exception ex)
         {
-            // Обработка ошибок
-            _log.Error("Ошибка загрузки данных", ex);
+            _log.Error("Data loading error", ex);
         }
     }
 
@@ -261,15 +260,25 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
 
     private async Task OnCancel()
     {
-        Source = new ObservableCollectionExtended<T>(await _service!.GetItemsListAsync());
-        if (ItemList.Count() > 0)
+        try
         {
-            _itemList.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
-            SelectedItem = ItemList.First();
+            _itemList.ToList().ForEach(x => x.PropertyChanged -= ItemPropertyChanged);
+            var items = await _service!.GetItemsListAsync();
+            RxApp.MainThreadScheduler.Schedule(() =>
+            {
+                Source.Clear();
+                Source.AddRange(items);
+                _itemList.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
+            });
+            this._deletedIds = new List<int>();
+            this._updatedIds = new List<int>();
+            this.RaisePropertyChanged(nameof(IsValid));
         }
-        this._deletedIds = new List<int>();
-        this._updatedIds = new List<int>();
-        this.RaisePropertyChanged(nameof(IsValid));
+        catch (Exception ex)
+        {
+
+            _log.Error("Data loading error", ex);
+        }
     }
 
     private async Task ShowErrorMessageBox(string message)
