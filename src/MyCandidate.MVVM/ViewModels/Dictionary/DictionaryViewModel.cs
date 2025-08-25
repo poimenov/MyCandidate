@@ -28,8 +28,6 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
     protected readonly ILog _log;
     protected readonly IDictionaryService<T>? _service;
     private readonly ObservableAsPropertyHelper<bool> _isLoading;
-    protected List<int> _deletedIds;
-    protected List<int> _updatedIds;
     protected virtual IObservable<Func<T, bool>>? Filter =>
         this.WhenAnyValue(x => x.Enabled, x => x.Name)
             .Select((x) => MakeFilter(x.Item1, x.Item2));
@@ -38,8 +36,6 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
     {
         _service = service;
         _log = log;
-        _deletedIds = new List<int>();
-        _updatedIds = new List<int>();
         _name = string.Empty;
 
         Source = new ObservableCollectionExtended<T>();
@@ -87,12 +83,12 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
                 T item = (T)obj;
                 if (item.Id > 0)
                 {
-                    _deletedIds.Add(item.Id);
+                    DeletedIds.Add(item.Id);
                 }
 
-                if (_updatedIds.Any(x => x == item.Id))
+                if (UpdatedIds.Any(x => x == item.Id))
                 {
-                    _updatedIds.Remove(item.Id);
+                    UpdatedIds.Remove(item.Id);
                 }
 
                 item.PropertyChanged -= ItemPropertyChanged;
@@ -117,7 +113,7 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
                         return;
                     }
 
-                    var operationResult = await _service.DeleteAsync(_deletedIds);
+                    var operationResult = await _service.DeleteAsync(DeletedIds);
                     if (!operationResult.Success)
                     {
                         await ShowErrorMessageBox(operationResult.Message ?? string.Empty);
@@ -132,7 +128,7 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
                         return;
                     }
 
-                    var updatedItems = ItemList.Where(x => _updatedIds.Contains(x.Id)).ToList();
+                    var updatedItems = ItemList.Where(x => UpdatedIds.Contains(x.Id)).ToList();
                     operationResult = await _service.UpdateAsync(updatedItems);
                     if (!operationResult.Success)
                     {
@@ -217,6 +213,8 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
     #endregion
 
     public bool IsLoading => _isLoading.Value;
+    protected List<int> DeletedIds { get; set; } = new List<int>();
+    protected List<int> UpdatedIds { get; set; } = new List<int>();
 
     public IReactiveCommand SaveCmd { get; }
     public IReactiveCommand CancelCmd { get; }
@@ -250,9 +248,9 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
         if (sender != null
             && sender is T entity
             && entity.Id != 0
-            && !_updatedIds.Any(x => x == entity.Id))
+            && !UpdatedIds.Any(x => x == entity.Id))
         {
-            _updatedIds.Add(entity.Id);
+            UpdatedIds.Add(entity.Id);
         }
 
         this.RaisePropertyChanged(nameof(IsValid));
@@ -260,25 +258,11 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
 
     private async Task OnCancel()
     {
-        try
-        {
-            _itemList.ToList().ForEach(x => x.PropertyChanged -= ItemPropertyChanged);
-            var items = await _service!.GetItemsListAsync();
-            RxApp.MainThreadScheduler.Schedule(() =>
-            {
-                Source.Clear();
-                Source.AddRange(items);
-                _itemList.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
-            });
-            this._deletedIds = new List<int>();
-            this._updatedIds = new List<int>();
-            this.RaisePropertyChanged(nameof(IsValid));
-        }
-        catch (Exception ex)
-        {
-
-            _log.Error("Data loading error", ex);
-        }
+        _itemList.ToList().ForEach(x => x.PropertyChanged -= ItemPropertyChanged);
+        await LoadDataAsync();
+        DeletedIds = new List<int>();
+        UpdatedIds = new List<int>();
+        this.RaisePropertyChanged(nameof(IsValid));
     }
 
     private async Task ShowErrorMessageBox(string message)
