@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Avalonia.Input;
 using DynamicData;
 using DynamicData.Binding;
@@ -21,15 +24,15 @@ public class CommentsViewModel : ViewModelBase
     private readonly VacancyViewModel? _vacancyViewModel;
     private readonly CandidateViewModel? _candidateViewModel;
     private readonly IAppServiceProvider _provider;
-    private bool _isVacancy;
+    private readonly ObservableAsPropertyHelper<bool> _isLoading;
     public CommentsViewModel(VacancyViewModel vacancyViewModel, IAppServiceProvider appServiceProvider)
     {
         _vacancyViewModel = vacancyViewModel;
+        _candidateViewModel = null;
         _provider = appServiceProvider;
-        _isVacancy = true;
         _selectedItem = null!;
 
-        Source = new ObservableCollectionExtended<CommentExt>(_provider.VacancyService.GetComments(vacancyViewModel.VacancyId).Select(x => new CommentExt(x)));
+        Source = new ObservableCollectionExtended<CommentExt>();
         Source.ToObservableChangeSet()
             .Filter(VacancyFilter ?? Observable.Return<Func<CommentExt, bool>>(x => true))
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -40,7 +43,10 @@ public class CommentsViewModel : ViewModelBase
         DeleteCmd = CreateDeleteCmd();
         DeleteKetDownCmd = CreateDeleteKetDownCmd();
 
-        LoadComments();
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadComments);
+        _isLoading = LoadDataCmd.IsExecuting
+            .ToProperty(this, x => x.IsLoading);
+        LoadDataCmd.Execute().Subscribe();
 
         _vacancyViewModel.WhenAnyValue(x => x.CandidatesOnVacancy!.SelectedItem)
             .Subscribe(x =>
@@ -51,11 +57,11 @@ public class CommentsViewModel : ViewModelBase
     public CommentsViewModel(CandidateViewModel candidateViewModel, IAppServiceProvider appServiceProvider)
     {
         _candidateViewModel = candidateViewModel;
+        _vacancyViewModel = null;
         _provider = appServiceProvider;
-        _isVacancy = false;
         _selectedItem = null!;
 
-        Source = new ObservableCollectionExtended<CommentExt>(_provider.CandidateService.GetComments(candidateViewModel.CandidateId).Select(x => new CommentExt(x)));
+        Source = new ObservableCollectionExtended<CommentExt>();
         Source.ToObservableChangeSet()
             .Filter(CandidateFilter ?? Observable.Return<Func<CommentExt, bool>>(x => true))
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -66,7 +72,10 @@ public class CommentsViewModel : ViewModelBase
         DeleteCmd = CreateDeleteCmd();
         DeleteKetDownCmd = CreateDeleteKetDownCmd();
 
-        LoadComments();
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadComments);
+        _isLoading = LoadDataCmd.IsExecuting
+            .ToProperty(this, x => x.IsLoading);
+        LoadDataCmd.Execute().Subscribe();
 
         _candidateViewModel.WhenAnyValue(x => x.CandidatesOnVacancy!.SelectedItem)
             .Subscribe(x =>
@@ -104,8 +113,29 @@ public class CommentsViewModel : ViewModelBase
     }
     #endregion
 
-    private void LoadComments()
+    private async Task LoadComments()
     {
+        var itemsExt = Enumerable.Empty<CommentExt>();
+        if (_vacancyViewModel != null)
+        {
+            var items = await _provider.VacancyService.GetCommentsAsync(_vacancyViewModel.VacancyId);
+            itemsExt = items.Select(x => new CommentExt(x));
+        }
+        else if (_candidateViewModel != null)
+        {
+            var items = await _provider.CandidateService.GetCommentsAsync(_candidateViewModel.CandidateId);
+            itemsExt = items.Select(x => new CommentExt(x));
+        }
+
+        if (itemsExt.Any())
+        {
+            RxApp.MainThreadScheduler.Schedule(() =>
+            {
+                Source.Clear();
+                Source.AddRange(itemsExt);
+            });
+        }
+
         _itemList.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
         this.WhenAnyValue(x => x.SelectedItem)
             .Subscribe(
@@ -138,7 +168,10 @@ public class CommentsViewModel : ViewModelBase
         return Source.Select(x => x.ToComment()).ToList();
     }
 
+    public bool IsLoading => _isLoading.Value;
+
     #region Commands
+    public ReactiveCommand<Unit, Unit> LoadDataCmd { get; }
     public IReactiveCommand AddCmd { get; }
     private IReactiveCommand CreateAddCmd()
     {
@@ -167,8 +200,8 @@ public class CommentsViewModel : ViewModelBase
                     this.RaisePropertyChanged(nameof(IsValid));
                 }
             },
-            this.WhenAnyValue(x => x._isVacancy, x => x.CandidateOnVacancy,
-                (b, obj) => obj != null)
+            this.WhenAnyValue(x => x.CandidateOnVacancy)
+                .Select(obj => obj != null)
         );
     }
     public IReactiveCommand DeleteCmd { get; }

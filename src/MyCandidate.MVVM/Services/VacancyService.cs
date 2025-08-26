@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using log4net;
@@ -27,67 +29,74 @@ public class VacancyService : IVacancyService
         _log = log;
     }
 
-    public bool Create(Vacancy item, out int id, out string message)
+    public async Task<OperationResult<int>> CreateAsync(Vacancy item)
     {
-        message = string.Empty;
-        id = 0;
-        bool retVal = false;
-        try
+        var result = new OperationResult<int> { Success = false, Result = 0 };
+        var createResult = await _vacancies.CreateAsync(item);
+        if (createResult.Success)
         {
-            _vacancies.Create(item, out id);
-            retVal = true;
+            result.Success = true;
+            result.Result = createResult.Result;
         }
-        catch (Exception ex)
+        else if (createResult.Exception != null)
         {
-            message = ex.Message;
-            _log.Error(ex);
-            if (ex.InnerException != null)
+            _log.Error(createResult.Exception);
+            if (createResult.Exception.InnerException != null)
             {
-                message = ex.InnerException.Message;
-                _log.Error(ex.InnerException);
+                _log.Error(createResult.Exception.InnerException);
             }
+            result.Message = "Failed to create vacancy";
+        }
+        else
+        {
+            result.Message = createResult.Message;
         }
 
-        return retVal;
+        return result;
     }
 
-    public bool Delete(int id, out string message)
+    public async Task<OperationResult> DeleteAsync(int id)
     {
-        message = string.Empty;
-        bool retVal = false;
-
-        try
+        var result = new OperationResult { Success = false };
+        var deleteResult = await _vacancies.DeleteAsync(id);
+        if (deleteResult.Success)
         {
-            _vacancies.Delete(id);
-            retVal = true;
+            result.Success = true;
         }
-        catch (Exception ex)
+        else if (deleteResult.Exception != null)
         {
-            message = ex.Message;
-            _log.Error(ex);
-            if (ex.InnerException != null)
+            _log.Error(deleteResult.Exception);
+            if (deleteResult.Exception.InnerException != null)
             {
-                message = ex.InnerException.Message;
-                _log.Error(ex.InnerException);
+                _log.Error(deleteResult.Exception.InnerException);
             }
+            result.Message = "Failed to delete vacancy";
+        }
+        else
+        {
+            result.Message = deleteResult.Message;
         }
 
-        return retVal;
+        return result;
     }
 
-    public bool Exist(int id)
+    public Task<bool> ExistAsync(int id)
     {
-        return _vacancies.Exist(id);
+        return _vacancies.ExistAsync(id);
     }
 
-    public Vacancy Get(int id)
+    public Task<Vacancy?> GetAsync(int id)
     {
-        return _vacancies.Get(id);
+        return _vacancies.GetAsync(id);
     }
 
-    public XmlDocument GetXml(int id)
+    public async Task<XmlDocument> GetXmlAsync(int id)
     {
-        var vacancy = _vacancies.Get(id);
+        var vacancy = await _vacancies.GetAsync(id);
+        if (vacancy == null)
+        {
+            return new XmlDocument();
+        }
         var root = vacancy.ToXml();
         var candidateOnVacancies = new XElement("CandidateOnVacancies");
         foreach (var item in vacancy.CandidateOnVacancies)
@@ -97,16 +106,21 @@ public class VacancyService : IVacancyService
                 var candidateOnVacancy = new XElement("CandidateOnVacancy", new XAttribute("status", item.SelectionStatus.Name),
                                                                             new XAttribute("created", item.CreationDate),
                                                                             new XAttribute("modified", item.LastModificationDate));
-                candidateOnVacancy.Add(_candidates.Get(item.CandidateId).ToXml());
-                candidateOnVacancies.Add(candidateOnVacancy);
+                var candidate = await _candidates.GetAsync(item.CandidateId);
+                if (candidate != null)
+                {
+                    candidateOnVacancy.Add(candidate.ToXml());
+                    candidateOnVacancies.Add(candidateOnVacancy);
+                }
             }
         }
         root.Add(candidateOnVacancies);
 
         StringBuilder sb = new StringBuilder();
-        using (var writer = XmlWriter.Create(sb))
+        var settings = new XmlWriterSettings { Async = true };
+        await using (var writer = XmlWriter.Create(sb, settings))
         {
-            root.Save(writer);
+            await root.SaveAsync(writer, CancellationToken.None);
         }
 
         var retVal = new XmlDocument();
@@ -114,47 +128,48 @@ public class VacancyService : IVacancyService
         return retVal;
     }
 
-    public IEnumerable<CandidateOnVacancy> GetCandidateOnVacancies(int vacancyId)
+    public async Task<IEnumerable<CandidateOnVacancy>> GetCandidateOnVacanciesAsync(int vacancyId)
     {
-        return _candidateOnVacancies.GetListByVacancyId(vacancyId);
+        return await _candidateOnVacancies.GetListByVacancyIdAsync(vacancyId);
     }
 
-    public IEnumerable<Comment> GetComments(int vacancyId)
+    public async Task<IEnumerable<Comment>> GetCommentsAsync(int vacancyId)
     {
-        return _comments.GetCommentsByVacancyId(vacancyId);
+        return await _comments.GetCommentsByVacancyIdAsync(vacancyId);
     }
 
-    public IEnumerable<Vacancy> Search(VacancySearch searchParams)
+    public async Task<IEnumerable<Vacancy>> SearchAsync(VacancySearch searchParams)
     {
-        return _vacancies.Search(searchParams);
+        return await _vacancies.SearchAsync(searchParams);
     }
 
-    public IEnumerable<Vacancy> GetRecent(int count)
+    public async Task<IEnumerable<Vacancy>> GetRecentasync(int count)
     {
-        return _vacancies.GetRecent(count);
+        return await _vacancies.GetRecentAsync(count);
     }
 
-    public bool Update(Vacancy item, out string message)
+    public async Task<OperationResult> UpdateAsync(Vacancy item)
     {
-        message = string.Empty;
-        bool retVal = false;
-
-        try
+        var result = new OperationResult { Success = false };
+        var updateResult = await _vacancies.UpdateAsync(item);
+        if (updateResult.Success)
         {
-            _vacancies.Update(item);
-            retVal = true;
+            result.Success = true;
         }
-        catch (Exception ex)
+        else if (updateResult.Exception != null)
         {
-            message = ex.Message;
-            _log.Error(ex);
-            if (ex.InnerException != null)
+            _log.Error(updateResult.Exception);
+            if (updateResult.Exception.InnerException != null)
             {
-                message = ex.InnerException.Message;
-                _log.Error(ex.InnerException);
+                _log.Error(updateResult.Exception.InnerException);
             }
+            result.Message = "Failed to update vacancy";
+        }
+        else
+        {
+            result.Message = updateResult.Message;
         }
 
-        return retVal;
+        return result;
     }
 }

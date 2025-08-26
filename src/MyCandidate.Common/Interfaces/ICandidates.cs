@@ -2,14 +2,14 @@ namespace MyCandidate.Common.Interfaces
 {
     public interface ICandidates
     {
-        bool Exist(int id);
-        bool Exist(string lastName, string firstName, DateTime? birthdate);
-        Candidate Get(int id);
-        void Delete(int id);
-        bool Create(Candidate candidate, out int id);
-        void Update(Candidate candidate);
-        IEnumerable<Candidate> Search(CandidateSearch searchParams);
-        IEnumerable<Candidate> GetRecent(int count);
+        Task<bool> ExistAsync(int id);
+        Task<bool> ExistAsync(string lastName, string firstName, DateTime? birthdate);
+        Task<Candidate?> GetAsync(int id);
+        Task<OperationResult> DeleteAsync(int id);
+        Task<OperationResult<int>> CreateAsync(Candidate candidate);
+        Task<OperationResult> UpdateAsync(Candidate candidate);
+        Task<IEnumerable<Candidate>> SearchAsync(CandidateSearch searchParams);
+        Task<IEnumerable<Candidate>> GetRecentAsync(int count);
     }
 
     public class CandidateSearch

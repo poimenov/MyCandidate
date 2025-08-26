@@ -2,13 +2,13 @@ namespace MyCandidate.Common.Interfaces
 {
     public interface IVacancies
     {
-        bool Exist(int id);
-        Vacancy Get(int id);
-        void Delete(int id);
-        bool Create(Vacancy vacancy, out int id);
-        void Update(Vacancy vacancy);
-        IEnumerable<Vacancy> Search(VacancySearch searchParams);
-        IEnumerable<Vacancy> GetRecent(int count);
+        Task<bool> ExistAsync(int id);
+        Task<Vacancy?> GetAsync(int id);
+        Task<OperationResult> DeleteAsync(int id);
+        Task<OperationResult<int>> CreateAsync(Vacancy vacancy);
+        Task<OperationResult> UpdateAsync(Vacancy vacancy);
+        Task<IEnumerable<Vacancy>> SearchAsync(VacancySearch searchParams);
+        Task<IEnumerable<Vacancy>> GetRecentAsync(int count);
     }
 
     public class VacancySearch

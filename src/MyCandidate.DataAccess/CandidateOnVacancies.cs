@@ -12,29 +12,29 @@ public class CandidateOnVacancies : ICandidateOnVacancies
         _databaseFactory = databaseFactory;
     }
 
-    public IEnumerable<CandidateOnVacancy> GetListByCandidateId(int candidateId)
+    public async Task<IEnumerable<CandidateOnVacancy>> GetListByCandidateIdAsync(int candidateId)
     {
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            return db.CandidateOnVacancies
+            return await db.CandidateOnVacancies
                         .Where(x => x.CandidateId == candidateId)
                         .Include(x => x.Candidate)
                         .Include(x => x.Vacancy)
                         .Include(x => x.SelectionStatus)
-                        .ToList();
+                        .ToListAsync();
         }
     }
 
-    public IEnumerable<CandidateOnVacancy> GetListByVacancyId(int vacancyId)
+    public async Task<IEnumerable<CandidateOnVacancy>> GetListByVacancyIdAsync(int vacancyId)
     {
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            return db.CandidateOnVacancies
+            return await db.CandidateOnVacancies
                         .Where(x => x.VacancyId == vacancyId)
                         .Include(x => x.Candidate)
                         .Include(x => x.Vacancy)
                         .Include(x => x.SelectionStatus)
-                        .ToList();
+                        .ToListAsync();
         }
     }
 }

@@ -12,28 +12,28 @@ public class VacancySkills : IVacancySkills
         _databaseFactory = databaseFactory;
     }
 
-    public VacancySkill Get(int id)
+    public async Task<VacancySkill?> GetAsync(int id)
     {
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            return db.VacancySkills
+            return await db.VacancySkills
                 .Include(x => x.Seniority)
                 .Include(x => x.Skill!)
                 .ThenInclude(x => x.SkillCategory)
-                .First(x => x.Id == id);
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
     }
 
-    public IEnumerable<VacancySkill> GetVacancySkills(int vacancyId)
+    public async Task<IEnumerable<VacancySkill>> GetVacancySkillsAsync(int vacancyId)
     {
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            return db.VacancySkills
+            return await db.VacancySkills
                 .Include(x => x.Seniority)
                 .Include(x => x.Skill!)
                 .ThenInclude(x => x.SkillCategory)
                 .Where(x => x.VacancyId == vacancyId)
-                .ToList();
+                .ToListAsync();
         }
     }
 }

@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Xsl;
 using Avalonia.PropertyGrid.Services;
@@ -26,13 +26,14 @@ namespace MyCandidate.MVVM.ViewModels.Candidates;
 public class CandidateViewModel : Document
 {
     private readonly IAppServiceProvider _provider;
-    private Candidate _candidate;
+    private Candidate? _candidate;
+    private City? _defaultCity;
 
     public CandidateViewModel(IAppServiceProvider appServiceProvider)
     {
         _provider = appServiceProvider;
-        _candidate = NewCandidate;
-        LoadCandidate();
+        LoadDataCmd = ReactiveCommand.CreateFromTask<int?>(LoadCandidate);
+        LoadDataCmd.Execute(null).Subscribe();
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = CreateCancelCmd();
         SaveCmd = CreateSaveCmd();
@@ -44,8 +45,8 @@ public class CandidateViewModel : Document
     public CandidateViewModel(IAppServiceProvider appServiceProvider, int candidateId)
     {
         _provider = appServiceProvider;
-        _candidate = _provider.CandidateService.Get(candidateId);
-        LoadCandidate();
+        LoadDataCmd = ReactiveCommand.CreateFromTask<int?>(LoadCandidate);
+        LoadDataCmd.Execute(candidateId).Subscribe();
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = CreateCancelCmd();
         SaveCmd = CreateSaveCmd();
@@ -58,7 +59,6 @@ public class CandidateViewModel : Document
     {
         get
         {
-            var defaultCity = _provider.CityService.GetItemsListAsync().Result.First();
             return new Candidate
             {
                 Id = 0,
@@ -68,8 +68,8 @@ public class CandidateViewModel : Document
                 Location = new Location
                 {
                     Enabled = true,
-                    CityId = defaultCity.Id,
-                    City = defaultCity
+                    CityId = _defaultCity != null ? _defaultCity.Id : 0,
+                    City = _defaultCity
                 },
                 CandidateResources = new List<CandidateResource>(),
                 CandidateSkills = new List<CandidateSkill>()
@@ -77,8 +77,20 @@ public class CandidateViewModel : Document
         }
     }
 
-    private void LoadCandidate()
+    private async Task LoadCandidate(int? id)
     {
+        var cities = await _provider.CityService.GetItemsListAsync();
+        _defaultCity = cities.FirstOrDefault();
+
+        if (id != null && id > 0)
+        {
+            _candidate = await _provider.CandidateService.GetAsync(id.Value) ?? NewCandidate;
+        }
+        else
+        {
+            _candidate = NewCandidate;
+        }
+
         if (_candidate.Id == 0)
         {
             Title = LocalizationService.Default["New_Candidate"];
@@ -94,8 +106,10 @@ public class CandidateViewModel : Document
         LastName = _candidate.LastName;
         CandidateTitle = _candidate.Title;
         Enabled = _candidate.Enabled;
-        Location = new LocationViewModel(_provider.CountryService.GetItemsListAsync().Result.Where(x => x.Enabled == true),
-            _provider.CityService.GetItemsListAsync().Result.Where(x => x.Enabled == true))
+        var countriesList = await _provider.CountryService.GetItemsListAsync();
+        var citiesList = await _provider.CityService.GetItemsListAsync();
+        Location = new LocationViewModel(countriesList.Where(x => x.Enabled == true),
+            citiesList.Where(x => x.Enabled == true))
         {
             Location = _candidate.Location
         };
@@ -112,14 +126,14 @@ public class CandidateViewModel : Document
 
     private void CultureChanged(object? sender, EventArgs e)
     {
-        if (_candidate.Id == 0)
+        if (Candidate?.Id == 0)
         {
             Title = LocalizationService.Default["New_Candidate"];
         }
     }
 
-    public Candidate Candidate => _candidate;
-    public int CandidateId => _candidate.Id;
+    public Candidate? Candidate => _candidate;
+    public int CandidateId => (_candidate != null) ? _candidate.Id : 0;
 
     public bool IsValid
     {
@@ -149,33 +163,40 @@ public class CandidateViewModel : Document
                         return;
                     }
 
-                    _candidate.CandidateResources = Resources?.Resources?.Select(x => x.ToCandidateResource(Candidate))?.ToList() ?? new List<CandidateResource>();
-                    _candidate.CandidateSkills = CandidateSkills?.Skills?.Select(x => x.ToCandidateSkill(_candidate))?.ToList() ?? new List<CandidateSkill>();
-                    _candidate.CandidateOnVacancies = CandidatesOnVacancy?.GetCandidateOnVacancies() ?? new List<CandidateOnVacancy>();
-                    string message;
-                    int id;
-                    bool success;
+                    if (Candidate != null)
+                    {
+                        Candidate.CandidateResources = Resources?.Resources?.Select(x => x.ToCandidateResource(Candidate))?.ToList() ?? new List<CandidateResource>();
+                        Candidate.CandidateSkills = CandidateSkills?.Skills?.Select(x => x.ToCandidateSkill(Candidate))?.ToList() ?? new List<CandidateSkill>();
+                        Candidate.CandidateOnVacancies = CandidatesOnVacancy?.GetCandidateOnVacancies() ?? new List<CandidateOnVacancy>();
 
-                    if (_candidate.Id == 0)
-                    {
-                        success = _provider.CandidateService.Create(_candidate, out id, out message);
-                    }
-                    else
-                    {
-                        success = _provider.CandidateService.Update(_candidate, out message);
-                        id = _candidate.Id;
-                    }
+                        string message = string.Empty;
+                        int id;
+                        bool success;
 
-                    if (success)
-                    {
-                        _candidate = _provider.CandidateService.Get(id);
-                        LoadCandidate();
-                    }
-                    else
-                    {
-                        dialog = this.GetMessageBox(LocalizationService.Default["Save"],
-                                                        message, ButtonEnum.Ok, Icon.Error);
-                        await dialog.ShowAsync();
+                        if (Candidate.Id == 0)
+                        {
+                            var createResult = await _provider.CandidateService.CreateAsync(Candidate);
+                            id = createResult.Result;
+                            message = createResult.Message ?? string.Empty;
+                            success = createResult.Success;
+                        }
+                        else
+                        {
+                            var updateResult = await _provider.CandidateService.UpdateAsync(Candidate);
+                            success = updateResult.Success;
+                            id = Candidate.Id;
+                        }
+
+                        if (success)
+                        {
+                            await LoadCandidate(id);
+                        }
+                        else
+                        {
+                            dialog = this.GetMessageBox(LocalizationService.Default["Save"],
+                                                            message, ButtonEnum.Ok, Icon.Error);
+                            await dialog.ShowAsync();
+                        }
                     }
 
                 }, this.WhenAnyValue(x => x.IsValid, v => v == true)
@@ -196,8 +217,13 @@ public class CandidateViewModel : Document
                     {
                         return;
                     }
-                    _candidate = _candidate.Id == 0 ? NewCandidate : _provider.CandidateService.Get(_candidate.Id);
-                    LoadCandidate();
+
+                    if (Candidate == null || Candidate.Id == 0)
+                    {
+                        _candidate = NewCandidate;
+                    }
+
+                    await LoadCandidate(Candidate?.Id);
                 }
             );
     }
@@ -229,8 +255,9 @@ public class CandidateViewModel : Document
                         return;
                     }
 
-                    string message;
-                    if (_provider.CandidateService.Delete(CandidateId, out message))
+                    var deleteResult = await _provider.CandidateService.DeleteAsync(CandidateId);
+                    string message = deleteResult.Message ?? string.Empty;
+                    if (deleteResult.Success)
                     {
                         _provider.CloseDock(this);
                     }
@@ -246,11 +273,12 @@ public class CandidateViewModel : Document
     }
 
     public IReactiveCommand ExportCmd { get; }
+    public ReactiveCommand<int?, Unit> LoadDataCmd { get; }
 
     private IReactiveCommand CreateExportCmd()
     {
-        return ReactiveCommand.Create<string, Unit>(
-            (format) =>
+        return ReactiveCommand.Create<string>(
+            async (format) =>
                 {
                     var exportFolder = Path.Combine(AppSettings.AppDataPath, "export");
                     if (!Directory.Exists(exportFolder))
@@ -258,7 +286,7 @@ public class CandidateViewModel : Document
                         Directory.CreateDirectory(exportFolder);
                     }
                     var entityName = "candidate";
-                    var doc = _provider.CandidateService.GetXml(CandidateId);
+                    var doc = await _provider.CandidateService.GetXmlAsync(CandidateId);
                     var path = Path.Combine(exportFolder, $"{entityName}.{CandidateId}.xml");
                     switch (format)
                     {
@@ -267,28 +295,31 @@ public class CandidateViewModel : Document
                             var args = new XsltArgumentList();
                             args.AddExtensionObject("urn:ExtObj", new XsltExtObject());
                             path = Path.Combine(exportFolder, $"{entityName}.{CandidateId}.html");
-                            XmlWriterSettings settings = new XmlWriterSettings
-                            {
-                                Indent = true,
-                                CloseOutput = true,
-                                OmitXmlDeclaration = true,
-                                Encoding = Encoding.UTF8
-                            };
-                            using (XmlWriter writer = XmlWriter.Create(path, settings))
-                            {
-                                xslt.Transform(doc, args, writer);
-                            }
+                            await SaveDocumentAsync(doc, path, xslt, args);
                             break;
                         default:
-                            doc.Save(path);
+                            await SaveDocumentAsync(doc, path, null, null);
                             break;
                     }
                     DataTemplateProvider.Open(path);
-                    return Unit.Default;
                 }, this.WhenAnyValue(x => x.CandidateId, y => y != 0)
             );
     }
     #endregion
+
+    private async Task SaveDocumentAsync(XmlDocument xmlDoc, string filePath, XslCompiledTransform? xslt, XsltArgumentList? args)
+    {
+        try
+        {
+            await xmlDoc.SaveAsync(filePath, xslt, args);
+        }
+        catch (Exception ex)
+        {
+            var dialog = this.GetMessageBox(LocalizationService.Default["Save"],
+                                            ex.Message, ButtonEnum.Ok, Icon.Error);
+            await dialog.ShowAsync();
+        }
+    }
 
     #region FirstName
     private string? _firstName;
@@ -299,9 +330,9 @@ public class CandidateViewModel : Document
         get => _firstName;
         set
         {
-            if (!string.IsNullOrWhiteSpace(value))
+            if (!string.IsNullOrWhiteSpace(value) && Candidate != null)
             {
-                _candidate.FirstName = value;
+                Candidate.FirstName = value;
                 this.RaiseAndSetIfChanged(ref _firstName, value);
                 this.RaisePropertyChanged(nameof(IsValid));
             }
@@ -318,9 +349,9 @@ public class CandidateViewModel : Document
         get => _lastName;
         set
         {
-            if (!string.IsNullOrWhiteSpace(value))
+            if (!string.IsNullOrWhiteSpace(value) && Candidate != null)
             {
-                _candidate.LastName = value;
+                Candidate.LastName = value;
                 this.RaiseAndSetIfChanged(ref _lastName, value);
                 this.RaisePropertyChanged(nameof(IsValid));
             }
@@ -336,8 +367,11 @@ public class CandidateViewModel : Document
         get => _candidateTitle;
         set
         {
-            _candidate.Title = value;
-            this.RaiseAndSetIfChanged(ref _candidateTitle, value);
+            if (!string.IsNullOrWhiteSpace(value) && Candidate != null)
+            {
+                Candidate.Title = value;
+                this.RaiseAndSetIfChanged(ref _candidateTitle, value);
+            }
         }
     }
     #endregion    
@@ -351,10 +385,13 @@ public class CandidateViewModel : Document
         get => _birthDate;
         set
         {
-            _candidate.BirthDate = value;
-            this.RaiseAndSetIfChanged(ref _birthDate, value);
-            this.RaisePropertyChanged(nameof(this.Age));
-            this.RaisePropertyChanged(nameof(IsValid));
+            if (value != null && Candidate != null)
+            {
+                Candidate.BirthDate = value;
+                this.RaiseAndSetIfChanged(ref _birthDate, value);
+                this.RaisePropertyChanged(nameof(this.Age));
+                this.RaisePropertyChanged(nameof(IsValid));
+            }
         }
     }
 
@@ -376,9 +413,9 @@ public class CandidateViewModel : Document
         get => _location;
         set
         {
-            if (value != null)
+            if (value != null && Candidate != null)
             {
-                _candidate.Location = value.Location;
+                Candidate.Location = value.Location;
                 this.RaiseAndSetIfChanged(ref _location, value);
                 this.RaisePropertyChanged(nameof(IsValid));
             }
@@ -393,9 +430,12 @@ public class CandidateViewModel : Document
         get => _enabled;
         set
         {
-            _candidate.Enabled = value;
-            this.RaiseAndSetIfChanged(ref _enabled, value);
-            this.RaisePropertyChanged(nameof(IsValid));
+            if (Candidate != null)
+            {
+                Candidate.Enabled = value;
+                this.RaiseAndSetIfChanged(ref _enabled, value);
+                this.RaisePropertyChanged(nameof(IsValid));
+            }
         }
     }
     #endregion

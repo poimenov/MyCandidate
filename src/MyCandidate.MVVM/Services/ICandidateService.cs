@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Xml;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
@@ -7,14 +8,14 @@ namespace MyCandidate.MVVM.Services;
 
 public interface ICandidateService
 {
-    bool Exist(int id);
-    Candidate Get(int id);
-    XmlDocument GetXml(int id);
-    bool Create (Candidate item, out int id, out string message);
-    bool Update (Candidate item, out string message);
-    bool Delete (int id, out string message);
-    IEnumerable<Candidate> Search(CandidateSearch searchParams);
-    IEnumerable<Candidate> GetRecent(int count);
-    IEnumerable<CandidateOnVacancy> GetCandidateOnVacancies(int candidateId);
-    IEnumerable<Comment> GetComments(int candidateId);
+    Task<bool> ExistAsync(int id);
+    Task<Candidate?> GetAsync(int id);
+    Task<XmlDocument> GetXmlAsync(int id);
+    Task<OperationResult<int>> CreateAsync(Candidate item);
+    Task<OperationResult> UpdateAsync(Candidate item);
+    Task<OperationResult> DeleteAsync(int id);
+    Task<IEnumerable<Candidate>> SearchAsync(CandidateSearch searchParams);
+    Task<IEnumerable<Candidate>> GetRecentAsync(int count);
+    Task<IEnumerable<CandidateOnVacancy>> GetCandidateOnVacanciesAsync(int candidateId);
+    Task<IEnumerable<Comment>> GetCommentsAsync(int candidateId);
 }

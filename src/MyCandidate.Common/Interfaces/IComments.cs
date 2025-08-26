@@ -1,7 +1,7 @@
 namespace MyCandidate.Common.Interfaces;
 
 public interface IComments
-{    
-    IEnumerable<Comment> GetCommentsByCandidateId(int candidateId);
-    IEnumerable<Comment> GetCommentsByVacancyId(int vacancyId);
+{
+    Task<IEnumerable<Comment>> GetCommentsByCandidateIdAsync(int candidateId);
+    Task<IEnumerable<Comment>> GetCommentsByVacancyIdAsync(int vacancyId);
 }

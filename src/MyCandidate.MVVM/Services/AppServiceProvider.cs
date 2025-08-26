@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia;
 using Dock.Model.Controls;
 using Dock.Model.Core;
@@ -262,7 +263,7 @@ public class AppServiceProvider : IAppServiceProvider
         return new CandidateViewModel(this);
     }
 
-    public void OpenCandidateViewModel(int candidateId)
+    public async Task OpenCandidateViewModelAsync(int candidateId)
     {
         if (Documents is { } && Documents?.VisibleDockables != null)
         {
@@ -271,14 +272,14 @@ public class AppServiceProvider : IAppServiceProvider
             {
                 Factory.SetActiveDockable(existed);
             }
-            else if (CandidateService.Exist(candidateId))
+            else if (await CandidateService.ExistAsync(candidateId))
             {
                 OpenDock(new CandidateViewModel(this, candidateId));
             }
         }
     }
 
-    public void OpenVacancyViewModel(int vacancyId)
+    public async Task OpenVacancyViewModelAsync(int vacancyId)
     {
         if (Documents is { } && Documents?.VisibleDockables != null)
         {
@@ -287,7 +288,7 @@ public class AppServiceProvider : IAppServiceProvider
             {
                 Factory.SetActiveDockable(existed);
             }
-            else if (VacancyService.Exist(vacancyId))
+            else if (await VacancyService.ExistAsync(vacancyId))
             {
                 OpenDock(new VacancyViewModel(this, vacancyId));
             }
@@ -301,7 +302,7 @@ public class AppServiceProvider : IAppServiceProvider
 
     public CandidateSearchViewModel GetCandidateSearchViewModel(VacancyViewModel vacancyViewModel)
     {
-        return new CandidateSearchViewModel(vacancyViewModel, this);
+        return new CandidateSearchViewModel(this, vacancyViewModel);
     }
 
     public void OpenDock(IDockable dockable)

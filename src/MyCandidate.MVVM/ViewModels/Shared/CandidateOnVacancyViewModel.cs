@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Input;
@@ -21,13 +23,13 @@ public class CandidateOnVacancyViewModel : ViewModelBase
     private readonly CandidateViewModel? _candidateViewModel;
     private readonly VacancyViewModel? _vacancyViewModel;
     private readonly IAppServiceProvider _provider;
-    private bool _isVacancy;
+    private readonly ObservableAsPropertyHelper<bool> _isLoading;
     public CandidateOnVacancyViewModel(CandidateViewModel candidateViewModel, IAppServiceProvider appServiceProvider)
     {
         _candidateViewModel = candidateViewModel;
+        _vacancyViewModel = null;
         _provider = appServiceProvider;
-        _isVacancy = false;
-        Source = new ObservableCollectionExtended<CandidateOnVacancyExt>(_provider.CandidateService.GetCandidateOnVacancies(candidateViewModel.CandidateId).Select(x => new CandidateOnVacancyExt(x)));
+        Source = new ObservableCollectionExtended<CandidateOnVacancyExt>();
         Source.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _itemList)
@@ -37,15 +39,18 @@ public class CandidateOnVacancyViewModel : ViewModelBase
         DeleteCmd = CreateDeleteCmd();
         DeleteKeyDownCmd = CreateDeleteKeyDownCmd();
 
-        LoadCandidateOnVacancy();
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadCandidateOnVacancy);
+        _isLoading = LoadDataCmd.IsExecuting
+            .ToProperty(this, x => x.IsLoading);
+        LoadDataCmd.Execute().Subscribe();
     }
 
     public CandidateOnVacancyViewModel(VacancyViewModel vacancyViewModel, IAppServiceProvider appServiceProvider)
     {
         _vacancyViewModel = vacancyViewModel;
+        _candidateViewModel = null;
         _provider = appServiceProvider;
-        _isVacancy = true;
-        Source = new ObservableCollectionExtended<CandidateOnVacancyExt>(_provider.VacancyService.GetCandidateOnVacancies(vacancyViewModel.VacancyId).Select(x => new CandidateOnVacancyExt(x)));
+        Source = new ObservableCollectionExtended<CandidateOnVacancyExt>();
         Source.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _itemList)
@@ -55,11 +60,35 @@ public class CandidateOnVacancyViewModel : ViewModelBase
         DeleteCmd = CreateDeleteCmd();
         DeleteKeyDownCmd = CreateDeleteKeyDownCmd();
 
-        LoadCandidateOnVacancy();
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadCandidateOnVacancy);
+        _isLoading = LoadDataCmd.IsExecuting
+            .ToProperty(this, x => x.IsLoading);
+        LoadDataCmd.Execute().Subscribe();
     }
 
-    private void LoadCandidateOnVacancy()
+    private async Task LoadCandidateOnVacancy()
     {
+        var itemsExt = Enumerable.Empty<CandidateOnVacancyExt>();
+        if (_candidateViewModel != null)
+        {
+            var items = await _provider.CandidateService.GetCandidateOnVacanciesAsync(_candidateViewModel.CandidateId);
+            itemsExt = items.Select(x => new CandidateOnVacancyExt(x));
+        }
+        else if (_vacancyViewModel != null)
+        {
+            var items = await _provider.VacancyService.GetCandidateOnVacanciesAsync(_vacancyViewModel.VacancyId);
+            itemsExt = items.Select(x => new CandidateOnVacancyExt(x));
+        }
+
+        if (itemsExt.Any())
+        {
+            RxApp.MainThreadScheduler.Schedule(() =>
+            {
+                Source.Clear();
+                Source.AddRange(itemsExt);
+            });
+        }
+
         this.WhenAnyValue(x => x.SelectedItem)
             .Subscribe(
                 x =>
@@ -89,14 +118,14 @@ public class CandidateOnVacancyViewModel : ViewModelBase
     public List<CandidateOnVacancy> GetCandidateOnVacancies()
     {
         var retVal = ItemList.Select(x => x.ToCandidateOnVacancy()).ToList();
-        List<Comment> comments;
-        if (_isVacancy)
+        var comments = Enumerable.Empty<Comment>();
+        if (_vacancyViewModel != null)
         {
-            comments = _vacancyViewModel!.Comments!.GetAllComments();
+            comments = _vacancyViewModel.Comments!.GetAllComments();
         }
-        else
+        else if (_candidateViewModel != null)
         {
-            comments = _candidateViewModel!.Comments!.GetAllComments();
+            comments = _candidateViewModel.Comments!.GetAllComments();
         }
 
         retVal.ForEach(x => x.Comments = comments.Where(c => c.CandidateOnVacancyId == x.Id).ToList());
@@ -105,19 +134,20 @@ public class CandidateOnVacancyViewModel : ViewModelBase
     }
 
     #region Commands
+    public ReactiveCommand<Unit, Unit> LoadDataCmd { get; }
     public IReactiveCommand OpenCmd { get; }
     private IReactiveCommand CreateOpenCmd()
     {
         return ReactiveCommand.Create(
-            (CandidateOnVacancyExt item) =>
+            async (CandidateOnVacancyExt item) =>
             {
-                if (_isVacancy)
+                if (_vacancyViewModel != null)
                 {
-                    _provider.OpenCandidateViewModel(SelectedItem!.CandidateId);
+                    await _provider.OpenCandidateViewModelAsync(SelectedItem!.CandidateId);
                 }
-                else
+                else if (_candidateViewModel != null)
                 {
-                    _provider.OpenVacancyViewModel(SelectedItem!.VacancyId);
+                    await _provider.OpenVacancyViewModelAsync(SelectedItem!.VacancyId);
                 }
             },
             this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
@@ -130,13 +160,13 @@ public class CandidateOnVacancyViewModel : ViewModelBase
         return ReactiveCommand.Create(
             (CandidateOnVacancyExt item) =>
             {
-                if (_isVacancy)
+                if (_vacancyViewModel != null)
                 {
-                    _vacancyViewModel!.Comments!.DeleteByCandidateOnVacancyId(item.Id);
+                    _vacancyViewModel.Comments!.DeleteByCandidateOnVacancyId(item.Id);
                 }
-                else
+                else if (_candidateViewModel != null)
                 {
-                    _candidateViewModel!.Comments!.DeleteByCandidateOnVacancyId(item.Id);
+                    _candidateViewModel.Comments!.DeleteByCandidateOnVacancyId(item.Id);
                 }
 
                 Source.Remove(item);
@@ -177,13 +207,15 @@ public class CandidateOnVacancyViewModel : ViewModelBase
     }
     #endregion
 
+    public bool IsLoading => _isLoading.Value;
+
     public bool CandidateColumnVisible
     {
-        get => _isVacancy;
+        get => _vacancyViewModel != null;
     }
 
     public bool VacancyColumnVisible
     {
-        get => !_isVacancy;
+        get => _candidateViewModel != null;
     }
 }

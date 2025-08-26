@@ -45,10 +45,10 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
             .Bind(out _itemList)
             .Subscribe();
 
-        LoadDataCommand = ReactiveCommand.CreateFromTask(LoadDataAsync);
-        _isLoading = LoadDataCommand.IsExecuting
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadDataAsync);
+        _isLoading = LoadDataCmd.IsExecuting
             .ToProperty(this, x => x.IsLoading);
-        LoadDataCommand.Execute().Subscribe();
+        LoadDataCmd.Execute().Subscribe();
 
         this.WhenAnyValue(x => x.SelectedItem)
             .Subscribe(
@@ -220,7 +220,7 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
     public IReactiveCommand CancelCmd { get; }
     public IReactiveCommand CreateCmd { get; }
     public IReactiveCommand DeleteCmd { get; }
-    public ReactiveCommand<Unit, Unit> LoadDataCommand { get; }
+    public ReactiveCommand<Unit, Unit> LoadDataCmd { get; }
 
     private Func<T, bool> MakeFilter(bool? enabled, string name)
     {

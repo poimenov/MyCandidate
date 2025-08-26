@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using MyCandidate.Common;
 
 namespace MyCandidate.MVVM.Models;
@@ -27,9 +28,9 @@ public class CandidateOnVacancyExt : CandidateOnVacancy
     public string CandidateName => Candidate?.Name ?? string.Empty;
     [DisplayName("Selection_Status")]
     [Category("Main")]
-    public override SelectionStatus? SelectionStatus { get; set; } 
+    public override SelectionStatus? SelectionStatus { get; set; }
 
-    [DisplayName("Creation_Date")]        
+    [DisplayName("Creation_Date")]
     public string Created => CreationDate.ToString("G");
 
     [DisplayName("Last_Modification_Date")]

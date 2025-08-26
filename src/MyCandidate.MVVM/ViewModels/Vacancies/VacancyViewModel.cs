@@ -5,12 +5,12 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Xsl;
 using Avalonia;
-using Avalonia.Platform;
 using Avalonia.PropertyGrid.Services;
 using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
@@ -18,7 +18,6 @@ using DynamicData.Binding;
 using MsBox.Avalonia.Enums;
 using MyCandidate.Common;
 using MyCandidate.Common.Interfaces;
-using MyCandidate.MVVM.Converters;
 using MyCandidate.MVVM.DataTemplates;
 using MyCandidate.MVVM.Extensions;
 using MyCandidate.MVVM.Models;
@@ -31,21 +30,26 @@ namespace MyCandidate.MVVM.ViewModels.Vacancies;
 public class VacancyViewModel : Document
 {
     private readonly IAppServiceProvider _provider;
-    private Vacancy _vacancy;
+    private readonly ObservableAsPropertyHelper<bool> _isLoading;
+    private Vacancy? _vacancy;
     private bool _initialSet = false;
 
     public VacancyViewModel(IAppServiceProvider appServiceProvider)
     {
         _provider = appServiceProvider;
-        OfficesSource = new ObservableCollectionExtended<Office>(_provider.OfficeService.GetItemsListAsync().Result.Where(x => x.Enabled == true));
+
+        OfficesSource = new ObservableCollectionExtended<Office>();
         OfficesSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter!)
             .Bind(out _offices)
             .Subscribe();
 
-        _vacancy = NewVacancy;
-        LoadVacancy();
+        LoadDataCmd = ReactiveCommand.CreateFromTask<int?>(LoadVacancy);
+        _isLoading = LoadDataCmd.IsExecuting
+            .ToProperty(this, x => x.IsLoading);
+        LoadDataCmd.Execute(null).Subscribe();
+
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = CreateCancelCmd();
         SaveCmd = CreateSaveCmd();
@@ -57,15 +61,19 @@ public class VacancyViewModel : Document
     public VacancyViewModel(IAppServiceProvider appServiceProvider, int vacancyId)
     {
         _provider = appServiceProvider;
-        OfficesSource = new ObservableCollectionExtended<Office>(_provider.OfficeService.GetItemsListAsync().Result.Where(x => x.Enabled == true));
+
+        OfficesSource = new ObservableCollectionExtended<Office>();
         OfficesSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter!)
             .Bind(out _offices)
             .Subscribe();
 
-        _vacancy = _provider.VacancyService.Get(vacancyId);
-        LoadVacancy();
+        LoadDataCmd = ReactiveCommand.CreateFromTask<int?>(LoadVacancy);
+        _isLoading = LoadDataCmd.IsExecuting
+            .ToProperty(this, x => x.IsLoading);
+        LoadDataCmd.Execute(vacancyId).Subscribe();
+
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = CreateCancelCmd();
         SaveCmd = CreateSaveCmd();
@@ -76,15 +84,15 @@ public class VacancyViewModel : Document
 
     private void CultureChanged(object? sender, EventArgs e)
     {
-        Title = (_vacancy.Id == 0) ? LocalizationService.Default["New_Vacancy"] : _vacancy.Name;
+        Title = (_vacancy == null || _vacancy.Id == 0) ? LocalizationService.Default["New_Vacancy"] : _vacancy?.Name ?? string.Empty;
     }
 
     private Vacancy NewVacancy
     {
         get
         {
-            var vacancyStatus = VacancyStatuses?.First(x => x.Name == VacancyStatusNames.New) ?? throw new InvalidOperationException("VacancyStatuses is null");
-            var office = OfficesSource?.First() ?? throw new InvalidOperationException("OfficesSource is null");
+            var vacancyStatus = VacancyStatuses.First(x => x.Name == VacancyStatusNames.New) ?? throw new InvalidOperationException("VacancyStatuses is null");
+            var office = OfficesSource.First() ?? throw new InvalidOperationException("OfficesSource is null");
             return new Vacancy
             {
                 Id = 0,
@@ -120,8 +128,28 @@ public class VacancyViewModel : Document
     }
     #endregion
 
-    private void LoadVacancy()
+    private async Task LoadVacancy(int? id)
     {
+        _vacancyStatuses = await _provider.DictionariesDataAccess.GetVacancyStatusesAsync();
+        var companies = await _provider.CompanyService.GetItemsListAsync();
+        _companies = companies.Where(x => x.Enabled == true).ToArray();
+
+        var offices = await _provider.OfficeService.GetItemsListAsync();
+        RxApp.MainThreadScheduler.Schedule(() =>
+        {
+            OfficesSource.Clear();
+            OfficesSource.AddRange(offices.Where(x => x.Enabled == true));
+        });
+
+        if (id != null && id > 0)
+        {
+            _vacancy = await _provider.VacancyService.GetAsync(id.Value) ?? NewVacancy;
+        }
+        else
+        {
+            _vacancy = NewVacancy;
+        }
+
         Title = (_vacancy.Id == 0) ? LocalizationService.Default["New_Vacancy"] : _vacancy.Name;
         Name = _vacancy.Name;
         Description = _vacancy.Description;
@@ -159,37 +187,43 @@ public class VacancyViewModel : Document
                         return;
                     }
 
-                    if (Resources?.Resources != null && VacancySkills?.Skills != null && CandidatesOnVacancy != null)
+                    if (Vacancy != null)
                     {
-                        _vacancy.VacancyResources = Resources.Resources.Select(x => x.ToVacancyResource(Vacancy)).ToList();
-                        _vacancy.VacancySkills = VacancySkills.Skills.Select(x => x.ToVacancySkill(_vacancy)).ToList();
-                        _vacancy.CandidateOnVacancies = CandidatesOnVacancy.GetCandidateOnVacancies();
-                    }
+                        if (Resources?.Resources != null && VacancySkills?.Skills != null && CandidatesOnVacancy != null)
+                        {
+                            Vacancy.VacancyResources = Resources.Resources.Select(x => x.ToVacancyResource(Vacancy)).ToList();
+                            Vacancy.VacancySkills = VacancySkills.Skills.Select(x => x.ToVacancySkill(Vacancy)).ToList();
+                            Vacancy.CandidateOnVacancies = CandidatesOnVacancy.GetCandidateOnVacancies();
+                        }
 
-                    string message;
-                    int id;
-                    bool success;
+                        string message = string.Empty;
+                        int id;
+                        bool success;
 
-                    if (_vacancy.Id == 0)
-                    {
-                        success = _provider.VacancyService.Create(_vacancy, out id, out message);
-                    }
-                    else
-                    {
-                        success = _provider.VacancyService.Update(_vacancy, out message);
-                        id = _vacancy.Id;
-                    }
+                        if (Vacancy.Id == 0)
+                        {
+                            var createResult = await _provider.VacancyService.CreateAsync(Vacancy);
+                            id = createResult.Result;
+                            message = createResult.Message ?? string.Empty;
+                            success = createResult.Success;
+                        }
+                        else
+                        {
+                            var updateResult = await _provider.VacancyService.UpdateAsync(Vacancy);
+                            success = updateResult.Success;
+                            id = Vacancy.Id;
+                        }
 
-                    if (success)
-                    {
-                        _vacancy = _provider.VacancyService.Get(id);
-                        LoadVacancy();
-                    }
-                    else
-                    {
-                        dialog = this.GetMessageBox(LocalizationService.Default["Save"],
-                                                        message, ButtonEnum.Ok, Icon.Error);
-                        await dialog.ShowAsync();
+                        if (success)
+                        {
+                            await LoadVacancy(id);
+                        }
+                        else
+                        {
+                            dialog = this.GetMessageBox(LocalizationService.Default["Save"],
+                                                            message, ButtonEnum.Ok, Icon.Error);
+                            await dialog.ShowAsync();
+                        }
                     }
 
                 }, this.WhenAnyValue(x => x.IsValid, v => v == true)
@@ -210,8 +244,13 @@ public class VacancyViewModel : Document
                     {
                         return;
                     }
-                    _vacancy = _vacancy.Id == 0 ? NewVacancy : _provider.VacancyService.Get(_vacancy.Id);
-                    LoadVacancy();
+
+                    if (Vacancy != null && Vacancy.Id == 0)
+                    {
+                        _vacancy = NewVacancy;
+                    }
+
+                    await LoadVacancy(Vacancy?.Id);
                 }
             );
     }
@@ -243,8 +282,9 @@ public class VacancyViewModel : Document
                         return;
                     }
 
-                    string message;
-                    if (_provider.VacancyService.Delete(VacancyId, out message))
+                    var deleteResult = await _provider.VacancyService.DeleteAsync(VacancyId);
+                    string message = deleteResult.Message ?? string.Empty;
+                    if (deleteResult.Success)
                     {
                         _provider.CloseDock(this);
                     }
@@ -260,11 +300,13 @@ public class VacancyViewModel : Document
     }
 
     public IReactiveCommand ExportCmd { get; }
+    public ReactiveCommand<int?, Unit> LoadDataCmd { get; }
+    public bool IsLoading => _isLoading.Value;
 
     private IReactiveCommand CreateExportCmd()
     {
-        return ReactiveCommand.Create<string, Unit>(
-            (format) =>
+        return ReactiveCommand.Create<string>(
+            async (format) =>
                 {
                     var exportFolder = Path.Combine(AppSettings.AppDataPath, "export");
                     if (!Directory.Exists(exportFolder))
@@ -272,7 +314,7 @@ public class VacancyViewModel : Document
                         Directory.CreateDirectory(exportFolder);
                     }
                     var entityName = "vacancy";
-                    var doc = _provider.VacancyService.GetXml(VacancyId);
+                    var doc = await _provider.VacancyService.GetXmlAsync(VacancyId);
                     var path = Path.Combine(exportFolder, $"{entityName}.{VacancyId}.xml");
                     switch (format)
                     {
@@ -281,31 +323,34 @@ public class VacancyViewModel : Document
                             var args = new XsltArgumentList();
                             args.AddExtensionObject("urn:ExtObj", new XsltExtObject());
                             path = Path.Combine(exportFolder, $"{entityName}.{VacancyId}.html");
-                            XmlWriterSettings settings = new XmlWriterSettings
-                            {
-                                Indent = true,
-                                CloseOutput = true,
-                                OmitXmlDeclaration = true,
-                                Encoding = Encoding.UTF8
-                            };
-                            using (XmlWriter writer = XmlWriter.Create(path, settings))
-                            {
-                                xslt.Transform(doc, args, writer);
-                            }
+                            await SaveDocumentAsync(doc, path, xslt, args);
                             break;
                         default:
-                            doc.Save(path);
+                            await SaveDocumentAsync(doc, path, null, null);
                             break;
                     }
                     DataTemplateProvider.Open(path);
-                    return Unit.Default;
                 }, this.WhenAnyValue(x => x.VacancyId, y => y != 0)
             );
     }
     #endregion
 
-    public Vacancy Vacancy => _vacancy;
-    public int VacancyId => _vacancy.Id;
+    private async Task SaveDocumentAsync(XmlDocument xmlDoc, string filePath, XslCompiledTransform? xslt, XsltArgumentList? args)
+    {
+        try
+        {
+            await xmlDoc.SaveAsync(filePath, xslt, args);
+        }
+        catch (Exception ex)
+        {
+            var dialog = this.GetMessageBox(LocalizationService.Default["Save"],
+                                            ex.Message, ButtonEnum.Ok, Icon.Error);
+            await dialog.ShowAsync();
+        }
+    }
+
+    public Vacancy? Vacancy => _vacancy;
+    public int VacancyId => (_vacancy != null) ? _vacancy.Id : 0;
 
     public bool IsValid
     {
@@ -328,9 +373,9 @@ public class VacancyViewModel : Document
         get => _name;
         set
         {
-            if (!string.IsNullOrEmpty(value))
+            if (!string.IsNullOrEmpty(value) && Vacancy != null)
             {
-                _vacancy.Name = value;
+                Vacancy.Name = value;
                 this.RaiseAndSetIfChanged(ref _name, value);
                 this.RaisePropertyChanged(nameof(IsValid));
             }
@@ -346,9 +391,9 @@ public class VacancyViewModel : Document
         get => _description;
         set
         {
-            if (value != null)
+            if (value != null && Vacancy != null)
             {
-                _vacancy.Description = value;
+                Vacancy.Description = value;
                 this.RaiseAndSetIfChanged(ref _description, value);
                 this.RaisePropertyChanged(nameof(IsValid));
             }
@@ -363,27 +408,19 @@ public class VacancyViewModel : Document
         get => _enabled;
         set
         {
-            _vacancy.Enabled = value;
-            this.RaiseAndSetIfChanged(ref _enabled, value);
-            this.RaisePropertyChanged(nameof(IsValid));
+            if (Vacancy != null)
+            {
+                Vacancy.Enabled = value;
+                this.RaiseAndSetIfChanged(ref _enabled, value);
+                this.RaisePropertyChanged(nameof(IsValid));
+            }
         }
     }
     #endregion
 
     #region VacancyStatus
-    private IEnumerable<VacancyStatus>? _vacancyStatuses;
-    public IEnumerable<VacancyStatus> VacancyStatuses
-    {
-        get
-        {
-            if (_vacancyStatuses == null)
-            {
-                _vacancyStatuses = _provider.DictionariesDataAccess.GetVacancyStatusesAsync().Result;
-            }
-
-            return _vacancyStatuses;
-        }
-    }
+    private IEnumerable<VacancyStatus> _vacancyStatuses = Enumerable.Empty<VacancyStatus>();
+    public IEnumerable<VacancyStatus> VacancyStatuses => _vacancyStatuses;
 
     private VacancyStatus? _selectedVacancyStatus;
     public VacancyStatus? SelectedVacancyStatus
@@ -391,10 +428,10 @@ public class VacancyViewModel : Document
         get => _selectedVacancyStatus;
         set
         {
-            if (value != null)
+            if (value != null && Vacancy != null)
             {
-                _vacancy.VacancyStatus = value;
-                _vacancy.VacancyStatusId = value.Id;
+                Vacancy.VacancyStatus = value;
+                Vacancy.VacancyStatusId = value.Id;
                 this.RaiseAndSetIfChanged(ref _selectedVacancyStatus, value);
             }
         }
@@ -402,19 +439,8 @@ public class VacancyViewModel : Document
     #endregion
 
     #region Company
-    private IEnumerable<Company>? _companies;
-    public IEnumerable<Company> Companies
-    {
-        get
-        {
-            if (_companies == null)
-            {
-                _companies = _provider.CompanyService.GetItemsListAsync().Result.Where(x => x.Enabled == true);
-            }
-
-            return _companies;
-        }
-    }
+    private IEnumerable<Company> _companies = Enumerable.Empty<Company>();
+    public IEnumerable<Company> Companies => _companies;
 
     private Company? _selectedCompany;
     public Company? SelectedCompany
@@ -445,10 +471,10 @@ public class VacancyViewModel : Document
         get => _selectedOffice;
         set
         {
-            if (value != null)
+            if (value != null && Vacancy != null)
             {
-                _vacancy.Office = value;
-                _vacancy.OfficeId = value.Id;
+                Vacancy.Office = value;
+                Vacancy.OfficeId = value.Id;
             }
 
             this.RaiseAndSetIfChanged(ref _selectedOffice, value);

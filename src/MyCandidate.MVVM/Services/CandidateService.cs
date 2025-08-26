@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using log4net;
@@ -26,139 +28,160 @@ public class CandidateService : ICandidateService
         _log = log;
     }
 
-    public bool Create(Candidate item, out int id, out string message)
+    public async Task<OperationResult<int>> CreateAsync(Candidate item)
     {
-        message = string.Empty;
-        id = 0;
-        bool retVal = false;
+        var result = new OperationResult<int> { Success = false, Result = 0 };
+        var createResult = await _candidates.CreateAsync(item);
+        if (createResult.Success)
+        {
+            result.Success = true;
+            result.Result = createResult.Result;
+        }
+        else if (createResult.Exception != null)
+        {
+            _log.Error(createResult.Exception);
+            if (createResult.Exception.InnerException != null)
+            {
+                _log.Error(createResult.Exception.InnerException);
+            }
+            result.Message = "Failed to create candidate";
+        }
+        else
+        {
+            result.Message = createResult.Message;
+        }
 
+        return result;
+    }
+
+    public async Task<OperationResult> DeleteAsync(int id)
+    {
+        var result = new OperationResult { Success = false };
+        var deleteResult = await _candidates.DeleteAsync(id);
+        if (deleteResult.Success)
+        {
+            result.Success = true;
+        }
+        else if (deleteResult.Exception != null)
+        {
+            _log.Error(deleteResult.Exception);
+            if (deleteResult.Exception.InnerException != null)
+            {
+                _log.Error(deleteResult.Exception.InnerException);
+            }
+            result.Message = "Failed to delete candidate";
+        }
+        else
+        {
+            result.Message = deleteResult.Message;
+        }
+
+        return result;
+    }
+
+    public Task<bool> ExistAsync(int id)
+    {
+        return _candidates.ExistAsync(id);
+    }
+
+    public Task<Candidate?> GetAsync(int id)
+    {
+        return _candidates.GetAsync(id);
+    }
+
+    public async Task<XmlDocument> GetXmlAsync(int id)
+    {
         try
         {
-            if (_candidates.Exist(item.LastName, item.FirstName, item.BirthDate))
+            var candidate = await _candidates.GetAsync(id);
+            if (candidate == null)
             {
-                message = "A candidate with the same last name, first name and birthday already exists";
+                return new XmlDocument();
             }
-            else if (_candidates.Create(item, out id))
+
+            var root = candidate.ToXml();
+            var candidateOnVacancies = new XElement("CandidateOnVacancies");
+            foreach (var item in candidate.CandidateOnVacancies)
             {
-                retVal = true;
+                if (item.SelectionStatus != null && !string.IsNullOrEmpty(item.SelectionStatus.Name))
+                {
+                    var candidateOnVacancy = new XElement("CandidateOnVacancy", new XAttribute("status", item.SelectionStatus.Name),
+                                                                        new XAttribute("created", item.CreationDate),
+                                                                        new XAttribute("modified", item.LastModificationDate));
+                    var vacancy = await _vacancies.GetAsync(item.VacancyId);
+                    if (vacancy != null)
+                    {
+                        candidateOnVacancy.Add(vacancy.ToXml());
+                        candidateOnVacancies.Add(candidateOnVacancy);
+                    }
+                }
             }
+            root.Add(candidateOnVacancies);
+
+            StringBuilder sb = new StringBuilder();
+            var settings = new XmlWriterSettings { Async = true };
+            await using (var writer = XmlWriter.Create(sb, settings))
+            {
+                await root.SaveAsync(writer, CancellationToken.None);
+            }
+
+            var retVal = new XmlDocument();
+            retVal.LoadXml(sb.ToString());
+            return retVal;
         }
         catch (Exception ex)
         {
-            message = ex.Message;
             _log.Error(ex);
             if (ex.InnerException != null)
             {
-                message = ex.InnerException.Message;
                 _log.Error(ex.InnerException);
             }
-        }
-
-        return retVal;
-    }
-
-    public bool Delete(int id, out string message)
-    {
-        message = string.Empty;
-        bool retVal = false;
-
-        try
-        {
-            _candidates.Delete(id);
-            retVal = true;
-        }
-        catch (Exception ex)
-        {
-            message = ex.Message;
-            _log.Error(ex);
-        }
-
-        return retVal;
-    }
-
-    public bool Exist(int id)
-    {
-        return _candidates.Exist(id);
-    }
-
-    public Candidate Get(int id)
-    {
-        return _candidates.Get(id);
-    }
-
-    public XmlDocument GetXml(int id)
-    {
-        var candidate = _candidates.Get(id);
-        if (candidate == null)
-        {
             return new XmlDocument();
         }
+    }
 
-        var root = candidate.ToXml();
-        var candidateOnVacancies = new XElement("CandidateOnVacancies");
-        foreach (var item in candidate.CandidateOnVacancies)
+    public async Task<IEnumerable<CandidateOnVacancy>> GetCandidateOnVacanciesAsync(int candidateId)
+    {
+        return await _candidateOnVacancies.GetListByCandidateIdAsync(candidateId);
+    }
+
+    public async Task<IEnumerable<Comment>> GetCommentsAsync(int candidateId)
+    {
+        return await _comments.GetCommentsByCandidateIdAsync(candidateId);
+    }
+
+    public async Task<IEnumerable<Candidate>> SearchAsync(CandidateSearch searchParams)
+    {
+        return await _candidates.SearchAsync(searchParams);
+    }
+
+    public async Task<IEnumerable<Candidate>> GetRecentAsync(int count)
+    {
+        return await _candidates.GetRecentAsync(count);
+    }
+
+    public async Task<OperationResult> UpdateAsync(Candidate item)
+    {
+        var result = new OperationResult { Success = false };
+        var updateResult = await _candidates.UpdateAsync(item);
+        if (updateResult.Success)
         {
-            if (item.SelectionStatus != null && !string.IsNullOrEmpty(item.SelectionStatus.Name))
+            result.Success = true;
+        }
+        else if (updateResult.Exception != null)
+        {
+            _log.Error(updateResult.Exception);
+            if (updateResult.Exception.InnerException != null)
             {
-                var candidateOnVacancy = new XElement("CandidateOnVacancy", new XAttribute("status", item.SelectionStatus.Name),
-                                                                        new XAttribute("created", item.CreationDate),
-                                                                        new XAttribute("modified", item.LastModificationDate));
-                var vacancy = _vacancies.Get(item.VacancyId);
-                if (vacancy != null)
-                {
-                    candidateOnVacancy.Add(vacancy.ToXml());
-                    candidateOnVacancies.Add(candidateOnVacancy);
-                }
+                _log.Error(updateResult.Exception.InnerException);
             }
+            result.Message = "Failed to update candidate";
         }
-        root.Add(candidateOnVacancies);
-
-        StringBuilder sb = new StringBuilder();
-        using (var writer = XmlWriter.Create(sb))
+        else
         {
-            root.Save(writer);
+            result.Message = updateResult.Message;
         }
 
-        var retVal = new XmlDocument();
-        retVal.LoadXml(sb.ToString());
-        return retVal;
-    }
-    public IEnumerable<CandidateOnVacancy> GetCandidateOnVacancies(int candidateId)
-    {
-        return _candidateOnVacancies.GetListByCandidateId(candidateId);
-    }
-
-    public IEnumerable<Comment> GetComments(int candidateId)
-    {
-        return _comments.GetCommentsByCandidateId(candidateId);
-    }
-
-    public IEnumerable<Candidate> Search(CandidateSearch searchParams)
-    {
-        return _candidates.Search(searchParams);
-    }
-
-    public IEnumerable<Candidate> GetRecent(int count)
-    {
-        return _candidates.GetRecent(count);
-    }
-
-    public bool Update(Candidate item, out string message)
-    {
-        message = string.Empty;
-        bool retVal = false;
-
-        try
-        {
-            _candidates.Update(item);
-            retVal = true;
-        }
-        catch (Exception ex)
-        {
-            message = ex.Message;
-            _log.Error(ex);
-        }
-
-        return retVal;
+        return result;
     }
 }

@@ -176,7 +176,7 @@ namespace MyCandidate.MVVM.Models
             switch (ResourceType.Name)
             {
                 case ResourceTypeNames.Path:
-                    retVal = File.Exists(PathValue);
+                    retVal = Path.IsPathFullyQualified(PathValue);
                     break;
                 case ResourceTypeNames.Url:
                     retVal = Uri.IsWellFormedUriString(UrlValue, UriKind.Absolute);

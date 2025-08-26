@@ -11,31 +11,32 @@ public class Comments : IComments
     {
         _databaseFactory = databaseFactory;
     }
-    public IEnumerable<Comment> GetCommentsByCandidateId(int candidateId)
+
+    public async Task<IEnumerable<Comment>> GetCommentsByCandidateIdAsync(int candidateId)
     {
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            return db.Comments
+            return await db.Comments
                         .Where(x => x.CandidateOnVacancy!.CandidateId == candidateId)
                         .Include(x => x.CandidateOnVacancy!)
                         .ThenInclude(x => x.Vacancy)
                         .Include(x => x.CandidateOnVacancy!)
                         .ThenInclude(x => x.Candidate)
-                        .ToList();
+                        .ToListAsync();
         }
     }
 
-    public IEnumerable<Comment> GetCommentsByVacancyId(int vacancyId)
+    public async Task<IEnumerable<Comment>> GetCommentsByVacancyIdAsync(int vacancyId)
     {
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            return db.Comments
+            return await db.Comments
                         .Where(x => x.CandidateOnVacancy!.VacancyId == vacancyId)
                         .Include(x => x.CandidateOnVacancy!)
                         .ThenInclude(x => x.Vacancy)
                         .Include(x => x.CandidateOnVacancy!)
                         .ThenInclude(x => x.Candidate)
-                        .ToList();
+                        .ToListAsync();
         }
     }
 }

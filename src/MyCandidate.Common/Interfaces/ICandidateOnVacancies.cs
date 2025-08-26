@@ -2,6 +2,6 @@ namespace MyCandidate.Common.Interfaces;
 
 public interface ICandidateOnVacancies
 {
-    public IEnumerable<CandidateOnVacancy> GetListByCandidateId(int candidateId);
-    public IEnumerable<CandidateOnVacancy> GetListByVacancyId(int vacancyId);
+    Task<IEnumerable<CandidateOnVacancy>> GetListByCandidateIdAsync(int candidateId);
+    Task<IEnumerable<CandidateOnVacancy>> GetListByVacancyIdAsync(int vacancyId);
 }

@@ -2,6 +2,6 @@ namespace MyCandidate.Common.Interfaces;
 
 public interface IVacancySkills
 {
-    VacancySkill Get(int id);
-    IEnumerable<VacancySkill> GetVacancySkills(int vacancyId);    
+    Task<VacancySkill?> GetAsync(int id);
+    Task<IEnumerable<VacancySkill>> GetVacancySkillsAsync(int vacancyId);
 }

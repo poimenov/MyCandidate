@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Avalonia.PropertyGrid.Services;
 using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
@@ -22,6 +25,7 @@ public class VacancySearchViewModel : Document
 {
     private readonly IAppServiceProvider _provider;
     private readonly CandidateViewModel? _candidateViewModel;
+    private readonly ObservableAsPropertyHelper<bool> _isLoading;
     public CandidateViewModel? CandidateViewModel => _candidateViewModel;
 
     public VacancySearchViewModel(IAppServiceProvider appServiceProvider)
@@ -30,10 +34,7 @@ public class VacancySearchViewModel : Document
         Title = LocalizationService.Default["Vacancy_Search"];
         LocalizationService.Default.OnCultureChanged += CultureChanged;
 
-        var _offices = new List<Office>() { new Office() { Id = 0, CompanyId = 0, Name = string.Empty } };
-        _offices.AddRange(_provider.OfficeService.GetItemsListAsync().Result.Where(x => x.Enabled == true));
-
-        OfficesSource = new ObservableCollectionExtended<Office>(_offices);
+        OfficesSource = new ObservableCollectionExtended<Office>();
         OfficesSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter!)
@@ -42,14 +43,17 @@ public class VacancySearchViewModel : Document
 
         Source = new ObservableCollectionExtended<VacancyModel>();
         Pager = new PagerViewModel();
-        LoadVacancySearch();
-
         Source.ToObservableChangeSet()
             .Page(Pager.Pager)
             .Do(x => Pager.PagingUpdate(x.Response.TotalSize, x.Response.Page, x.Response.Pages))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _itemList)
             .Subscribe();
+
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadVacancySearch);
+        _isLoading = LoadDataCmd.IsExecuting
+            .ToProperty(this, x => x.IsLoading);
+        LoadDataCmd.Execute().Subscribe();
 
         OpenCmd = CreateOpenCmd();
         SearchCmd = CreateSearchCmd();
@@ -61,14 +65,10 @@ public class VacancySearchViewModel : Document
         _candidateViewModel = candidateViewModel;
         _provider = appServiceProvider;
 
-        Title = $"{LocalizationService.Default["Vacancy_Search_Candidate"]} {CandidateViewModel!.Candidate.Name}";
+        Title = $"{LocalizationService.Default["Vacancy_Search_Candidate"]} {candidateViewModel.Candidate?.Name}";
         LocalizationService.Default.OnCultureChanged += CultureChanged;
 
-        var _offices = new List<Office>() { new Office() { Id = 0, CompanyId = 0, Name = string.Empty } };
-        _offices.AddRange(_provider.OfficeService.GetItemsListAsync().Result.Where(x => x.Enabled == true));
-
-        OfficesSource = new ObservableCollectionExtended<Office>(_offices);
-        Pager = new PagerViewModel();
+        OfficesSource = new ObservableCollectionExtended<Office>();
         OfficesSource.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter!)
@@ -76,8 +76,7 @@ public class VacancySearchViewModel : Document
             .Subscribe();
 
         Source = new ObservableCollectionExtended<VacancyModel>();
-        LoadVacancySearch();
-
+        Pager = new PagerViewModel();
         Source.ToObservableChangeSet()
             .Page(Pager.Pager)
             .Do(x => Pager.PagingUpdate(x.Response.TotalSize, x.Response.Page, x.Response.Pages))
@@ -85,13 +84,27 @@ public class VacancySearchViewModel : Document
             .Bind(out _itemList)
             .Subscribe();
 
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadVacancySearch);
+        _isLoading = LoadDataCmd.IsExecuting
+            .ToProperty(this, x => x.IsLoading);
+        LoadDataCmd.Execute().Subscribe();
+
         OpenCmd = CreateOpenCmd();
         SearchCmd = CreateSearchCmd();
         AddToCandidateCmd = CreateAddToCandidateCmd();
     }
 
-    private void LoadVacancySearch()
+    private async Task LoadVacancySearch()
     {
+        var officies = await _provider.OfficeService.GetItemsListAsync();
+        var _offices = new List<Office>() { new Office() { Id = 0, CompanyId = 0, Name = string.Empty } };
+        _offices.AddRange(officies.Where(x => x.Enabled == true));
+        RxApp.MainThreadScheduler.Schedule(() =>
+        {
+            OfficesSource.Clear();
+            OfficesSource.AddRange(_offices);
+        });
+
         if (CandidateViewModel == null)
         {
             Skills = new SkillsViewModel(new List<SkillModel>(), _provider.Properties!);
@@ -99,9 +112,17 @@ public class VacancySearchViewModel : Document
         }
         else
         {
-            Skills = new SkillsViewModel(CandidateViewModel.Candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill!, x.Seniority!)), _provider.Properties!);
-            VacancySearch = new VacancySearch(CandidateViewModel.Candidate.CandidateSkills);
-            var location = CandidateViewModel.Candidate.Location;
+            Skills = new SkillsViewModel(
+                CandidateViewModel.Candidate?.CandidateSkills != null
+                    ? CandidateViewModel.Candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill!, x.Seniority!))
+                    : Enumerable.Empty<SkillModel>(),
+                _provider.Properties!);
+
+            VacancySearch = new VacancySearch(CandidateViewModel.Candidate?.CandidateSkills != null
+                    ? CandidateViewModel.Candidate.CandidateSkills
+                    : new List<CandidateSkill>());
+
+            var location = CandidateViewModel.Candidate?.Location;
 
             Office = Offices.FirstOrDefault(x => x.Location?.CityId == location?.CityId);
             if (Office != null)
@@ -163,17 +184,18 @@ public class VacancySearchViewModel : Document
         }
         else
         {
-            Title = $"{LocalizationService.Default["Vacancy_Search_Candidate"]} {CandidateViewModel.Candidate.Name}";
+            Title = $"{LocalizationService.Default["Vacancy_Search_Candidate"]} {CandidateViewModel.Candidate?.Name}";
         }
     }
 
+    public ReactiveCommand<Unit, Unit> LoadDataCmd { get; }
     public IReactiveCommand OpenCmd { get; }
     private IReactiveCommand CreateOpenCmd()
     {
         return ReactiveCommand.Create(
-            () =>
+            async () =>
                 {
-                    _provider.OpenVacancyViewModel(SelectedItem?.Vacancy?.Id ?? 0);
+                    await _provider.OpenVacancyViewModelAsync(SelectedItem?.Vacancy?.Id ?? 0);
                 }, this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                     (obj, list) => obj != null && list.Count > 0)
             );
@@ -217,16 +239,22 @@ public class VacancySearchViewModel : Document
     private IReactiveCommand CreateSearchCmd()
     {
         return ReactiveCommand.Create(
-            () =>
+            async () =>
             {
                 VacancySearch!.Skills = Skills!.Skills.Select(x => x.ToSkillVaue());
-                Source.Load(_provider.VacancyService.Search(VacancySearch).Select(x => new VacancyModel(x)));
+                var vacancies = await _provider.VacancyService.SearchAsync(VacancySearch);
+                RxApp.MainThreadScheduler.Schedule(() =>
+                {
+                    Source.Clear();
+                    Source.AddRange(vacancies.Select(x => new VacancyModel(x)));
+                });
                 Pager!.PagingUpdate(Source.Count());
             }, this.WhenAnyValue(x => x.IsValid, v => v == true)
         );
     }
 
     public bool AddToCandidateVisible => AddToCandidateCmd != null;
+    public bool IsLoading => _isLoading.Value;
 
     public bool IsValid
     {

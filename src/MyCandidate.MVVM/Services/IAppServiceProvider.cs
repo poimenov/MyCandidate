@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Dock.Model.Controls;
 using Dock.Model.Core;
 using MyCandidate.Common;
@@ -27,17 +28,17 @@ public interface IAppServiceProvider
     DictionaryViewModel<Company> GetCompaniesViewModel();
     DictionaryViewModel<Office> GetOfficiesViewModel();
     VacancyViewModel GetVacancyViewModel();
-    void OpenVacancyViewModel(int vacancyId);
+    Task OpenVacancyViewModelAsync(int vacancyId);
     VacancySearchViewModel GetVacancySearchViewModel();
     VacancySearchViewModel GetVacancySearchViewModel(CandidateViewModel candidateViewModel);
     CandidateViewModel GetCandidateViewModel();
-    void OpenCandidateViewModel(int candidateId);
+    Task OpenCandidateViewModelAsync(int candidateId);
     CandidateSearchViewModel GetCandidateSearchViewModel();
-    CandidateSearchViewModel GetCandidateSearchViewModel(VacancyViewModel vacancyViewModel);    
+    CandidateSearchViewModel GetCandidateSearchViewModel(VacancyViewModel vacancyViewModel);
     void OpenDock(IDockable dockable);
     void OpenSingleDock(IDockable dockable);
     void CloseDock(IDockable dockable);
     IDocumentDock? Documents { get; }
-    IProperties? Properties { get; } 
-    IFactory Factory { get; } 
+    IProperties? Properties { get; }
+    IFactory Factory { get; }
 }

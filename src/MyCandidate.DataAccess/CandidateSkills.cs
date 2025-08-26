@@ -11,28 +11,29 @@ public class CandidateSkills : ICandidateSkills
     {
         _databaseFactory = databaseFactory;
     }
-    public CandidateSkill Get(int id)
+
+    public async Task<CandidateSkill?> GetAsync(int id)
     {
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            return db.CandidateSkills
+            return await db.CandidateSkills
                 .Include(x => x.Seniority)
                 .Include(x => x.Skill!)
                 .ThenInclude(x => x.SkillCategory)
-                .First(x => x.Id == id);
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
     }
 
-    public IEnumerable<CandidateSkill> GetCandidateSkills(int candidateId)
+    public async Task<IEnumerable<CandidateSkill>> GetCandidateSkillsAsync(int candidateId)
     {
-        using (var db = _databaseFactory.CreateDbContext())
+        await using (var db = _databaseFactory.CreateDbContext())
         {
-            return db.CandidateSkills
+            return await db.CandidateSkills
                 .Include(x => x.Seniority)
                 .Include(x => x.Skill!)
                 .ThenInclude(x => x.SkillCategory)
                 .Where(x => x.CandidateId == candidateId)
-                .ToList();
+                .ToListAsync();
         }
     }
 }

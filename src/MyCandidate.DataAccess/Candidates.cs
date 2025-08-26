@@ -12,80 +12,90 @@ namespace MyCandidate.DataAccess
             _databaseFactory = databaseFactory;
         }
 
-        public bool Exist(int id)
+        public async Task<bool> ExistAsync(int id)
         {
-            using (var db = _databaseFactory.CreateDbContext())
+            await using (var db = _databaseFactory.CreateDbContext())
             {
-                return db.Candidates.Any(x => x.Id == id);
+                return await db.Candidates.AnyAsync(x => x.Id == id);
             }
         }
 
-        public bool Exist(string lastName, string firstName, DateTime? birthdate)
+        public async Task<bool> ExistAsync(string lastName, string firstName, DateTime? birthdate)
         {
-            using (var db = _databaseFactory.CreateDbContext())
+            await using (var db = _databaseFactory.CreateDbContext())
             {
-                return db.Candidates.Any(x => x.LastName.Trim().ToLower() == lastName.Trim().ToLower()
+                return await db.Candidates.AnyAsync(x => x.LastName.Trim().ToLower() == lastName.Trim().ToLower()
                                                 && x.FirstName.Trim().ToLower() == firstName.Trim().ToLower()
                                                 && x.BirthDate == birthdate);
             }
         }
 
-        public void Delete(int id)
+        public async Task<OperationResult> DeleteAsync(int id)
         {
-            using (var db = _databaseFactory.CreateDbContext())
+            var retVal = new OperationResult { Success = false };
+            await using (var db = _databaseFactory.CreateDbContext())
             {
-                using (var transaction = db.Database.BeginTransaction())
+                await using (var transaction = await db.Database.BeginTransactionAsync())
                 {
-                    if (db.Candidates.Any(x => x.Id == id))
+                    if (await db.Candidates.AnyAsync(x => x.Id == id))
                     {
                         try
                         {
-                            if (db.CandidateResources.Any(x => x.CandidateId == id))
+                            if (await db.CandidateResources.AnyAsync(x => x.CandidateId == id))
                             {
                                 db.CandidateResources.RemoveRange(db.CandidateResources.Where(x => x.CandidateId == id));
                             }
 
-                            if (db.CandidateSkills.Any(x => x.CandidateId == id))
+                            if (await db.CandidateSkills.AnyAsync(x => x.CandidateId == id))
                             {
                                 db.CandidateSkills.RemoveRange(db.CandidateSkills.Where(x => x.CandidateId == id));
                             }
 
-                            var item = db.Candidates.First(x => x.Id == id);
-                            db.Locations.Remove(db.Locations.First(x => x.Id == item.LocationId));
+                            var item = await db.Candidates.FirstAsync(x => x.Id == id);
+                            db.Locations.Remove(await db.Locations.FirstAsync(x => x.Id == item.LocationId));
 
                             var candidateOnVacancies = db.CandidateOnVacancies.Where(x => x.CandidateId == id).ToList();
-                            candidateOnVacancies.ForEach(x => db.Comments.RemoveRange(db.Comments.Where(x => x.CandidateOnVacancyId == x.Id)));
+                            foreach (var cov in candidateOnVacancies)
+                            {
+                                db.Comments.RemoveRange(db.Comments.Where(x => x.CandidateOnVacancyId == cov.Id));
+                            }
                             db.CandidateOnVacancies.RemoveRange(candidateOnVacancies);
 
                             db.Candidates.Remove(item);
 
-                            db.SaveChanges();
-                            transaction.Commit();
+                            await db.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                            retVal.Success = true;
                         }
-                        catch (System.Exception)
+                        catch (Exception ex)
                         {
-                            transaction.Rollback();
-                            throw;
+                            await transaction.RollbackAsync();
+                            retVal.Message = ex.Message;
+                            retVal.Exception = ex;
                         }
                     }
-
+                    else
+                    {
+                        retVal.Message = "Candidate not found.";
+                    }
                 }
             }
+            return retVal;
         }
 
-        public bool Create(Candidate candidate, out int id)
+        public async Task<OperationResult<int>> CreateAsync(Candidate candidate)
         {
-            bool retVal = false;
-            id = 0;
+            var retVal = new OperationResult<int> { Success = false, Result = 0 };
 
-            if (Exist(candidate.LastName, candidate.FirstName, candidate.BirthDate))
+            if (await ExistAsync(candidate.LastName, candidate.FirstName, candidate.BirthDate))
             {
+                retVal.Message = "Candidate already exists.";
                 return retVal;
             }
 
-            using (var db = _databaseFactory.CreateDbContext())
+            await using (var db = _databaseFactory.CreateDbContext())
             {
-                using (var transaction = db.Database.BeginTransaction())
+                await using (var transaction = await db.Database.BeginTransactionAsync())
                 {
                     try
                     {
@@ -94,8 +104,8 @@ namespace MyCandidate.DataAccess
                             Address = candidate.Location!.Address ?? string.Empty,
                             CityId = candidate.Location!.CityId
                         };
-                        db.Locations.Add(newLocation);
-                        db.SaveChanges();
+                        await db.Locations.AddAsync(newLocation);
+                        await db.SaveChangesAsync();
 
                         var newCandidate = new Candidate
                         {
@@ -107,9 +117,9 @@ namespace MyCandidate.DataAccess
                             CreationDate = DateTime.Now,
                             LastModificationDate = DateTime.Now
                         };
-                        db.Candidates.Add(newCandidate);
-                        db.SaveChanges();
-                        id = newCandidate.Id;
+                        await db.Candidates.AddAsync(newCandidate);
+                        await db.SaveChangesAsync();
+                        var id = newCandidate.Id;
 
                         foreach (var candidateResource in candidate.CandidateResources)
                         {
@@ -119,7 +129,7 @@ namespace MyCandidate.DataAccess
                                 Value = candidateResource.Value,
                                 ResourceTypeId = candidateResource.ResourceTypeId
                             };
-                            db.CandidateResources.Add(newCandidateResource);
+                            await db.CandidateResources.AddAsync(newCandidateResource);
                         }
 
                         foreach (var candidateSkill in candidate.CandidateSkills)
@@ -130,35 +140,38 @@ namespace MyCandidate.DataAccess
                                 SeniorityId = candidateSkill.SeniorityId,
                                 SkillId = candidateSkill.SkillId
                             };
-                            db.CandidateSkills.Add(newCandidateSkill);
+                            await db.CandidateSkills.AddAsync(newCandidateSkill);
                         }
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        retVal.Success = true;
+                        retVal.Result = id;
 
-                        db.SaveChanges();
-                        transaction.Commit();
-                        retVal = true;
                     }
-                    catch (System.Exception)
+                    catch (Exception ex)
                     {
-                        transaction.Rollback();
-                        throw;
+                        await transaction.RollbackAsync();
+                        retVal.Message = ex.Message;
+                        retVal.Exception = ex;
                     }
                 }
             }
             return retVal;
         }
 
-        public void Update(Candidate candidate)
+        public async Task<OperationResult> UpdateAsync(Candidate candidate)
         {
-            using (var db = _databaseFactory.CreateDbContext())
+            var retVal = new OperationResult { Success = false };
+            await using (var db = _databaseFactory.CreateDbContext())
             {
-                using (var transaction = db.Database.BeginTransaction())
+                await using (var transaction = await db.Database.BeginTransactionAsync())
                 {
                     try
                     {
                         var dateTime = DateTime.Now;
-                        if (db.Candidates.Any(x => x.Id == candidate.Id))
+                        if (await db.Candidates.AnyAsync(x => x.Id == candidate.Id))
                         {
-                            var entity = db.Candidates.First(x => x.Id == candidate.Id);
+                            var entity = await db.Candidates.FirstAsync(x => x.Id == candidate.Id);
                             entity.LastModificationDate = dateTime;
                             entity.FirstName = candidate.FirstName;
                             entity.LastName = candidate.LastName;
@@ -166,32 +179,37 @@ namespace MyCandidate.DataAccess
                             entity.BirthDate = candidate.BirthDate;
                             entity.Enabled = candidate.Enabled;
 
-                            var location = db.Locations.First(x => x.Id == entity.LocationId);
+                            var location = await db.Locations.FirstAsync(x => x.Id == entity.LocationId);
                             location.Address = candidate.Location!.Address;
                             location.CityId = candidate.Location.CityId;
-
-                            ResourcesUpdate(db, candidate);
-                            SkillsUpdate(db, candidate);
-                            CandidateOnVacanciesUpdate(db, candidate, dateTime);
-
-                            db.SaveChanges();
-                            transaction.Commit();
+                            await ResourcesUpdateAsync(db, candidate);
+                            await SkillsUpdateAsync(db, candidate);
+                            await CandidateOnVacanciesUpdateAsync(db, candidate, dateTime);
+                            await db.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                            retVal.Success = true;
+                        }
+                        else
+                        {
+                            retVal.Message = "Candidate not found.";
                         }
                     }
-                    catch (System.Exception)
+                    catch (Exception ex)
                     {
-                        transaction.Rollback();
-                        throw;
+                        await transaction.RollbackAsync();
+                        retVal.Message = ex.Message;
+                        retVal.Exception = ex;
                     }
                 }
             }
+            return retVal;
         }
 
-        public Candidate Get(int id)
+        public async Task<Candidate?> GetAsync(int id)
         {
-            using (var db = _databaseFactory.CreateDbContext())
+            await using (var db = _databaseFactory.CreateDbContext())
             {
-                return db.Candidates
+                return await db.Candidates
                     .Include(x => x.Location!)
                     .ThenInclude(x => x.City!)
                     .ThenInclude(x => x.Country)
@@ -206,21 +224,26 @@ namespace MyCandidate.DataAccess
                     .ThenInclude(x => x.Vacancy)
                     .Include(x => x.CandidateOnVacancies)
                     .ThenInclude(x => x.SelectionStatus)
-                    .First(x => x.Id == id);
+                    .Include(x => x.CandidateOnVacancies)
+                    .ThenInclude(x => x.Comments)
+                    .FirstOrDefaultAsync(x => x.Id == id);
             }
         }
 
-        public IEnumerable<Candidate> GetRecent(int count)
+        public async Task<IEnumerable<Candidate>> GetRecentAsync(int count)
         {
-            using (var db = _databaseFactory.CreateDbContext())
+            await using (var db = _databaseFactory.CreateDbContext())
             {
-                return db.Candidates.OrderByDescending(x => x.LastModificationDate).Take(count).ToList();
+                return await db.Candidates
+                    .OrderByDescending(x => x.LastModificationDate)
+                    .Take(count)
+                    .ToListAsync();
             }
         }
 
-        public IEnumerable<Candidate> Search(CandidateSearch searchParams)
+        public async Task<IEnumerable<Candidate>> SearchAsync(CandidateSearch searchParams)
         {
-            using (var db = _databaseFactory.CreateDbContext())
+            await using (var db = _databaseFactory.CreateDbContext())
             {
                 var query = db.Candidates.AsQueryable();
                 query = query.Include(x => x.Location!)
@@ -274,37 +297,44 @@ namespace MyCandidate.DataAccess
 
                     if (!searchParams.SearchStrictBySeniority)
                     {
-                        return query.ToList().OrderDescending(new CandidateSkillsComparer(searchParams.Skills));
+                        var candidates = await query.ToListAsync();
+                        candidates.Sort(new CandidateSkillsComparer(searchParams.Skills));
+                        candidates.Reverse();
+                        return candidates;
                     }
                 }
 
-                return query.ToList();
+                return await query.ToListAsync();
             }
         }
 
-        private void CandidateOnVacanciesUpdate(Database db, Candidate candidate, DateTime dateTime)
+        private async Task CandidateOnVacanciesUpdateAsync(Database db, Candidate candidate, DateTime dateTime)
         {
             //update existed candidateOnVacancies
             var idsToUpdate = candidate.CandidateOnVacancies.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
             foreach (var idToUpdate in idsToUpdate)
             {
-                if (db.CandidateOnVacancies.Any(x => x.Id == idToUpdate))
+                if (await db.CandidateOnVacancies.AnyAsync(x => x.Id == idToUpdate))
                 {
                     var candidateOnVacancyToUpdate = candidate.CandidateOnVacancies.First(x => x.Id == idToUpdate);
                     var candidateOnVacancy = db.CandidateOnVacancies.First(x => x.Id == idToUpdate);
                     candidateOnVacancy.SelectionStatusId = candidateOnVacancyToUpdate.SelectionStatusId;
                     candidateOnVacancy.LastModificationDate = dateTime;
-                    CommentsUpdate(db, idToUpdate, candidateOnVacancyToUpdate.Comments, dateTime);
+                    await CommentsUpdateAsync(db, idToUpdate, candidateOnVacancyToUpdate.Comments, dateTime);
                 }
             }
             //delete existed candidateOnVacancies
-            var idsToDelete = db.CandidateOnVacancies.Where(x => x.CandidateId == candidate.Id && !idsToUpdate.Contains(x.Id)).Select(x => x.Id).ToArray();
+            var idsToDelete = await db.CandidateOnVacancies
+                .Where(x => x.CandidateId == candidate.Id
+                    && !idsToUpdate.Contains(x.Id))
+                .Select(x => x.Id).ToArrayAsync();
+
             foreach (var idToDelete in idsToDelete)
             {
-                if (db.CandidateOnVacancies.Any(x => x.Id == idToDelete))
+                if (await db.CandidateOnVacancies.AnyAsync(x => x.Id == idToDelete))
                 {
-                    db.Comments.RemoveRange(db.Comments.Where(x => x.CandidateOnVacancyId == idToDelete).ToList());
-                    db.CandidateOnVacancies.Remove(db.CandidateOnVacancies.First(x => x.Id == idToDelete));
+                    db.Comments.RemoveRange(await db.Comments.Where(x => x.CandidateOnVacancyId == idToDelete).ToListAsync());
+                    db.CandidateOnVacancies.Remove(await db.CandidateOnVacancies.FirstAsync(x => x.Id == idToDelete));
                 }
             }
             //add new candidateOnVacancies
@@ -318,8 +348,8 @@ namespace MyCandidate.DataAccess
                     CreationDate = dateTime,
                     LastModificationDate = dateTime
                 };
-                db.CandidateOnVacancies.Add(newCandidateOnVacancy);
-                db.SaveChanges();
+                await db.CandidateOnVacancies.AddAsync(newCandidateOnVacancy);
+                await db.SaveChangesAsync();
                 foreach (var comment in candidateOnVacancyToAdd.Comments)
                 {
                     var newComment = new Comment
@@ -329,33 +359,35 @@ namespace MyCandidate.DataAccess
                         CreationDate = dateTime,
                         LastModificationDate = dateTime
                     };
-                    db.Comments.Add(newComment);
+                    await db.Comments.AddAsync(newComment);
                 }
             }
         }
 
-        private void SkillsUpdate(Database db, Candidate candidate)
+        private async Task SkillsUpdateAsync(Database db, Candidate candidate)
         {
             //update existed skills
             var idsToUpdate = candidate.CandidateSkills.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
             foreach (var idToUpdate in idsToUpdate)
             {
-                if (db.CandidateSkills.Any(x => x.Id == idToUpdate))
+                if (await db.CandidateSkills.AnyAsync(x => x.Id == idToUpdate))
                 {
                     var skillToUpdate = candidate.CandidateSkills.First(x => x.Id == idToUpdate);
-                    var skill = db.CandidateSkills.First(x => x.Id == idToUpdate);
+                    var skill = await db.CandidateSkills.FirstAsync(x => x.Id == idToUpdate);
                     skill.SeniorityId = skillToUpdate.SeniorityId;
                     skill.SkillId = skillToUpdate.SkillId;
                 }
             }
             //delete existed skills
-            var idsToDelete = db.CandidateSkills.Where(x => x.CandidateId == candidate.Id && !idsToUpdate.Contains(x.Id))
-                                                           .Select(x => x.Id).ToArray();
+            var idsToDelete = await db.CandidateSkills
+                .Where(x => x.CandidateId == candidate.Id && !idsToUpdate.Contains(x.Id))
+                .Select(x => x.Id).ToArrayAsync();
+
             foreach (var idToDelete in idsToDelete)
             {
-                if (db.CandidateSkills.Any(x => x.Id == idToDelete))
+                if (await db.CandidateSkills.AnyAsync(x => x.Id == idToDelete))
                 {
-                    var skill = db.CandidateSkills.First(x => x.Id == idToDelete);
+                    var skill = await db.CandidateSkills.FirstAsync(x => x.Id == idToDelete);
                     db.CandidateSkills.Remove(skill);
                 }
             }
@@ -368,32 +400,35 @@ namespace MyCandidate.DataAccess
                     SeniorityId = skillToAdd.SeniorityId,
                     SkillId = skillToAdd.SkillId
                 };
-                db.CandidateSkills.Add(newSkill);
+                await db.CandidateSkills.AddAsync(newSkill);
             }
         }
 
-        private void ResourcesUpdate(Database db, Candidate candidate)
+        private async Task ResourcesUpdateAsync(Database db, Candidate candidate)
         {
             //update existed resources
             var idsToUpdate = candidate.CandidateResources.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
             foreach (var idToUpdate in idsToUpdate)
             {
-                if (db.CandidateResources.Any(x => x.Id == idToUpdate))
+                if (await db.CandidateResources.AnyAsync(x => x.Id == idToUpdate))
                 {
                     var resourceToUpdate = candidate.CandidateResources.First(x => x.Id == idToUpdate);
-                    var resource = db.CandidateResources.First(x => x.Id == idToUpdate);
+                    var resource = await db.CandidateResources.FirstAsync(x => x.Id == idToUpdate);
                     resource.Value = resourceToUpdate.Value;
                     resource.ResourceTypeId = resourceToUpdate.ResourceTypeId;
                 }
             }
             //delete existed resources
-            var idsToDelete = db.CandidateResources.Where(x => x.CandidateId == candidate.Id && !idsToUpdate.Contains(x.Id))
-                                                           .Select(x => x.Id).ToArray();
+            var idsToDelete = await db.CandidateResources
+                .Where(x => x.CandidateId == candidate.Id
+                    && !idsToUpdate.Contains(x.Id))
+                .Select(x => x.Id).ToArrayAsync();
+
             foreach (var idToDelete in idsToDelete)
             {
-                if (db.CandidateResources.Any(x => x.Id == idToDelete))
+                if (await db.CandidateResources.AnyAsync(x => x.Id == idToDelete))
                 {
-                    var resource = db.CandidateResources.First(x => x.Id == idToDelete);
+                    var resource = await db.CandidateResources.FirstAsync(x => x.Id == idToDelete);
                     db.CandidateResources.Remove(resource);
                 }
             }
@@ -406,29 +441,34 @@ namespace MyCandidate.DataAccess
                     Value = resourceToAdd.Value,
                     ResourceTypeId = resourceToAdd.ResourceTypeId
                 };
-                db.CandidateResources.Add(newResource);
+                await db.CandidateResources.AddAsync(newResource);
             }
         }
 
-        private void CommentsUpdate(Database db, int candidateOnVacancyId, IEnumerable<Comment> comments, DateTime dateTime)
+        private async Task CommentsUpdateAsync(Database db, int candidateOnVacancyId,
+            IEnumerable<Comment> comments, DateTime dateTime)
         {
             //update existed comments
             var idsToUpdate = comments.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
             foreach (var idToUpdate in idsToUpdate)
             {
-                if (db.Comments.Any(x => x.Id == idToUpdate))
+                if (await db.Comments.AnyAsync(x => x.Id == idToUpdate))
                 {
                     var commentToUpdate = comments.First(x => x.Id == idToUpdate);
-                    var comment = db.Comments.First(x => x.Id == idToUpdate);
+                    var comment = await db.Comments.FirstAsync(x => x.Id == idToUpdate);
                     comment.Value = commentToUpdate.Value;
                     comment.LastModificationDate = dateTime;
                 }
             }
             //delete existed comments
-            var idsToDelete = db.Comments.Where(x => x.CandidateOnVacancyId == candidateOnVacancyId && !idsToUpdate.Contains(x.Id)).Select(x => x.Id).ToArray();
+            var idsToDelete = await db.Comments
+                .Where(x => x.CandidateOnVacancyId == candidateOnVacancyId
+                    && !idsToUpdate.Contains(x.Id))
+                .Select(x => x.Id).ToArrayAsync();
+
             foreach (var idToDelete in idsToDelete)
             {
-                if (db.Comments.Any(x => x.Id == idToDelete))
+                if (await db.Comments.AnyAsync(x => x.Id == idToDelete))
                 {
                     db.Comments.Remove(db.Comments.First(x => x.Id == idToDelete));
                 }
@@ -443,7 +483,7 @@ namespace MyCandidate.DataAccess
                     CreationDate = dateTime,
                     LastModificationDate = dateTime
                 };
-                db.Comments.Add(newComment);
+                await db.Comments.AddAsync(newComment);
             }
         }
     }

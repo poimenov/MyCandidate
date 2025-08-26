@@ -7,7 +7,6 @@ namespace MyCandidate.DataAccess;
 
 public static class ServiceCollectionExtensions
 {
-
     public static IServiceCollection AddDatabaseServices(
         this IServiceCollection services,
         IConfiguration configuration)

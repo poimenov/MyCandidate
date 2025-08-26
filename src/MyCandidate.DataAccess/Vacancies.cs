@@ -12,22 +12,20 @@ namespace MyCandidate.DataAccess
             _databaseFactory = databaseFactory;
         }
 
-        public bool Exist(int id)
+        public async Task<bool> ExistAsync(int id)
         {
-            using (var db = _databaseFactory.CreateDbContext())
+            await using (var db = _databaseFactory.CreateDbContext())
             {
-                return db.Vacancies.Any(x => x.Id == id);
+                return await db.Vacancies.AnyAsync(x => x.Id == id);
             }
         }
 
-        public bool Create(Vacancy vacancy, out int id)
+        public async Task<OperationResult<int>> CreateAsync(Vacancy vacancy)
         {
-            bool retVal = false;
-            id = 0;
-
-            using (var db = _databaseFactory.CreateDbContext())
+            var operationResult = new OperationResult<int> { Success = false, Result = 0 };
+            await using (var db = _databaseFactory.CreateDbContext())
             {
-                using (var transaction = db.Database.BeginTransaction())
+                await using (var transaction = await db.Database.BeginTransactionAsync())
                 {
                     try
                     {
@@ -41,91 +39,97 @@ namespace MyCandidate.DataAccess
                             CreationDate = DateTime.Now,
                             LastModificationDate = DateTime.Now
                         };
-                        db.Vacancies.Add(newVacancy);
-                        db.SaveChanges();
-                        id = newVacancy.Id;
+                        await db.Vacancies.AddAsync(newVacancy);
+                        await db.SaveChangesAsync();
+                        operationResult.Result = newVacancy.Id;
 
                         foreach (var VacancyResource in vacancy.VacancyResources)
                         {
                             var newVacancyResource = new VacancyResource
                             {
-                                VacancyId = id,
+                                VacancyId = operationResult.Result,
                                 Value = VacancyResource.Value,
                                 ResourceTypeId = VacancyResource.ResourceTypeId
                             };
-                            db.VacancyResources.Add(newVacancyResource);
+                            await db.VacancyResources.AddAsync(newVacancyResource);
                         }
-
                         foreach (var VacancySkill in vacancy.VacancySkills)
                         {
                             var newVacancySkill = new VacancySkill
                             {
-                                VacancyId = id,
+                                VacancyId = operationResult.Result,
                                 SeniorityId = VacancySkill.SeniorityId,
                                 SkillId = VacancySkill.SkillId
                             };
-                            db.VacancySkills.Add(newVacancySkill);
+                            await db.VacancySkills.AddAsync(newVacancySkill);
                         }
-
-                        db.SaveChanges();
-                        transaction.Commit();
-                        retVal = true;
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        operationResult.Success = true;
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        transaction.Rollback();
-                        throw;
+                        await transaction.RollbackAsync();
+                        operationResult.Message = ex.Message;
+                        operationResult.Exception = ex;
                     }
                 }
             }
-            return retVal;
+            return operationResult;
         }
 
-        public void Delete(int id)
+        public async Task<OperationResult> DeleteAsync(int id)
         {
-            using (var db = _databaseFactory.CreateDbContext())
+            var retVal = new OperationResult { Success = false };
+            await using (var db = _databaseFactory.CreateDbContext())
             {
-                using (var transaction = db.Database.BeginTransaction())
+                await using (var transaction = await db.Database.BeginTransactionAsync())
                 {
-                    if (db.Vacancies.Any(x => x.Id == id))
+                    if (await db.Vacancies.AnyAsync(x => x.Id == id))
                     {
                         try
                         {
-                            if (db.VacancyResources.Any(x => x.VacancyId == id))
+                            if (await db.VacancyResources.AnyAsync(x => x.VacancyId == id))
                             {
                                 db.VacancyResources.RemoveRange(db.VacancyResources.Where(x => x.VacancyId == id));
                             }
 
-                            if (db.VacancySkills.Any(x => x.VacancyId == id))
+                            if (await db.VacancySkills.AnyAsync(x => x.VacancyId == id))
                             {
                                 db.VacancySkills.RemoveRange(db.VacancySkills.Where(x => x.VacancyId == id));
                             }
 
-                            var candidateOnVacancies = db.CandidateOnVacancies.Where(x => x.VacancyId == id).ToList();
-                            candidateOnVacancies.ForEach(x => db.Comments.RemoveRange(db.Comments.Where(x => x.CandidateOnVacancyId == x.Id)));
+                            var candidateOnVacancies = await db.CandidateOnVacancies.Where(x => x.VacancyId == id).ToListAsync();
+                            foreach (var cov in candidateOnVacancies)
+                            {
+                                db.Comments.RemoveRange(db.Comments.Where(x => x.CandidateOnVacancyId == cov.Id));
+                            }
                             db.CandidateOnVacancies.RemoveRange(candidateOnVacancies);
 
-                            db.Vacancies.Remove(db.Vacancies.First(x => x.Id == id));
+                            db.Vacancies.Remove(await db.Vacancies.FirstAsync(x => x.Id == id));
 
-                            db.SaveChanges();
-                            transaction.Commit();
+                            await db.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                            retVal.Success = true;
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
-                            transaction.Rollback();
-                            throw;
+                            await transaction.RollbackAsync();
+                            retVal.Message = ex.Message;
+                            retVal.Exception = ex;
                         }
                     }
-
                 }
             }
+
+            return retVal;
         }
 
-        public Vacancy Get(int id)
+        public async Task<Vacancy?> GetAsync(int id)
         {
-            using (var db = _databaseFactory.CreateDbContext())
+            await using (var db = _databaseFactory.CreateDbContext())
             {
-                return db.Vacancies
+                return await db.Vacancies
                     .Include(x => x.Office!)
                     .ThenInclude(x => x.Company)
                     .Include(x => x.Office!)
@@ -142,13 +146,13 @@ namespace MyCandidate.DataAccess
                     .ThenInclude(x => x.SkillCategory)
                     .Include(x => x.CandidateOnVacancies)
                     .ThenInclude(x => x.SelectionStatus)
-                    .First(x => x.Id == id);
+                    .FirstOrDefaultAsync(x => x.Id == id);
             }
         }
 
-        public IEnumerable<Vacancy> Search(VacancySearch searchParams)
+        public async Task<IEnumerable<Vacancy>> SearchAsync(VacancySearch searchParams)
         {
-            using (var db = _databaseFactory.CreateDbContext())
+            await using (var db = _databaseFactory.CreateDbContext())
             {
                 var query = db.Vacancies.AsQueryable();
                 query = query.Include(x => x.Office!)
@@ -197,34 +201,38 @@ namespace MyCandidate.DataAccess
 
                     if (!searchParams.SearchStrictBySeniority)
                     {
-                        return query.ToList().OrderDescending(new VacancySkillsComparer(searchParams.Skills));
+                        return (await query.ToListAsync()).OrderDescending(new VacancySkillsComparer(searchParams.Skills));
                     }
                 }
 
-                return query.ToList();
+                return await query.ToListAsync();
             }
         }
 
-        public IEnumerable<Vacancy> GetRecent(int count)
+        public async Task<IEnumerable<Vacancy>> GetRecentAsync(int count)
         {
-            using (var db = _databaseFactory.CreateDbContext())
+            await using (var db = _databaseFactory.CreateDbContext())
             {
-                return db.Vacancies.OrderByDescending(x => x.LastModificationDate).Take(count).ToList();
+                return await db.Vacancies
+                    .OrderByDescending(x => x.LastModificationDate)
+                    .Take(count)
+                    .ToListAsync();
             }
         }
 
-        public void Update(Vacancy vacancy)
+        public async Task<OperationResult> UpdateAsync(Vacancy vacancy)
         {
-            using (var db = _databaseFactory.CreateDbContext())
+            var retVal = new OperationResult { Success = false };
+            await using (var db = _databaseFactory.CreateDbContext())
             {
-                using (var transaction = db.Database.BeginTransaction())
+                await using (var transaction = await db.Database.BeginTransactionAsync())
                 {
                     try
                     {
                         var dateTime = DateTime.Now;
-                        if (db.Vacancies.Any(x => x.Id == vacancy.Id))
+                        if (await db.Vacancies.AnyAsync(x => x.Id == vacancy.Id))
                         {
-                            var entity = db.Vacancies.First(x => x.Id == vacancy.Id);
+                            var entity = await db.Vacancies.FirstAsync(x => x.Id == vacancy.Id);
                             entity.LastModificationDate = dateTime;
                             entity.Name = vacancy.Name;
                             entity.Description = vacancy.Description;
@@ -232,45 +240,54 @@ namespace MyCandidate.DataAccess
                             entity.OfficeId = vacancy.OfficeId;
                             entity.Enabled = vacancy.Enabled;
 
-                            ResourcesUpdate(db, vacancy);
-                            SkillsUpdate(db, vacancy);
-                            CandidateOnVacanciesUpdate(db, vacancy, dateTime);
+                            await ResourcesUpdate(db, vacancy);
+                            await SkillsUpdate(db, vacancy);
+                            await CandidateOnVacanciesUpdate(db, vacancy, dateTime);
 
-                            db.SaveChanges();
-                            transaction.Commit();
+                            await db.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                            retVal.Success = true;
+                        }
+                        else
+                        {
+                            retVal.Message = "Vacancy not found.";
                         }
                     }
-                    catch (System.Exception)
+                    catch (Exception ex)
                     {
-                        transaction.Rollback();
-                        throw;
+                        await transaction.RollbackAsync();
+                        retVal.Message = ex.Message;
+                        retVal.Exception = ex;
                     }
                 }
             }
+            return retVal;
         }
 
-        private void SkillsUpdate(Database db, Vacancy vacancy)
+        private async Task SkillsUpdate(Database db, Vacancy vacancy)
         {
             //update existed skills
             var idsToUpdate = vacancy.VacancySkills.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
             foreach (var idToUpdate in idsToUpdate)
             {
-                if (db.VacancySkills.Any(x => x.Id == idToUpdate))
+                if (await db.VacancySkills.AnyAsync(x => x.Id == idToUpdate))
                 {
                     var skillToUpdate = vacancy.VacancySkills.First(x => x.Id == idToUpdate);
-                    var skill = db.VacancySkills.First(x => x.Id == idToUpdate);
+                    var skill = await db.VacancySkills.FirstAsync(x => x.Id == idToUpdate);
                     skill.SeniorityId = skillToUpdate.SeniorityId;
                     skill.SkillId = skillToUpdate.SkillId;
                 }
             }
             //delete existed skills
-            var idsToDelete = db.VacancySkills.Where(x => x.VacancyId == vacancy.Id && !idsToUpdate.Contains(x.Id))
-                                                           .Select(x => x.Id).ToArray();
+            var idsToDelete = await db.VacancySkills
+                .Where(x => x.VacancyId == vacancy.Id && !idsToUpdate.Contains(x.Id))
+                .Select(x => x.Id).ToArrayAsync();
+
             foreach (var idToDelete in idsToDelete)
             {
-                if (db.VacancySkills.Any(x => x.Id == idToDelete))
+                if (await db.VacancySkills.AnyAsync(x => x.Id == idToDelete))
                 {
-                    var skill = db.VacancySkills.First(x => x.Id == idToDelete);
+                    var skill = await db.VacancySkills.FirstAsync(x => x.Id == idToDelete);
                     db.VacancySkills.Remove(skill);
                 }
             }
@@ -283,33 +300,34 @@ namespace MyCandidate.DataAccess
                     SeniorityId = skillToAdd.SeniorityId,
                     SkillId = skillToAdd.SkillId
                 };
-                db.VacancySkills.Add(newSkill);
+                await db.VacancySkills.AddAsync(newSkill);
             }
         }
 
-        private void ResourcesUpdate(Database db, Vacancy vacancy)
+        private async Task ResourcesUpdate(Database db, Vacancy vacancy)
         {
             //update existed resources
             var idsToUpdate = vacancy.VacancyResources.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
             foreach (var idToUpdate in idsToUpdate)
             {
-                if (db.VacancyResources.Any(x => x.Id == idToUpdate))
+                if (await db.VacancyResources.AnyAsync(x => x.Id == idToUpdate))
                 {
                     var resourceToUpdate = vacancy.VacancyResources.First(x => x.Id == idToUpdate);
-                    var resource = db.VacancyResources.First(x => x.Id == idToUpdate);
+                    var resource = await db.VacancyResources.FirstAsync(x => x.Id == idToUpdate);
                     resource.Value = resourceToUpdate.Value;
                     resource.ResourceTypeId = resourceToUpdate.ResourceTypeId;
                 }
             }
             //delete existed resources
-            var idsToDelete = db.VacancyResources.Where(x => x.VacancyId == vacancy.Id && !idsToUpdate.Contains(x.Id))
-                                                           .Select(x => x.Id).ToArray();
+            var idsToDelete = await db.VacancyResources
+                .Where(x => x.VacancyId == vacancy.Id && !idsToUpdate.Contains(x.Id))
+                .Select(x => x.Id).ToArrayAsync();
+
             foreach (var idToDelete in idsToDelete)
             {
-                if (db.VacancyResources.Any(x => x.Id == idToDelete))
+                if (await db.VacancyResources.AnyAsync(x => x.Id == idToDelete))
                 {
-                    var resource = db.VacancyResources.First(x => x.Id == idToDelete);
-                    db.VacancyResources.Remove(resource);
+                    db.VacancyResources.Remove(await db.VacancyResources.FirstAsync(x => x.Id == idToDelete));
                 }
             }
             //add new resources
@@ -321,33 +339,37 @@ namespace MyCandidate.DataAccess
                     Value = resourceToAdd.Value,
                     ResourceTypeId = resourceToAdd.ResourceTypeId
                 };
-                db.VacancyResources.Add(newResource);
+                await db.VacancyResources.AddAsync(newResource);
             }
         }
 
-        private void CandidateOnVacanciesUpdate(Database db, Vacancy vacancy, DateTime dateTime)
+        private async Task CandidateOnVacanciesUpdate(Database db, Vacancy vacancy, DateTime dateTime)
         {
             //update existed candidateOnVacancies
             var idsToUpdate = vacancy.CandidateOnVacancies.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
             foreach (var idToUpdate in idsToUpdate)
             {
-                if (db.CandidateOnVacancies.Any(x => x.Id == idToUpdate))
+                if (await db.CandidateOnVacancies.AnyAsync(x => x.Id == idToUpdate))
                 {
                     var candidateOnVacancyToUpdate = vacancy.CandidateOnVacancies.First(x => x.Id == idToUpdate);
-                    var candidateOnVacancy = db.CandidateOnVacancies.First(x => x.Id == idToUpdate);
+                    var candidateOnVacancy = await db.CandidateOnVacancies.FirstAsync(x => x.Id == idToUpdate);
                     candidateOnVacancy.SelectionStatusId = candidateOnVacancyToUpdate.SelectionStatusId;
                     candidateOnVacancy.LastModificationDate = dateTime;
-                    CommentsUpdate(db, idToUpdate, candidateOnVacancyToUpdate.Comments, dateTime);
+                    await CommentsUpdate(db, idToUpdate, candidateOnVacancyToUpdate.Comments, dateTime);
                 }
             }
             //delete existed candidateOnVacancies
-            var idsToDelete = db.CandidateOnVacancies.Where(x => x.VacancyId == vacancy.Id && !idsToUpdate.Contains(x.Id)).Select(x => x.Id).ToArray();
+            var idsToDelete = await db.CandidateOnVacancies
+                .Where(x => x.VacancyId == vacancy.Id
+                    && !idsToUpdate.Contains(x.Id))
+                .Select(x => x.Id).ToArrayAsync();
+
             foreach (var idToDelete in idsToDelete)
             {
-                if (db.CandidateOnVacancies.Any(x => x.Id == idToDelete))
+                if (await db.CandidateOnVacancies.AnyAsync(x => x.Id == idToDelete))
                 {
-                    db.Comments.RemoveRange(db.Comments.Where(x => x.CandidateOnVacancyId == idToDelete).ToList());
-                    db.CandidateOnVacancies.Remove(db.CandidateOnVacancies.First(x => x.Id == idToDelete));
+                    db.Comments.RemoveRange(await db.Comments.Where(x => x.CandidateOnVacancyId == idToDelete).ToListAsync());
+                    db.CandidateOnVacancies.Remove(await db.CandidateOnVacancies.FirstAsync(x => x.Id == idToDelete));
                 }
             }
             //add new candidateOnVacancies
@@ -361,8 +383,8 @@ namespace MyCandidate.DataAccess
                     CreationDate = dateTime,
                     LastModificationDate = dateTime
                 };
-                db.CandidateOnVacancies.Add(newCandidateOnVacancy);
-                db.SaveChanges();
+                await db.CandidateOnVacancies.AddAsync(newCandidateOnVacancy);
+                await db.SaveChangesAsync();
                 foreach (var comment in candidateOnVacancyToAdd.Comments)
                 {
                     var newComment = new Comment
@@ -372,32 +394,36 @@ namespace MyCandidate.DataAccess
                         CreationDate = dateTime,
                         LastModificationDate = dateTime
                     };
-                    db.Comments.Add(newComment);
+                    await db.Comments.AddAsync(newComment);
                 }
             }
         }
 
-        private void CommentsUpdate(Database db, int candidateOnVacancyId, IEnumerable<Comment> comments, DateTime dateTime)
+        private async Task CommentsUpdate(Database db, int candidateOnVacancyId, IEnumerable<Comment> comments, DateTime dateTime)
         {
             //update existed comments
             var idsToUpdate = comments.Where(x => x.Id > 0).Select(x => x.Id).ToArray();
             foreach (var idToUpdate in idsToUpdate)
             {
-                if (db.Comments.Any(x => x.Id == idToUpdate))
+                if (await db.Comments.AnyAsync(x => x.Id == idToUpdate))
                 {
                     var commentToUpdate = comments.First(x => x.Id == idToUpdate);
-                    var comment = db.Comments.First(x => x.Id == idToUpdate);
+                    var comment = await db.Comments.FirstAsync(x => x.Id == idToUpdate);
                     comment.Value = commentToUpdate.Value;
                     comment.LastModificationDate = dateTime;
                 }
             }
             //delete existed comments
-            var idsToDelete = db.Comments.Where(x => x.CandidateOnVacancyId == candidateOnVacancyId && !idsToUpdate.Contains(x.Id)).Select(x => x.Id).ToArray();
+            var idsToDelete = await db.Comments
+                .Where(x => x.CandidateOnVacancyId == candidateOnVacancyId
+                    && !idsToUpdate.Contains(x.Id))
+                .Select(x => x.Id).ToArrayAsync();
+
             foreach (var idToDelete in idsToDelete)
             {
-                if (db.Comments.Any(x => x.Id == idToDelete))
+                if (await db.Comments.AnyAsync(x => x.Id == idToDelete))
                 {
-                    db.Comments.Remove(db.Comments.First(x => x.Id == idToDelete));
+                    db.Comments.Remove(await db.Comments.FirstAsync(x => x.Id == idToDelete));
                 }
             }
             //add new comments
@@ -410,10 +436,9 @@ namespace MyCandidate.DataAccess
                     CreationDate = dateTime,
                     LastModificationDate = dateTime
                 };
-                db.Comments.Add(newComment);
+                await db.Comments.AddAsync(newComment);
             }
         }
-
     }
 
     internal class VacancySkillsComparer : IComparer<Vacancy>
