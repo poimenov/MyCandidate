@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive.Disposables;
 using Avalonia;
 using Avalonia.Controls;
@@ -198,6 +199,23 @@ public class MainWindowViewModel : ViewModelBase
                 await messageBox.ShowAsync();
             }
         ).DisposeWith(Disposables);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        LocalizationService.Default.OnCultureChanged -= CultureChanged;
+        if (_provider.Documents?.VisibleDockables != null)
+        {
+            foreach (var dock in _provider.Documents.VisibleDockables)
+            {
+                var doc = dock as IDisposable;
+                if (doc != null)
+                {
+                    doc.Dispose();
+                }
+            }
+        }
+        base.Dispose(disposing);
     }
 
     private void CultureChanged(object? sender, EventArgs e)
