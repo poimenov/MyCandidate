@@ -28,14 +28,18 @@ public class SkillService : IDictionaryService<Skill>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var duplicatesCheck = await CheckDuplicatesAsync(items);
-            if (duplicatesCheck.Success)
+            if (items.Count() > 0)
             {
-                result.Message = $"It is impossible to add next skills: {string.Join(", ", duplicatesCheck.Messages)} because they already exist";
-                return result;
+                var duplicatesCheck = await CheckDuplicatesAsync(items);
+                if (duplicatesCheck.Success)
+                {
+                    result.Message = $"It is impossible to add next skills: {string.Join(", ", duplicatesCheck.Messages)} because they already exist";
+                    return result;
+                }
+
+                await _skills.CreateAsync(items);
             }
 
-            await _skills.CreateAsync(items);
             result.Success = true;
             return result;
         }
@@ -52,7 +56,11 @@ public class SkillService : IDictionaryService<Skill>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            await _skills.DeleteAsync(itemIds);
+            if (itemIds.Count() > 0)
+            {
+                await _skills.DeleteAsync(itemIds);
+            }
+
             result.Success = true;
             return result;
         }
@@ -74,14 +82,10 @@ public class SkillService : IDictionaryService<Skill>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var duplicatesCheck = await CheckDuplicatesAsync(items);
-            if (duplicatesCheck.Success)
+            if (items.Count() > 0)
             {
-                result.Message = $"It is impossible to add next skills: {string.Join(", ", duplicatesCheck.Messages)} because they already exist";
-                return result;
+                await _skills.UpdateAsync(items);
             }
-
-            await _skills.UpdateAsync(items);
             result.Success = true;
             return result;
         }

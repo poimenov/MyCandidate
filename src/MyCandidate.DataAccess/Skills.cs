@@ -68,7 +68,10 @@ public class Skills : IDataAccess<Skill>
         await using var transaction = await db.Database.BeginTransactionAsync();
         foreach (var item in items)
         {
-            if (await db.Skills.AnyAsync(x => x.Id == item.Id))
+            if (await db.Skills.AnyAsync(x => x.Id == item.Id)
+                && !await db.Skills.Where(x => x.Id != item.Id
+                    && x.SkillCategoryId == item.SkillCategoryId
+                    && x.Name.ToLower() == item.Name.ToLower()).AnyAsync())
             {
                 var entity = await db.Skills.FirstAsync(x => x.Id == item.Id);
                 entity.SkillCategoryId = item.SkillCategoryId;

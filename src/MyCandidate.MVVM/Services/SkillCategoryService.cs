@@ -30,18 +30,22 @@ public class SkillCategoryService : IDictionaryService<SkillCategory>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var itemList = await _categories.GetItemsListAsync();
-            if (itemList.Any(x => items.Select(y => y.Name).Contains(x.Name, StringComparer.InvariantCultureIgnoreCase)))
+            if (items.Count() > 0)
             {
-                var countryNames = items
-                    .Where(x => itemList.Select(y => y.Name)
-                    .Contains(x.Name, StringComparer.InvariantCultureIgnoreCase))
-                    .Select(x => $"\"{x.Name}\"");
-                result.Message = $"It is impossible to add next categories: {string.Join(", ", countryNames)} because they already exist";
-                return result;
+                var itemList = await _categories.GetItemsListAsync();
+                if (itemList.Any(x => items.Select(y => y.Name).Contains(x.Name, StringComparer.InvariantCultureIgnoreCase)))
+                {
+                    var countryNames = items
+                        .Where(x => itemList.Select(y => y.Name)
+                        .Contains(x.Name, StringComparer.InvariantCultureIgnoreCase))
+                        .Select(x => $"\"{x.Name}\"");
+                    result.Message = $"It is impossible to add next categories: {string.Join(", ", countryNames)} because they already exist";
+                    return result;
+                }
+
+                await _categories.CreateAsync(items);
             }
 
-            await _categories.CreateAsync(items);
             result.Success = true;
             return result;
         }
@@ -58,21 +62,25 @@ public class SkillCategoryService : IDictionaryService<SkillCategory>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var skillsList = await _skills.GetItemsListAsync();
-            if (skillsList.Any(x => itemIds.Contains(x.SkillCategoryId)))
+            if (itemIds.Count() > 0)
             {
-                var categoryIds = skillsList
-                                    .Where(x => itemIds.Contains(x.SkillCategoryId))
-                                    .Select(x => x.SkillCategoryId);
-                var categoryNames = (await _categories.GetItemsListAsync())
-                                                .Where(x => categoryIds.Contains(x.Id))
-                                                .Select(x => $"\"{x.Name}\"");
+                var skillsList = await _skills.GetItemsListAsync();
+                if (skillsList.Any(x => itemIds.Contains(x.SkillCategoryId)))
+                {
+                    var categoryIds = skillsList
+                                        .Where(x => itemIds.Contains(x.SkillCategoryId))
+                                        .Select(x => x.SkillCategoryId);
+                    var categoryNames = (await _categories.GetItemsListAsync())
+                                                    .Where(x => categoryIds.Contains(x.Id))
+                                                    .Select(x => $"\"{x.Name}\"");
 
-                result.Message = $"It is impossible to delete next categories: {string.Join(", ", categoryNames)} because there are skills associated with it";
-                return result;
+                    result.Message = $"It is impossible to delete next categories: {string.Join(", ", categoryNames)} because there are skills associated with it";
+                    return result;
+                }
+
+                await _categories.DeleteAsync(itemIds);
             }
 
-            await _categories.DeleteAsync(itemIds);
             result.Success = true;
             return result;
         }
@@ -94,25 +102,11 @@ public class SkillCategoryService : IDictionaryService<SkillCategory>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var itemList = await _categories.GetItemsListAsync();
-            foreach (var item in items)
+            if (items.Count() > 0)
             {
-                var existedItem = itemList.FirstOrDefault(x => x.Name.Equals(item.Name, StringComparison.InvariantCultureIgnoreCase) && x.Id != item.Id);
-                if (existedItem != null)
-                {
-                    result.Message = $"It is impossible to update next category: {existedItem.Name} because a category with that name already exists";
-                    return result;
-                }
-
-                var newItem = items.FirstOrDefault(x => x.Name.Equals(item.Name, StringComparison.InvariantCultureIgnoreCase) && x.Id != item.Id);
-                if (newItem != null)
-                {
-                    result.Message = $"Same name for category: {newItem.Name}";
-                    return result;
-                }
+                await _categories.UpdateAsync(items);
             }
 
-            await _categories.UpdateAsync(items);
             result.Success = true;
             return result;
         }

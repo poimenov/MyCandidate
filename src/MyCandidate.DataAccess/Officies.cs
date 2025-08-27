@@ -98,7 +98,10 @@ public class Officies : IDataAccess<Office>
             {
                 foreach (var item in items)
                 {
-                    if (await db.Offices.AnyAsync(x => x.Id == item.Id))
+                    if (await db.Offices.AnyAsync(x => x.Id == item.Id)
+                        && !await db.Offices.Where(x => x.Id != item.Id
+                            && x.CompanyId == item.CompanyId
+                            && x.Name.ToLower() == item.Name.ToLower()).AnyAsync())
                     {
                         var entity = await db.Offices.FirstAsync(x => x.Id == item.Id);
                         entity.CompanyId = item.CompanyId;

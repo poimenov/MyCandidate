@@ -80,7 +80,9 @@ public class Countries : IDataAccess<Country>
             {
                 foreach (var item in items)
                 {
-                    if (await db.Countries.AnyAsync(x => x.Id == item.Id))
+                    if (await db.Countries.AnyAsync(x => x.Id == item.Id)
+                        && !await db.Countries.Where(x => x.Id != item.Id
+                            && x.Name.ToLower() == item.Name.ToLower()).AnyAsync())
                     {
                         var entity = await db.Countries.FirstAsync(x => x.Id == item.Id);
                         entity.Name = item.Name;

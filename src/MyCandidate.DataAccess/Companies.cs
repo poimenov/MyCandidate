@@ -81,7 +81,9 @@ public class Companies : IDataAccess<Company>
             {
                 foreach (var item in items)
                 {
-                    if (await db.Companies.AnyAsync(x => x.Id == item.Id))
+                    if (await db.Companies.AnyAsync(x => x.Id == item.Id)
+                        && !await db.Companies.Where(x => x.Id != item.Id
+                            && x.Name.ToLower() == item.Name.ToLower()).AnyAsync())
                     {
                         var entity = await db.Companies.FirstAsync(x => x.Id == item.Id);
                         entity.Name = item.Name;

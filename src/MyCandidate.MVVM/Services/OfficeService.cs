@@ -28,14 +28,18 @@ public class OfficeService : IDictionaryService<Office>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var duplicatesCheck = await CheckDuplicatesAsync(items);
-            if (duplicatesCheck.Success)
+            if (items.Count() > 0)
             {
-                result.Message = $"It is impossible to add next officies: {string.Join(", ", duplicatesCheck.Messages)} because they already exist";
-                return result;
+                var duplicatesCheck = await CheckDuplicatesAsync(items);
+                if (duplicatesCheck.Success)
+                {
+                    result.Message = $"It is impossible to add next officies: {string.Join(", ", duplicatesCheck.Messages)} because they already exist";
+                    return result;
+                }
+
+                await _officies.CreateAsync(items);
             }
 
-            await _officies.CreateAsync(items);
             result.Success = true;
             return result;
         }
@@ -52,7 +56,11 @@ public class OfficeService : IDictionaryService<Office>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            await _officies.DeleteAsync(itemIds);
+            if (itemIds.Count() > 0)
+            {
+                await _officies.DeleteAsync(itemIds);
+            }
+
             result.Success = true;
             return result;
         }
@@ -74,14 +82,10 @@ public class OfficeService : IDictionaryService<Office>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var duplicatesCheck = await CheckDuplicatesAsync(items);
-            if (duplicatesCheck.Success)
+            if (items.Count() > 0)
             {
-                result.Message = $"It is impossible to update next officies: {string.Join(", ", duplicatesCheck.Messages)} because they already exist";
-                return result;
+                await _officies.UpdateAsync(items);
             }
-
-            await _officies.UpdateAsync(items);
             result.Success = true;
             return result;
         }

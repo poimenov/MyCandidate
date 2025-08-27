@@ -30,18 +30,22 @@ public class CompanyService : IDictionaryService<Company>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var itemList = await _companies.GetItemsListAsync();
-            if (itemList.Any(x => items.Select(y => y.Name).Contains(x.Name, StringComparer.InvariantCultureIgnoreCase)))
+            if (items.Count() > 0)
             {
-                var countryNames = items
-                    .Where(x => itemList.Select(y => y.Name)
-                    .Contains(x.Name, StringComparer.InvariantCultureIgnoreCase))
-                    .Select(x => $"\"{x.Name}\"");
-                result.Message = $"It is impossible to add next companies: {string.Join(", ", countryNames)} because they already exist";
-                return result;
+                var itemList = await _companies.GetItemsListAsync();
+                if (itemList.Any(x => items.Select(y => y.Name).Contains(x.Name, StringComparer.InvariantCultureIgnoreCase)))
+                {
+                    var countryNames = items
+                        .Where(x => itemList.Select(y => y.Name)
+                        .Contains(x.Name, StringComparer.InvariantCultureIgnoreCase))
+                        .Select(x => $"\"{x.Name}\"");
+                    result.Message = $"It is impossible to add next companies: {string.Join(", ", countryNames)} because they already exist";
+                    return result;
+                }
+
+                await _companies.CreateAsync(items);
             }
 
-            await _companies.CreateAsync(items);
             result.Success = true;
             return result;
         }
@@ -57,19 +61,24 @@ public class CompanyService : IDictionaryService<Company>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var officiesList = await _officies.GetItemsListAsync();
-            if (officiesList.Any(x => itemIds.Contains(x.CompanyId)))
+            if (itemIds.Count() > 0)
             {
-                var companyIds = officiesList
-                                    .Where(x => itemIds.Contains(x.CompanyId))
-                                    .Select(x => x.CompanyId);
-                var companyNames = (await _companies.GetItemsListAsync())
-                                                .Where(x => companyIds.Contains(x.Id))
-                                                .Select(x => $"\"{x.Name}\"");
-                result.Message = $"It is impossible to delete next companies: {string.Join(", ", companyNames)} because there are officies associated with it";
-                return result;
+                var officiesList = await _officies.GetItemsListAsync();
+                if (officiesList.Any(x => itemIds.Contains(x.CompanyId)))
+                {
+                    var companyIds = officiesList
+                                        .Where(x => itemIds.Contains(x.CompanyId))
+                                        .Select(x => x.CompanyId);
+                    var companyNames = (await _companies.GetItemsListAsync())
+                                                    .Where(x => companyIds.Contains(x.Id))
+                                                    .Select(x => $"\"{x.Name}\"");
+                    result.Message = $"It is impossible to delete next companies: {string.Join(", ", companyNames)} because there are officies associated with it";
+                    return result;
+                }
+
+                await _companies.DeleteAsync(itemIds);
             }
-            await _companies.DeleteAsync(itemIds);
+
             result.Success = true;
             return result;
         }
@@ -90,25 +99,11 @@ public class CompanyService : IDictionaryService<Company>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var itemList = await _companies.GetItemsListAsync();
-            foreach (var item in items)
+            if (items.Count() > 0)
             {
-                var existedItem = itemList.FirstOrDefault(x => x.Name.Equals(item.Name, StringComparison.InvariantCultureIgnoreCase) && x.Id != item.Id);
-                if (existedItem != null)
-                {
-                    result.Message = $"It is impossible to update next company: {existedItem.Name} because a company with that name already exists";
-                    return result;
-                }
-
-                var newItem = items.FirstOrDefault(x => x.Name.Equals(item.Name, StringComparison.InvariantCultureIgnoreCase) && x.Id != item.Id);
-                if (newItem != null)
-                {
-                    result.Message = $"Same name for company: {newItem.Name}";
-                    return result;
-                }
+                await _companies.UpdateAsync(items);
             }
 
-            await _companies.UpdateAsync(items);
             result.Success = true;
             return result;
         }

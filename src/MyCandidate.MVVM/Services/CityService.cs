@@ -28,14 +28,18 @@ public class CityService : IDictionaryService<City>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var duplicatesCheck = await CheckDuplicatesAsync(items);
-            if (duplicatesCheck.Success)
+            if (items.Count() > 0)
             {
-                result.Message = $"It is impossible to add next cities: {string.Join(", ", duplicatesCheck.Messages)} because they already exist";
-                return result;
+                var duplicatesCheck = await CheckDuplicatesAsync(items);
+                if (duplicatesCheck.Success)
+                {
+                    result.Message = $"It is impossible to add next cities: {string.Join(", ", duplicatesCheck.Messages)} because they already exist";
+                    return result;
+                }
+
+                await _cities.CreateAsync(items);
             }
 
-            await _cities.CreateAsync(items);
             result.Success = true;
             return result;
         }
@@ -52,7 +56,10 @@ public class CityService : IDictionaryService<City>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            await _cities.DeleteAsync(itemIds);
+            if (itemIds.Count() > 0)
+            {
+                await _cities.DeleteAsync(itemIds);
+            }
             result.Success = true;
             return result;
         }
@@ -74,14 +81,11 @@ public class CityService : IDictionaryService<City>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var duplicatesCheck = await CheckDuplicatesAsync(items);
-            if (duplicatesCheck.Success)
+            if (items.Count() > 0)
             {
-                result.Message = $"It is impossible to update next cities: {string.Join(", ", duplicatesCheck.Messages)} because they already exist";
-                return result;
+                await _cities.UpdateAsync(items);
             }
 
-            await _cities.UpdateAsync(items);
             result.Success = true;
             return result;
         }

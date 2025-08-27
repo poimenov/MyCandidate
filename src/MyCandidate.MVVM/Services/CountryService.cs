@@ -30,18 +30,22 @@ public class CountryService : IDictionaryService<Country>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var itemList = await _countries.GetItemsListAsync();
-            if (itemList.Any(x => items.Select(y => y.Name).Contains(x.Name, StringComparer.InvariantCultureIgnoreCase)))
+            if (items.Count() > 0)
             {
-                var countryNames = items
-                    .Where(x => itemList.Select(y => y.Name)
-                    .Contains(x.Name, StringComparer.InvariantCultureIgnoreCase))
-                    .Select(x => $"\"{x.Name}\"");
-                result.Message = $"It is impossible to add next countries: {string.Join(", ", countryNames)} because they already exist";
-                return result;
+                var itemList = await _countries.GetItemsListAsync();
+                if (itemList.Any(x => items.Select(y => y.Name).Contains(x.Name, StringComparer.InvariantCultureIgnoreCase)))
+                {
+                    var countryNames = items
+                        .Where(x => itemList.Select(y => y.Name)
+                        .Contains(x.Name, StringComparer.InvariantCultureIgnoreCase))
+                        .Select(x => $"\"{x.Name}\"");
+                    result.Message = $"It is impossible to add next countries: {string.Join(", ", countryNames)} because they already exist";
+                    return result;
+                }
+
+                await _countries.CreateAsync(items);
             }
 
-            await _countries.CreateAsync(items);
             result.Success = true;
             return result;
         }
@@ -57,21 +61,25 @@ public class CountryService : IDictionaryService<Country>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var citiesList = await _cities.GetItemsListAsync();
-            if (citiesList.Any(x => itemIds.Contains(x.CountryId)))
+            if (itemIds.Count() > 0)
             {
-                var countryIds = citiesList
-                                    .Where(x => itemIds.Contains(x.CountryId))
-                                    .Select(x => x.CountryId);
-                var countryNames = (await _countries.GetItemsListAsync())
-                                                .Where(x => countryIds.Contains(x.Id))
-                                                .Select(x => $"\"{x.Name}\"");
+                var citiesList = await _cities.GetItemsListAsync();
+                if (citiesList.Any(x => itemIds.Contains(x.CountryId)))
+                {
+                    var countryIds = citiesList
+                                        .Where(x => itemIds.Contains(x.CountryId))
+                                        .Select(x => x.CountryId);
+                    var countryNames = (await _countries.GetItemsListAsync())
+                                                    .Where(x => countryIds.Contains(x.Id))
+                                                    .Select(x => $"\"{x.Name}\"");
 
-                result.Message = $"It is impossible to delete next countries: {string.Join(", ", countryNames)} because there are cities associated with it";
-                return result;
+                    result.Message = $"It is impossible to delete next countries: {string.Join(", ", countryNames)} because there are cities associated with it";
+                    return result;
+                }
+
+                await _countries.DeleteAsync(itemIds);
             }
 
-            await _countries.DeleteAsync(itemIds);
             result.Success = true;
             return result;
         }
@@ -93,25 +101,11 @@ public class CountryService : IDictionaryService<Country>
         var result = new OperationResult { Success = false, Message = string.Empty };
         try
         {
-            var originalItems = await _countries.GetItemsListAsync();
-            foreach (var item in items)
+            if (items.Count() > 0)
             {
-                var existedItem = originalItems.FirstOrDefault(x => x.Name.Equals(item.Name, StringComparison.InvariantCultureIgnoreCase) && x.Id != item.Id);
-                if (existedItem != null)
-                {
-                    result.Message = $"It is impossible to update next country: {existedItem.Name} because a country with that name already exists";
-                    return result;
-                }
-
-                var newItem = items.FirstOrDefault(x => x.Name.Equals(item.Name, StringComparison.InvariantCultureIgnoreCase) && x.Id != item.Id);
-                if (newItem != null)
-                {
-                    result.Message = $"Same name for country: {newItem.Name}";
-                    return result;
-                }
+                await _countries.UpdateAsync(items);
             }
 
-            await _countries.UpdateAsync(items);
             result.Success = true;
             return result;
         }

@@ -81,7 +81,9 @@ public class SkillCategories : IDataAccess<SkillCategory>
             {
                 foreach (var item in items)
                 {
-                    if (await db.SkillCategories.AnyAsync(x => x.Id == item.Id))
+                    if (await db.SkillCategories.AnyAsync(x => x.Id == item.Id)
+                        && !await db.SkillCategories.Where(x => x.Id != item.Id
+                            && x.Name.ToLower() == item.Name.ToLower()).AnyAsync())
                     {
                         var entity = await db.SkillCategories.FirstAsync(x => x.Id == item.Id);
                         entity.Name = item.Name;

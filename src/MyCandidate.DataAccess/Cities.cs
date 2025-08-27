@@ -83,7 +83,10 @@ public class Cities : IDataAccess<City>
             {
                 foreach (var item in items)
                 {
-                    if (await db.Cities.AnyAsync(x => x.Id == item.Id))
+                    if (await db.Cities.AnyAsync(x => x.Id == item.Id)
+                        && !await db.Cities.Where(x => x.Id != item.Id
+                            && x.CountryId == item.CountryId
+                            && x.Name.ToLower() == item.Name.ToLower()).AnyAsync())
                     {
                         var entity = await db.Cities.FirstAsync(x => x.Id == item.Id);
                         entity.CountryId = item.CountryId;
