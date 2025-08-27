@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using MyCandidate.Common;
@@ -24,7 +25,7 @@ public class MenuThemeViewModel : CheckMenuModel
             {
                 App.ThemeManager?.Switch(theme);
                 _appSettings.DefaultTheme = theme.ToString();
-                await _appSettings.Save();
+                await _appSettings.SaveAsync();
                 foreach (var item in Items!)
                 {
                     if (item.CommandParameter != null
@@ -38,7 +39,7 @@ public class MenuThemeViewModel : CheckMenuModel
                         item.Icon = null;
                     }
                 }
-            });
+            }).DisposeWith(Disposables);
 
         Items = new ReadOnlyObservableCollection<MenuItem>(
             new ObservableCollection<MenuItem>

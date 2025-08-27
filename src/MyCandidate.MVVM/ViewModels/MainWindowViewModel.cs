@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Disposables;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -29,10 +30,10 @@ public class MainWindowViewModel : ViewModelBase
         LocalizationService.Default.AddExtraService(new AppLocalizationService());
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         Title = LocalizationService.Default["progName"];
-        MenuThemeViewModel = new MenuThemeViewModel(_options.Value);
-        MenuLanguageViewModel = new MenuLanguageViewModel(_options.Value);
-        RecentCandidatesViewModel = new MenuRecentViewModel(_provider, Models.TargetModelType.Candidate, 10);
-        RecentVacanciesViewModel = new MenuRecentViewModel(_provider, Models.TargetModelType.Vacancy, 5);
+        MenuThemeViewModel = new MenuThemeViewModel(_options.Value).DisposeWith(Disposables);
+        MenuLanguageViewModel = new MenuLanguageViewModel(_options.Value).DisposeWith(Disposables);
+        RecentCandidatesViewModel = new MenuRecentViewModel(_provider, Models.TargetModelType.Candidate, 10).DisposeWith(Disposables);
+        RecentVacanciesViewModel = new MenuRecentViewModel(_provider, Models.TargetModelType.Vacancy, 5).DisposeWith(Disposables);
 
         var factory = appServiceProvider.Factory;
         Layout = factory?.CreateLayout();
@@ -49,14 +50,14 @@ public class MainWindowViewModel : ViewModelBase
                     desktopLifetime.Shutdown();
                 }
             }
-        );
+        ).DisposeWith(Disposables);
 
         OpenCountriesCmd = ReactiveCommand.Create(
             () =>
             {
                 _provider.OpenSingleDock(_provider.GetCountriesViewModel());
             }
-        );
+        ).DisposeWith(Disposables);
 
         OpenCitiesCmd = ReactiveCommand.Create(
             async () =>
@@ -69,14 +70,14 @@ public class MainWindowViewModel : ViewModelBase
 
                 _provider.OpenSingleDock(_provider.GetCitiesViewModel());
             }
-        );
+        ).DisposeWith(Disposables);
 
         OpenSkillCategoriesCmd = ReactiveCommand.Create(
             () =>
             {
                 _provider.OpenSingleDock(_provider.GetCategoriesViewModel());
             }
-        );
+        ).DisposeWith(Disposables);
 
         OpenSkillsCmd = ReactiveCommand.Create(
             async () =>
@@ -89,79 +90,84 @@ public class MainWindowViewModel : ViewModelBase
 
                 _provider.OpenSingleDock(_provider.GetSkillsViewModel());
             }
-        );
+        ).DisposeWith(Disposables);
 
         OpenCompaniesCmd = ReactiveCommand.Create(
             () =>
             {
                 _provider.OpenSingleDock(_provider.GetCompaniesViewModel());
             }
-        );
+        ).DisposeWith(Disposables);
 
         OpenOfficiesCmd = ReactiveCommand.Create(
             async () =>
             {
                 if (!(await _provider.CompanyService.AnyAsync() && await _provider.CityService.AnyAsync()))
                 {
-                    ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_CompaniesCities_Text"]);
+                    ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"],
+                        LocalizationService.Default["No_CompaniesCities_Text"]);
                     return;
                 }
 
                 _provider.OpenSingleDock(_provider.GetOfficiesViewModel());
             }
-        );
+        ).DisposeWith(Disposables);
 
         OpenCreateCandidateCmd = ReactiveCommand.Create(
             async () =>
             {
                 if (!(await _provider.CityService.AnyAsync() && await _provider.SkillService.AnyAsync()))
                 {
-                    ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_SkillsCities_Text"]);
+                    ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"],
+                        LocalizationService.Default["No_SkillsCities_Text"]);
                     return;
                 }
 
                 _provider.OpenDock(_provider.GetCandidateViewModel());
             }
-        );
+        ).DisposeWith(Disposables);
 
         OpenSearchCandidateCmd = ReactiveCommand.Create(
             async () =>
             {
                 if (!(await _provider.CityService.AnyAsync() && await _provider.SkillService.AnyAsync()))
                 {
-                    ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_SkillsCities_Text"]);
+                    ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"],
+                        LocalizationService.Default["No_SkillsCities_Text"]);
                     return;
                 }
 
                 _provider.OpenDock(_provider.GetCandidateSearchViewModel());
             }
-        );
+        ).DisposeWith(Disposables);
 
         OpenSearchVacancyCmd = ReactiveCommand.Create(
             async () =>
             {
                 if (!(await _provider.OfficeService.AnyAsync() && await _provider.SkillService.AnyAsync()))
                 {
-                    ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_OfficiesSkills_Text"]);
+                    ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"],
+                        LocalizationService.Default["No_OfficiesSkills_Text"]);
                     return;
                 }
 
                 _provider.OpenDock(_provider.GetVacancySearchViewModel());
             }
-        );
+        ).DisposeWith(Disposables);
 
         OpenCreateVacancyCmd = ReactiveCommand.Create(
             async () =>
             {
                 if (!(await _provider.OfficeService.AnyAsync() && await _provider.SkillService.AnyAsync()))
                 {
-                    ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"], LocalizationService.Default["No_OfficiesSkills_Text"]);
+                    ShowMessageBox(LocalizationService.Default["CommandIsUnawailable"],
+                        LocalizationService.Default["No_OfficiesSkills_Text"]);
                     return;
                 }
 
                 _provider.OpenDock(_provider.GetVacancyViewModel());
             }
-        );
+        ).DisposeWith(Disposables);
 
         AboutCmd = ReactiveCommand.Create(
             async () =>
@@ -191,7 +197,7 @@ public class MainWindowViewModel : ViewModelBase
                 var messageBox = MessageBoxManager.GetMessageBoxStandard(standardParams);
                 await messageBox.ShowAsync();
             }
-        );
+        ).DisposeWith(Disposables);
     }
 
     private void CultureChanged(object? sender, EventArgs e)

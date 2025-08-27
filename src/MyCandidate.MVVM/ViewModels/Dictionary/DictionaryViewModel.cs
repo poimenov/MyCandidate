@@ -6,10 +6,10 @@ using System.Globalization;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.PropertyGrid.Services;
-using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
 using DynamicData.Binding;
 using log4net;
@@ -23,11 +23,10 @@ using ReactiveUI.Validation.Extensions;
 
 namespace MyCandidate.MVVM.ViewModels.Dictionary;
 
-public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
+public abstract class DictionaryViewModel<T> : DocumentBase where T : Entity, new()
 {
     protected readonly ILog _log;
     protected readonly IDictionaryService<T>? _service;
-    private readonly ObservableAsPropertyHelper<bool> _isLoading;
     protected virtual IObservable<Func<T, bool>>? Filter =>
         this.WhenAnyValue(x => x.Enabled, x => x.Name)
             .Select((x) => MakeFilter(x.Item1, x.Item2));
@@ -43,12 +42,11 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter ?? Observable.Return<Func<T, bool>>(x => true))
             .Bind(out _itemList)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(Disposables);
 
-        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadDataAsync);
-        _isLoading = LoadDataCmd.IsExecuting
-            .ToProperty(this, x => x.IsLoading);
-        LoadDataCmd.Execute().Subscribe();
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadDataAsync).DisposeWith(Disposables);
+        LoadDataCmd.Execute().Subscribe().DisposeWith(Disposables);
 
         this.WhenAnyValue(x => x.SelectedItem)
             .Subscribe(
@@ -59,7 +57,7 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
                         Properties.SelectedItem = x;
                     }
                 }
-            );
+            ).DisposeWith(Disposables);
 
         CreateCmd = ReactiveCommand.Create(
             () =>
@@ -73,9 +71,9 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
                 SelectedItem = item;
                 this.RaisePropertyChanged(nameof(IsValid));
             }
-        );
+        ).DisposeWith(Disposables);
 
-        CancelCmd = ReactiveCommand.Create(async () => { await OnCancel(); });
+        CancelCmd = ReactiveCommand.Create(async () => { await OnCancel(); }).DisposeWith(Disposables);
 
         DeleteCmd = ReactiveCommand.Create(
             (object obj) =>
@@ -97,7 +95,7 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
             },
             this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                 (obj, list) => obj != null && obj.Enabled && list.Count > 0)
-        );
+        ).DisposeWith(Disposables);
 
         SaveCmd = ReactiveCommand.Create(
             async (object obj) =>
@@ -141,7 +139,7 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
 
             },
             this.WhenAnyValue(x => x.IsValid, v => v == true)
-        );
+        ).DisposeWith(Disposables);
     }
 
     private async Task LoadDataAsync()
@@ -154,7 +152,7 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
                 Source.Clear();
                 Source.AddRange(items);
                 _itemList.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
-            });
+            }).DisposeWith(Disposables);
         }
         catch (Exception ex)
         {
@@ -212,7 +210,6 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
     }
     #endregion
 
-    public bool IsLoading => _isLoading.Value;
     protected List<int> DeletedIds { get; set; } = new List<int>();
     protected List<int> UpdatedIds { get; set; } = new List<int>();
 
@@ -221,6 +218,12 @@ public abstract class DictionaryViewModel<T> : Document where T : Entity, new()
     public IReactiveCommand CreateCmd { get; }
     public IReactiveCommand DeleteCmd { get; }
     public ReactiveCommand<Unit, Unit> LoadDataCmd { get; }
+
+    protected override void OnClosed()
+    {
+        _itemList.ToList().ForEach(x => x.PropertyChanged -= ItemPropertyChanged);
+        base.OnClosed();
+    }
 
     private Func<T, bool> MakeFilter(bool? enabled, string name)
     {

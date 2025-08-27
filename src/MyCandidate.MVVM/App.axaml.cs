@@ -15,6 +15,7 @@ using MyCandidate.Common.Interfaces;
 using log4net;
 using System.Reflection;
 using MyCandidate.MVVM.Extensions;
+using MyCandidate.MVVM.ViewModels;
 
 namespace MyCandidate.MVVM;
 
@@ -77,6 +78,7 @@ public partial class App : Application
                 GetRequiredService<IDatabaseMigrator>().MigrateDatabase();
                 // set and show
                 desktop.MainWindow = GetRequiredService<MainWindow>();
+                desktop.MainWindow.Closed += OnClosed;
                 desktop.ShutdownRequested += OnShutdownRequested;
 
                 // startup background services
@@ -95,6 +97,19 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void OnClosed(object? sender, EventArgs e)
+    {
+        if (sender != null)
+        {
+            var window = sender as MainWindow;
+            if (window != null && window.DataContext != null
+                && window.DataContext is MainWindowViewModel mainWindowViewModel)
+            {
+                mainWindowViewModel.Dispose();
+            }
+        }
     }
 
     #region Logger

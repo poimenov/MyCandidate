@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Input;
@@ -23,7 +24,7 @@ public class CandidateOnVacancyViewModel : ViewModelBase
     private readonly CandidateViewModel? _candidateViewModel;
     private readonly VacancyViewModel? _vacancyViewModel;
     private readonly IAppServiceProvider _provider;
-    private readonly ObservableAsPropertyHelper<bool> _isLoading;
+
     public CandidateOnVacancyViewModel(CandidateViewModel candidateViewModel, IAppServiceProvider appServiceProvider)
     {
         _candidateViewModel = candidateViewModel;
@@ -33,16 +34,15 @@ public class CandidateOnVacancyViewModel : ViewModelBase
         Source.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _itemList)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(Disposables);
 
         OpenCmd = CreateOpenCmd();
         DeleteCmd = CreateDeleteCmd();
         DeleteKeyDownCmd = CreateDeleteKeyDownCmd();
 
-        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadCandidateOnVacancy);
-        _isLoading = LoadDataCmd.IsExecuting
-            .ToProperty(this, x => x.IsLoading);
-        LoadDataCmd.Execute().Subscribe();
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadCandidateOnVacancy).DisposeWith(Disposables);
+        LoadDataCmd.Execute().Subscribe().DisposeWith(Disposables);
     }
 
     public CandidateOnVacancyViewModel(VacancyViewModel vacancyViewModel, IAppServiceProvider appServiceProvider)
@@ -54,16 +54,15 @@ public class CandidateOnVacancyViewModel : ViewModelBase
         Source.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _itemList)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(Disposables);
 
         OpenCmd = CreateOpenCmd();
         DeleteCmd = CreateDeleteCmd();
         DeleteKeyDownCmd = CreateDeleteKeyDownCmd();
 
-        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadCandidateOnVacancy);
-        _isLoading = LoadDataCmd.IsExecuting
-            .ToProperty(this, x => x.IsLoading);
-        LoadDataCmd.Execute().Subscribe();
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadCandidateOnVacancy).DisposeWith(Disposables);
+        LoadDataCmd.Execute().Subscribe().DisposeWith(Disposables);
     }
 
     private async Task LoadCandidateOnVacancy()
@@ -86,7 +85,7 @@ public class CandidateOnVacancyViewModel : ViewModelBase
             {
                 Source.Clear();
                 Source.AddRange(itemsExt);
-            });
+            }).DisposeWith(Disposables);
         }
 
         this.WhenAnyValue(x => x.SelectedItem)
@@ -98,7 +97,7 @@ public class CandidateOnVacancyViewModel : ViewModelBase
                         _provider.Properties.SelectedItem = x;
                     }
                 }
-            );
+            ).DisposeWith(Disposables);
     }
 
     public void Add(CandidateOnVacancy item)
@@ -152,7 +151,7 @@ public class CandidateOnVacancyViewModel : ViewModelBase
             },
             this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                 (obj, list) => obj != null && list.Count > 0)
-        );
+        ).DisposeWith(Disposables);
     }
     public IReactiveCommand DeleteCmd { get; }
     private IReactiveCommand CreateDeleteCmd()
@@ -173,7 +172,7 @@ public class CandidateOnVacancyViewModel : ViewModelBase
             },
             this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                 (obj, list) => obj != null && list.Count > 0)
-        );
+        ).DisposeWith(Disposables);
     }
     public IReactiveCommand DeleteKeyDownCmd { get; }
     private IReactiveCommand CreateDeleteKeyDownCmd()
@@ -188,7 +187,7 @@ public class CandidateOnVacancyViewModel : ViewModelBase
             },
             this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                 (obj, list) => obj != null && list.Count > 0)
-        );
+        ).DisposeWith(Disposables);
     }
     #endregion
 
@@ -206,8 +205,6 @@ public class CandidateOnVacancyViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedItem, value);
     }
     #endregion
-
-    public bool IsLoading => _isLoading.Value;
 
     public bool CandidateColumnVisible
     {

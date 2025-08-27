@@ -20,7 +20,7 @@ public class AppSettings
         }
     }
 
-    public async Task Save()
+    public async Task SaveAsync()
     {
         string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, JSON_FILE_NAME);
         if (File.Exists(filePath))

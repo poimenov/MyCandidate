@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.PropertyGrid.Services;
@@ -31,7 +32,7 @@ public class MenuLanguageViewModel : CheckMenuModel
             {
                 LocalizationService.Default.SelectCulture(lang.Culture.Name);
                 _appSettings.DefaultLanguage = lang.Culture.Name;
-                await _appSettings.Save();
+                await _appSettings.SaveAsync();
                 foreach (var item in Items!)
                 {
                     if (item.CommandParameter != null
@@ -45,7 +46,7 @@ public class MenuLanguageViewModel : CheckMenuModel
                         item.Icon = null;
                     }
                 }
-            });
+            }).DisposeWith(Disposables);
 
         Items = new ReadOnlyObservableCollection<MenuItem>(
             new ObservableCollection<MenuItem>(

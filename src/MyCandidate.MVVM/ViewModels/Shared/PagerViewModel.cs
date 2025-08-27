@@ -1,4 +1,5 @@
 using System;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using DynamicData;
 using ReactiveUI;
@@ -17,25 +18,28 @@ public class PagerViewModel : ViewModelBase
                     {
                         CurrentPage = FIRST_PAGE;
                     }, this.WhenAnyValue(x => x.PreviousPageEnabled, y => y == true)
-                );
+                ).DisposeWith(Disposables);
+
         PreviousPageCmd = ReactiveCommand.Create(
                     () =>
                     {
                         CurrentPage = CurrentPage - 1;
                     }, this.WhenAnyValue(x => x.PreviousPageEnabled, y => y == true)
-                );
+                ).DisposeWith(Disposables);
+
         NextPageCmd = ReactiveCommand.Create(
                     () =>
                     {
                         CurrentPage = CurrentPage + 1;
                     }, this.WhenAnyValue(x => x.NextPageEnabled, y => y == true)
-                );
+                ).DisposeWith(Disposables);
+
         LastPageCmd = ReactiveCommand.Create(
                     () =>
                     {
                         CurrentPage = TotalPages;
                     }, this.WhenAnyValue(x => x.NextPageEnabled, y => y == true)
-                );
+                ).DisposeWith(Disposables);
     }
 
     private bool _previousPageEnabled;
@@ -50,7 +54,7 @@ public class PagerViewModel : ViewModelBase
     {
         get => _nextPageEnabled;
         set => this.RaiseAndSetIfChanged(ref _nextPageEnabled, value);
-    }           
+    }
 
     public System.IObservable<IPageRequest> Pager =>
         this.WhenAnyValue(x => x.CurrentPage)
@@ -66,12 +70,12 @@ public class PagerViewModel : ViewModelBase
     }
 
     public void PagingUpdate(int totalCount)
-    {        
+    {
         TotalPages = Convert.ToInt32(Math.Ceiling(Convert.ToDecimal(totalCount) / PAGE_SIZE));
         CurrentPage = 1;
         TotalItems = totalCount;
         PreviousPageEnabled = CurrentPage > FIRST_PAGE;
-        NextPageEnabled = CurrentPage < TotalItems;        
+        NextPageEnabled = CurrentPage < TotalItems;
     }
 
     public IReactiveCommand FirstPageCmd { get; }

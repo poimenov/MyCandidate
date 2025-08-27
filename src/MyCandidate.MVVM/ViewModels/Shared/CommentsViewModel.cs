@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Input;
@@ -24,7 +25,7 @@ public class CommentsViewModel : ViewModelBase
     private readonly VacancyViewModel? _vacancyViewModel;
     private readonly CandidateViewModel? _candidateViewModel;
     private readonly IAppServiceProvider _provider;
-    private readonly ObservableAsPropertyHelper<bool> _isLoading;
+
     public CommentsViewModel(VacancyViewModel vacancyViewModel, IAppServiceProvider appServiceProvider)
     {
         _vacancyViewModel = vacancyViewModel;
@@ -37,22 +38,21 @@ public class CommentsViewModel : ViewModelBase
             .Filter(VacancyFilter ?? Observable.Return<Func<CommentExt, bool>>(x => true))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _itemList)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(Disposables);
 
         AddCmd = CreateAddCmd();
         DeleteCmd = CreateDeleteCmd();
         DeleteKetDownCmd = CreateDeleteKetDownCmd();
 
-        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadComments);
-        _isLoading = LoadDataCmd.IsExecuting
-            .ToProperty(this, x => x.IsLoading);
-        LoadDataCmd.Execute().Subscribe();
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadComments).DisposeWith(Disposables);
+        LoadDataCmd.Execute().Subscribe().DisposeWith(Disposables);
 
         _vacancyViewModel.WhenAnyValue(x => x.CandidatesOnVacancy!.SelectedItem)
             .Subscribe(x =>
             {
                 CandidateOnVacancy = x;
-            });
+            }).DisposeWith(Disposables);
     }
     public CommentsViewModel(CandidateViewModel candidateViewModel, IAppServiceProvider appServiceProvider)
     {
@@ -66,22 +66,21 @@ public class CommentsViewModel : ViewModelBase
             .Filter(CandidateFilter ?? Observable.Return<Func<CommentExt, bool>>(x => true))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _itemList)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(Disposables);
 
         AddCmd = CreateAddCmd();
         DeleteCmd = CreateDeleteCmd();
         DeleteKetDownCmd = CreateDeleteKetDownCmd();
 
-        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadComments);
-        _isLoading = LoadDataCmd.IsExecuting
-            .ToProperty(this, x => x.IsLoading);
-        LoadDataCmd.Execute().Subscribe();
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadComments).DisposeWith(Disposables);
+        LoadDataCmd.Execute().Subscribe().DisposeWith(Disposables);
 
         _candidateViewModel.WhenAnyValue(x => x.CandidatesOnVacancy!.SelectedItem)
             .Subscribe(x =>
             {
                 CandidateOnVacancy = x;
-            });
+            }).DisposeWith(Disposables);
     }
     public bool IsValid
     {
@@ -133,7 +132,7 @@ public class CommentsViewModel : ViewModelBase
             {
                 Source.Clear();
                 Source.AddRange(itemsExt);
-            });
+            }).DisposeWith(Disposables);
         }
 
         _itemList.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
@@ -146,7 +145,13 @@ public class CommentsViewModel : ViewModelBase
                         _provider.Properties.SelectedItem = x;
                     }
                 }
-            );
+            ).DisposeWith(Disposables);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        _itemList.ToList().ForEach(x => x.PropertyChanged -= ItemPropertyChanged);
+        base.Dispose(disposing);
     }
 
     private void ItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -167,8 +172,6 @@ public class CommentsViewModel : ViewModelBase
     {
         return Source.Select(x => x.ToComment()).ToList();
     }
-
-    public bool IsLoading => _isLoading.Value;
 
     #region Commands
     public ReactiveCommand<Unit, Unit> LoadDataCmd { get; }
@@ -202,7 +205,7 @@ public class CommentsViewModel : ViewModelBase
             },
             this.WhenAnyValue(x => x.CandidateOnVacancy)
                 .Select(obj => obj != null)
-        );
+        ).DisposeWith(Disposables);
     }
     public IReactiveCommand DeleteCmd { get; }
     private IReactiveCommand CreateDeleteCmd()
@@ -215,7 +218,7 @@ public class CommentsViewModel : ViewModelBase
             },
             this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                 (obj, list) => obj != null && list.Count > 0)
-        );
+        ).DisposeWith(Disposables);
     }
     public IReactiveCommand DeleteKetDownCmd { get; }
     private IReactiveCommand CreateDeleteKetDownCmd()
@@ -231,7 +234,7 @@ public class CommentsViewModel : ViewModelBase
             },
             this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                 (obj, list) => obj != null && list.Count > 0)
-        );
+        ).DisposeWith(Disposables);
     }
     #endregion
 

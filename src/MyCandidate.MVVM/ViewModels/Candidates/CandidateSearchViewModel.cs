@@ -5,10 +5,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.PropertyGrid.Services;
-using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
 using DynamicData.Binding;
 using MyCandidate.Common;
@@ -21,11 +21,10 @@ using ReactiveUI;
 
 namespace MyCandidate.MVVM.ViewModels.Candidates;
 
-public class CandidateSearchViewModel : Document
+public class CandidateSearchViewModel : DocumentBase
 {
     private readonly IAppServiceProvider _provider;
     private readonly VacancyViewModel? _vacancyViewModel;
-    private readonly ObservableAsPropertyHelper<bool> _isLoading;
     public VacancyViewModel? VacancyViewModel => _vacancyViewModel;
 
     public CandidateSearchViewModel(IAppServiceProvider appServiceProvider)
@@ -41,21 +40,21 @@ public class CandidateSearchViewModel : Document
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter!)
             .Bind(out _citiesList)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(Disposables);
 
         Source = new ObservableCollectionExtended<CandidateModel>();
-        Pager = new PagerViewModel();
+        Pager = new PagerViewModel().DisposeWith(Disposables);
         Source.ToObservableChangeSet()
             .Page(Pager.Pager)
             .Do(x => Pager.PagingUpdate(x.Response.TotalSize, x.Response.Page, x.Response.Pages))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _itemList)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(Disposables);
 
-        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadCandidateSearch);
-        _isLoading = LoadDataCmd.IsExecuting
-            .ToProperty(this, x => x.IsLoading);
-        LoadDataCmd.Execute().Subscribe();
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadCandidateSearch).DisposeWith(Disposables);
+        LoadDataCmd.Execute().Subscribe().DisposeWith(Disposables);
 
         OpenCmd = CreateOpenCmd();
         SearchCmd = CreateSearchCmd();
@@ -75,22 +74,22 @@ public class CandidateSearchViewModel : Document
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter!)
             .Bind(out _citiesList)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(Disposables);
 
         Source = new ObservableCollectionExtended<CandidateModel>();
-        Pager = new PagerViewModel();
+        Pager = new PagerViewModel().DisposeWith(Disposables);
         Source.ToObservableChangeSet()
             .Page(Pager.Pager)
             .ObserveOn(RxApp.MainThreadScheduler)
             .Do(x => Pager.PagingUpdate(x.Response.TotalSize, x.Response.Page, x.Response.Pages))
             .Bind(out _itemList)
             .DisposeMany()
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(Disposables);
 
-        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadCandidateSearch);
-        _isLoading = LoadDataCmd.IsExecuting
-            .ToProperty(this, x => x.IsLoading);
-        LoadDataCmd.Execute().Subscribe();
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadCandidateSearch).DisposeWith(Disposables);
+        LoadDataCmd.Execute().Subscribe().DisposeWith(Disposables);
 
         OpenCmd = CreateOpenCmd();
         SearchCmd = CreateSearchCmd();
@@ -110,11 +109,11 @@ public class CandidateSearchViewModel : Document
         {
             CitiesSource.Clear();
             CitiesSource.AddRange(_cities);
-        });
+        }).DisposeWith(Disposables);
 
         if (VacancyViewModel == null)
         {
-            Skills = new SkillsViewModel(new List<SkillModel>(), _provider.Properties!);
+            Skills = new SkillsViewModel(new List<SkillModel>(), _provider.Properties!).DisposeWith(Disposables);
             CandidateSearch = new CandidateSearch();
         }
         else
@@ -122,7 +121,7 @@ public class CandidateSearchViewModel : Document
             Skills = new SkillsViewModel(VacancyViewModel.Vacancy?.VacancySkills != null
                     ? VacancyViewModel.Vacancy.VacancySkills.Select(x => new SkillModel(x.Id, x.Skill!, x.Seniority!))
                     : Enumerable.Empty<SkillModel>()
-                , _provider.Properties!);
+                , _provider.Properties!).DisposeWith(Disposables);
 
             var location = VacancyViewModel.Vacancy?.Office?.Location;
             if (location != null)
@@ -141,13 +140,12 @@ public class CandidateSearchViewModel : Document
 
         Enabled = true;
         SearchStrictBySeniority = true;
-        Pager = new PagerViewModel();
-        Skills!.WhenAnyValue(x => x.IsValid).Subscribe(x => { this.RaisePropertyChanged(nameof(IsValid)); });
-        this.WhenAnyValue(x => x.FirstName).Subscribe(x => { CandidateSearch!.FirstName = x ?? string.Empty; });
-        this.WhenAnyValue(x => x.LastName).Subscribe(x => { CandidateSearch!.LastName = x ?? string.Empty; });
-        this.WhenAnyValue(x => x.CandidateTitle).Subscribe(x => { CandidateSearch!.Title = x ?? string.Empty; });
-        this.WhenAnyValue(x => x.Enabled).Subscribe(x => { CandidateSearch!.Enabled = x; });
-        this.WhenAnyValue(x => x.SearchStrictBySeniority).Subscribe(x => { CandidateSearch!.SearchStrictBySeniority = x; });
+        Skills!.WhenAnyValue(x => x.IsValid).Subscribe(x => { this.RaisePropertyChanged(nameof(IsValid)); }).DisposeWith(Disposables);
+        this.WhenAnyValue(x => x.FirstName).Subscribe(x => { CandidateSearch!.FirstName = x ?? string.Empty; }).DisposeWith(Disposables);
+        this.WhenAnyValue(x => x.LastName).Subscribe(x => { CandidateSearch!.LastName = x ?? string.Empty; }).DisposeWith(Disposables);
+        this.WhenAnyValue(x => x.CandidateTitle).Subscribe(x => { CandidateSearch!.Title = x ?? string.Empty; }).DisposeWith(Disposables);
+        this.WhenAnyValue(x => x.Enabled).Subscribe(x => { CandidateSearch!.Enabled = x; }).DisposeWith(Disposables);
+        this.WhenAnyValue(x => x.SearchStrictBySeniority).Subscribe(x => { CandidateSearch!.SearchStrictBySeniority = x; }).DisposeWith(Disposables);
 
         this.WhenAnyValue(x => x.SelectedItem).Subscribe(
             x =>
@@ -157,7 +155,7 @@ public class CandidateSearchViewModel : Document
                     _provider.Properties.SelectedItem = x;
                 }
             }
-        );
+        ).DisposeWith(Disposables);
 
         this.WhenAnyValue(x => x.City).Subscribe(
             x =>
@@ -168,7 +166,7 @@ public class CandidateSearchViewModel : Document
                     CandidateSearch.CityId = x.Id > 0 ? x.Id : null;
                 }
             }
-        );
+        ).DisposeWith(Disposables);
 
         this.WhenAnyValue(x => x.Country).Subscribe(
             x =>
@@ -179,8 +177,9 @@ public class CandidateSearchViewModel : Document
                     CandidateSearch.CountryId = x.Id > 0 ? x.Id : null;
                 }
             }
-        );
+        ).DisposeWith(Disposables);
     }
+
     private void CultureChanged(object? sender, EventArgs e)
     {
         if (VacancyViewModel == null)
@@ -191,6 +190,12 @@ public class CandidateSearchViewModel : Document
         {
             Title = $"{LocalizationService.Default["Candidate_Search_Vacancy"]} {VacancyViewModel.Name}";
         }
+    }
+
+    protected override void OnClosed()
+    {
+        LocalizationService.Default.OnCultureChanged -= CultureChanged;
+        base.OnClosed();
     }
 
     #region CandidateSearch
@@ -243,7 +248,7 @@ public class CandidateSearchViewModel : Document
                     await _provider.OpenCandidateViewModelAsync(SelectedItem!.Candidate.Id);
                 }, this.WhenAnyValue(x => x.SelectedItem, x => x.ItemList,
                     (obj, list) => obj != null && list.Count > 0)
-            );
+            ).DisposeWith(Disposables);
     }
     public IReactiveCommand AddToVacancyCmd { get; }
     private IReactiveCommand CreateAddToVacancyCmd()
@@ -276,7 +281,7 @@ public class CandidateSearchViewModel : Document
                     VacancyViewModel!.CandidatesOnVacancy!.Add(newItem);
                 }, this.WhenAnyValue(x => x.SelectedItem, x => x.VacancyViewModel,
                     (obj, vm) => obj != null && vm != null && !vm.CandidatesOnVacancy!.ItemList.Any(y => y.CandidateId == obj.Candidate.Id))
-            );
+            ).DisposeWith(Disposables);
     }
     public IReactiveCommand SearchCmd { get; }
     private IReactiveCommand CreateSearchCmd()
@@ -290,14 +295,13 @@ public class CandidateSearchViewModel : Document
                 {
                     Source.Clear();
                     Source.AddRange(candidates.Select(x => new CandidateModel(x)));
-                });
+                }).DisposeWith(Disposables);
             }, this.WhenAnyValue(x => x.IsValid, v => v == true)
-        );
+        ).DisposeWith(Disposables);
     }
     #endregion
 
     public bool AddToVacancyVisible => AddToVacancyCmd != null;
-    public bool IsLoading => _isLoading.Value;
 
     #region Pager
     private PagerViewModel? _pagerViewModel;

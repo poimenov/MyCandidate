@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -22,7 +23,6 @@ public class MenuRecentViewModel : ViewModelBase
     private readonly IAppServiceProvider _provider;
     private readonly TargetModelType _modelType;
     private readonly int _countItems;
-    private readonly ObservableAsPropertyHelper<bool> _isLoading;
     public MenuRecentViewModel(IAppServiceProvider appServiceProvider, TargetModelType modelType, int countItems)
     {
         _provider = appServiceProvider;
@@ -34,25 +34,24 @@ public class MenuRecentViewModel : ViewModelBase
             {
                 await _provider.OpenCandidateViewModelAsync(id);
             }
-        );
+        ).DisposeWith(Disposables);
 
         OpenVacancyCmd = ReactiveCommand.Create<int>(
             async (id) =>
             {
                 await _provider.OpenVacancyViewModelAsync(id);
             }
-        );
+        ).DisposeWith(Disposables);
 
         Source = new ObservableCollection<MenuItem>();
         Source.ToObservableChangeSet<MenuItem>()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _items)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(Disposables);
 
-        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadDataAsync);
-        _isLoading = LoadDataCmd.IsExecuting
-            .ToProperty(this, x => x.IsLoading);
-        LoadDataCmd.Execute().Subscribe();
+        LoadDataCmd = ReactiveCommand.CreateFromTask(LoadDataAsync).DisposeWith(Disposables);
+        LoadDataCmd.Execute().Subscribe().DisposeWith(Disposables);
     }
 
     private async Task LoadDataAsync()
@@ -83,7 +82,7 @@ public class MenuRecentViewModel : ViewModelBase
         {
             Source.Clear();
             Source.AddRange(items);
-        });
+        }).DisposeWith(Disposables);
     }
 
     private void CultureChanged(object? sender, EventArgs e)
@@ -101,7 +100,6 @@ public class MenuRecentViewModel : ViewModelBase
         };
     }
 
-    public bool IsLoading => _isLoading.Value;
     public ObservableCollection<MenuItem> Source = new ObservableCollection<MenuItem>();
     private readonly ReadOnlyObservableCollection<MenuItem> _items;
     public ReadOnlyObservableCollection<MenuItem> Items => _items;

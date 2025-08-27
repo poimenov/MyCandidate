@@ -6,13 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Xsl;
 using Avalonia;
 using Avalonia.PropertyGrid.Services;
-using Dock.Model.ReactiveUI.Controls;
 using DynamicData;
 using DynamicData.Binding;
 using MsBox.Avalonia.Enums;
@@ -27,10 +27,9 @@ using ReactiveUI;
 
 namespace MyCandidate.MVVM.ViewModels.Vacancies;
 
-public class VacancyViewModel : Document
+public class VacancyViewModel : DocumentBase
 {
     private readonly IAppServiceProvider _provider;
-    private readonly ObservableAsPropertyHelper<bool> _isLoading;
     private Vacancy? _vacancy;
     private bool _initialSet = false;
 
@@ -43,12 +42,11 @@ public class VacancyViewModel : Document
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter!)
             .Bind(out _offices)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(Disposables);
 
-        LoadDataCmd = ReactiveCommand.CreateFromTask<int?>(LoadVacancy);
-        _isLoading = LoadDataCmd.IsExecuting
-            .ToProperty(this, x => x.IsLoading);
-        LoadDataCmd.Execute(null).Subscribe();
+        LoadDataCmd = ReactiveCommand.CreateFromTask<int?>(LoadVacancy).DisposeWith(Disposables);
+        LoadDataCmd.Execute(null).Subscribe().DisposeWith(Disposables);
 
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = CreateCancelCmd();
@@ -67,12 +65,11 @@ public class VacancyViewModel : Document
             .ObserveOn(RxApp.MainThreadScheduler)
             .Filter(Filter!)
             .Bind(out _offices)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(Disposables);
 
-        LoadDataCmd = ReactiveCommand.CreateFromTask<int?>(LoadVacancy);
-        _isLoading = LoadDataCmd.IsExecuting
-            .ToProperty(this, x => x.IsLoading);
-        LoadDataCmd.Execute(vacancyId).Subscribe();
+        LoadDataCmd = ReactiveCommand.CreateFromTask<int?>(LoadVacancy).DisposeWith(Disposables);
+        LoadDataCmd.Execute(vacancyId).Subscribe().DisposeWith(Disposables);
 
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = CreateCancelCmd();
@@ -128,6 +125,12 @@ public class VacancyViewModel : Document
     }
     #endregion
 
+    protected override void OnClosed()
+    {
+        LocalizationService.Default.OnCultureChanged -= CultureChanged;
+        base.OnClosed();
+    }
+
     private async Task LoadVacancy(int? id)
     {
         _vacancyStatuses = await _provider.DictionariesDataAccess.GetVacancyStatusesAsync();
@@ -139,7 +142,7 @@ public class VacancyViewModel : Document
         {
             OfficesSource.Clear();
             OfficesSource.AddRange(offices.Where(x => x.Enabled == true));
-        });
+        }).DisposeWith(Disposables);
 
         if (id != null && id > 0)
         {
@@ -160,13 +163,24 @@ public class VacancyViewModel : Document
         _initialSet = false;
         SelectedOffice = Offices.First(x => x.Id == _vacancy.OfficeId);
 
-        Resources = new ResourcesViewModel(_vacancy, _provider.Properties!);
-        Resources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
-        VacancySkills = new SkillsViewModel(_vacancy.VacancySkills.Select(x => new SkillModel(x.Id, x.Skill!, x.Seniority!)), _provider.Properties!);
-        VacancySkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
-        CandidatesOnVacancy = new CandidateOnVacancyViewModel(this, _provider);
-        Comments = new CommentsViewModel(this, _provider);
-        Comments.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
+        Resources = new ResourcesViewModel(_vacancy, _provider.Properties!).DisposeWith(Disposables);
+        Resources.WhenAnyValue(x => x.IsValid)
+            .Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); })
+            .DisposeWith(Disposables);
+
+        VacancySkills = new SkillsViewModel(_vacancy.VacancySkills.Select(x => new SkillModel(x.Id, x.Skill!, x.Seniority!)),
+            _provider.Properties!).DisposeWith(Disposables);
+        VacancySkills.WhenAnyValue(x => x.IsValid)
+            .Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); })
+            .DisposeWith(Disposables);
+
+        CandidatesOnVacancy = new CandidateOnVacancyViewModel(this, _provider).DisposeWith(Disposables);
+
+        Comments = new CommentsViewModel(this, _provider).DisposeWith(Disposables);
+        Comments.WhenAnyValue(x => x.IsValid)
+            .Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); })
+            .DisposeWith(Disposables);
+
         this.RaisePropertyChanged(nameof(VacancyId));
     }
 
@@ -227,7 +241,7 @@ public class VacancyViewModel : Document
                     }
 
                 }, this.WhenAnyValue(x => x.IsValid, v => v == true)
-            );
+            ).DisposeWith(Disposables);
     }
     public IReactiveCommand CancelCmd { get; }
 
@@ -252,7 +266,7 @@ public class VacancyViewModel : Document
 
                     await LoadVacancy(Vacancy?.Id);
                 }
-            );
+            ).DisposeWith(Disposables);
     }
 
     public IReactiveCommand SearchCmd { get; }
@@ -263,7 +277,7 @@ public class VacancyViewModel : Document
             () =>
             {
                 _provider.OpenDock(_provider.GetCandidateSearchViewModel(this));
-            }, this.WhenAnyValue(x => x.VacancyId, y => y != 0));
+            }, this.WhenAnyValue(x => x.VacancyId, y => y != 0)).DisposeWith(Disposables);
     }
 
     public IReactiveCommand DeleteCmd { get; }
@@ -296,12 +310,11 @@ public class VacancyViewModel : Document
                     }
 
                 }, this.WhenAnyValue(x => x.VacancyId, y => y != 0)
-            );
+            ).DisposeWith(Disposables);
     }
 
     public IReactiveCommand ExportCmd { get; }
     public ReactiveCommand<int?, Unit> LoadDataCmd { get; }
-    public bool IsLoading => _isLoading.Value;
 
     private IReactiveCommand CreateExportCmd()
     {
@@ -331,7 +344,7 @@ public class VacancyViewModel : Document
                     }
                     DataTemplateProvider.Open(path);
                 }, this.WhenAnyValue(x => x.VacancyId, y => y != 0)
-            );
+            ).DisposeWith(Disposables);
     }
     #endregion
 

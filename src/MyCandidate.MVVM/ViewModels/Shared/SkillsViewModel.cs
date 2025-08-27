@@ -12,6 +12,7 @@ using MyCandidate.Common.Interfaces;
 using MyCandidate.MVVM.Models;
 using System.Collections.Generic;
 using Avalonia.Input;
+using System.Reactive.Disposables;
 
 namespace MyCandidate.MVVM.ViewModels.Shared;
 
@@ -24,7 +25,8 @@ public class SkillsViewModel : ViewModelBase
         SourceSkills.ToObservableChangeSet()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _skills)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(Disposables);
 
         _skills.ToList().ForEach(x => x.PropertyChanged += ItemPropertyChanged);
 
@@ -37,17 +39,18 @@ public class SkillsViewModel : ViewModelBase
                         Properties.SelectedItem = x;
                     }
                 }
-            );
+            ).DisposeWith(Disposables);
 
         DeleteSkillCmd = ReactiveCommand.Create(
             (SkillModel obj) =>
             {
                 SourceSkills.Remove(obj);
+                obj.PropertyChanged -= ItemPropertyChanged;
                 this.RaisePropertyChanged(nameof(IsValid));
             },
             this.WhenAnyValue(x => x.SelectedSkill, x => x.Skills,
                 (obj, list) => obj != null && list.Count > 0)
-        );
+        ).DisposeWith(Disposables);
 
         DeleteSkillKeyDownCmd = ReactiveCommand.Create(
             (KeyEventArgs args) =>
@@ -60,7 +63,7 @@ public class SkillsViewModel : ViewModelBase
             },
             this.WhenAnyValue(x => x.SelectedSkill, x => x.Skills,
                 (obj, list) => obj != null && list.Count > 0)
-        );
+        ).DisposeWith(Disposables);
 
         CreateSkillCmd = ReactiveCommand.Create(
             () =>
@@ -79,7 +82,13 @@ public class SkillsViewModel : ViewModelBase
                 SelectedSkill = _newSkill;
                 this.RaisePropertyChanged(nameof(IsValid));
             }
-        );
+        ).DisposeWith(Disposables);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        _skills.ToList().ForEach(x => x.PropertyChanged -= ItemPropertyChanged);
+        base.Dispose(disposing);
     }
 
     private void ItemPropertyChanged(object? sender, PropertyChangedEventArgs e)

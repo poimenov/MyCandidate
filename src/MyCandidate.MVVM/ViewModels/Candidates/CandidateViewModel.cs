@@ -4,12 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Xsl;
 using Avalonia.PropertyGrid.Services;
-using Dock.Model.ReactiveUI.Controls;
 using MsBox.Avalonia.Enums;
 using MyCandidate.Common;
 using MyCandidate.MVVM.DataAnnotations;
@@ -23,7 +23,7 @@ using ReactiveUI;
 
 namespace MyCandidate.MVVM.ViewModels.Candidates;
 
-public class CandidateViewModel : Document
+public class CandidateViewModel : DocumentBase
 {
     private readonly IAppServiceProvider _provider;
     private Candidate? _candidate;
@@ -32,8 +32,8 @@ public class CandidateViewModel : Document
     public CandidateViewModel(IAppServiceProvider appServiceProvider)
     {
         _provider = appServiceProvider;
-        LoadDataCmd = ReactiveCommand.CreateFromTask<int?>(LoadCandidate);
-        LoadDataCmd.Execute(null).Subscribe();
+        LoadDataCmd = ReactiveCommand.CreateFromTask<int?>(LoadCandidate).DisposeWith(Disposables);
+        LoadDataCmd.Execute(null).Subscribe().DisposeWith(Disposables);
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = CreateCancelCmd();
         SaveCmd = CreateSaveCmd();
@@ -45,8 +45,8 @@ public class CandidateViewModel : Document
     public CandidateViewModel(IAppServiceProvider appServiceProvider, int candidateId)
     {
         _provider = appServiceProvider;
-        LoadDataCmd = ReactiveCommand.CreateFromTask<int?>(LoadCandidate);
-        LoadDataCmd.Execute(candidateId).Subscribe();
+        LoadDataCmd = ReactiveCommand.CreateFromTask<int?>(LoadCandidate).DisposeWith(Disposables);
+        LoadDataCmd.Execute(candidateId).Subscribe().DisposeWith(Disposables);
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         CancelCmd = CreateCancelCmd();
         SaveCmd = CreateSaveCmd();
@@ -108,19 +108,32 @@ public class CandidateViewModel : Document
         Enabled = _candidate.Enabled;
         var countriesList = await _provider.CountryService.GetItemsListAsync();
         var citiesList = await _provider.CityService.GetItemsListAsync();
+
         Location = new LocationViewModel(countriesList.Where(x => x.Enabled == true),
             citiesList.Where(x => x.Enabled == true))
         {
             Location = _candidate.Location
-        };
+        }.DisposeWith(Disposables);
 
-        Resources = new ResourcesViewModel(_candidate, _provider.Properties!);
-        Resources.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
-        CandidateSkills = new SkillsViewModel(_candidate.CandidateSkills.Select(x => new SkillModel(x.Id, x.Skill!, x.Seniority!)), _provider.Properties!);
-        CandidateSkills.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
-        CandidatesOnVacancy = new CandidateOnVacancyViewModel(this, _provider);
-        Comments = new CommentsViewModel(this, _provider);
-        Comments.WhenAnyValue(x => x.IsValid).Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); });
+        Resources = new ResourcesViewModel(_candidate, _provider.Properties!).DisposeWith(Disposables);
+        Resources.WhenAnyValue(x => x.IsValid)
+            .Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); })
+            .DisposeWith(Disposables);
+
+        CandidateSkills = new SkillsViewModel(_candidate.CandidateSkills
+            .Select(x => new SkillModel(x.Id, x.Skill!, x.Seniority!)), _provider.Properties!)
+            .DisposeWith(Disposables);
+        CandidateSkills.WhenAnyValue(x => x.IsValid)
+            .Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); })
+            .DisposeWith(Disposables);
+
+        CandidatesOnVacancy = new CandidateOnVacancyViewModel(this, _provider).DisposeWith(Disposables);
+
+        Comments = new CommentsViewModel(this, _provider).DisposeWith(Disposables);
+        Comments.WhenAnyValue(x => x.IsValid)
+            .Subscribe((x) => { this.RaisePropertyChanged(nameof(IsValid)); })
+            .DisposeWith(Disposables);
+
         this.RaisePropertyChanged(nameof(CandidateId));
     }
 
@@ -130,6 +143,12 @@ public class CandidateViewModel : Document
         {
             Title = LocalizationService.Default["New_Candidate"];
         }
+    }
+
+    protected override void OnClosed()
+    {
+        LocalizationService.Default.OnCultureChanged -= CultureChanged;
+        base.OnClosed();
     }
 
     public Candidate? Candidate => _candidate;
@@ -200,7 +219,7 @@ public class CandidateViewModel : Document
                     }
 
                 }, this.WhenAnyValue(x => x.IsValid, v => v == true)
-            );
+            ).DisposeWith(Disposables);
     }
     public IReactiveCommand CancelCmd { get; }
 
@@ -225,7 +244,7 @@ public class CandidateViewModel : Document
 
                     await LoadCandidate(Candidate?.Id);
                 }
-            );
+            ).DisposeWith(Disposables);
     }
 
     public IReactiveCommand SearchCmd { get; }
@@ -236,7 +255,7 @@ public class CandidateViewModel : Document
             () =>
             {
                 _provider.OpenDock(_provider.GetVacancySearchViewModel(this));
-            }, this.WhenAnyValue(x => x.CandidateId, y => y != 0));
+            }, this.WhenAnyValue(x => x.CandidateId, y => y != 0)).DisposeWith(Disposables);
     }
 
     public IReactiveCommand DeleteCmd { get; }
@@ -269,7 +288,7 @@ public class CandidateViewModel : Document
                     }
 
                 }, this.WhenAnyValue(x => x.CandidateId, y => y != 0)
-            );
+            ).DisposeWith(Disposables);
     }
 
     public IReactiveCommand ExportCmd { get; }
@@ -303,11 +322,12 @@ public class CandidateViewModel : Document
                     }
                     DataTemplateProvider.Open(path);
                 }, this.WhenAnyValue(x => x.CandidateId, y => y != 0)
-            );
+            ).DisposeWith(Disposables);
     }
     #endregion
 
-    private async Task SaveDocumentAsync(XmlDocument xmlDoc, string filePath, XslCompiledTransform? xslt, XsltArgumentList? args)
+    private async Task SaveDocumentAsync(XmlDocument xmlDoc, string filePath,
+                                XslCompiledTransform? xslt, XsltArgumentList? args)
     {
         try
         {
