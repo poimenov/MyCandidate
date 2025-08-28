@@ -14,6 +14,7 @@
     <PackageReference Include="Avalonia" Version="11.2.5" />
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.5" />
     <PackageReference Include="Avalonia.Desktop" Version="11.2.5" />
+    <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.2.5" />
     <PackageReference Include="Avalonia.Svg" Version="11.2.0" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.5" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.5" />
@@ -45,5 +46,11 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <!--https://theme.xaml.live/-->
+    <Content Include="Themes\Nighttime.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Themes\Lavender.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Themes\Forest.axaml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

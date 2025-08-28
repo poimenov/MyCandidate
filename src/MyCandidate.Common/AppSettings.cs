@@ -9,7 +9,11 @@ public class AppSettings
     public const string JSON_FILE_NAME = "appsettings.json";
     public const string DB_FILE_NAME = "MyCandidate.db";
     public string DefaultLanguage { get; set; } = "en-US";
-    public string DefaultTheme { get; set; } = "Dark";
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public ThemeName DefaultTheme { get; set; } = ThemeName.Light;
+
+    public string? Palette { get; set; } = null;
     public DatabaseSettings DatabaseSettings { get; set; } = new DatabaseSettings();
 
     public static string AppDataPath
@@ -51,4 +55,10 @@ public enum DatabaseType
     SqlServer,
     PostgreSQL,
     SQLite
+}
+
+public enum ThemeName
+{
+    Light,
+    Dark
 }

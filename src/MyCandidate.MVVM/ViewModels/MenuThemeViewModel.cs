@@ -1,10 +1,8 @@
-using System;
 using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using MyCandidate.Common;
-using MyCandidate.MVVM.Themes;
 using ReactiveUI;
 
 namespace MyCandidate.MVVM.ViewModels;
@@ -16,15 +14,15 @@ public class MenuThemeViewModel : CheckMenuModel
 
     public MenuThemeViewModel(AppSettings appSettings) : base(appSettings)
     {
-        ThemeName defaultTheme = ThemeName.Light;
-        Enum.TryParse<ThemeName>(_appSettings.DefaultTheme, out defaultTheme);
-        App.ThemeManager?.Switch(defaultTheme);
+        var defaultTheme = _appSettings.DefaultTheme;
+        var paletteName = _appSettings.Palette;
+        App.ThemeManager?.Switch(defaultTheme, paletteName);
 
         ChangeThemeCmd = ReactiveCommand.Create<ThemeName, Task>(
             async (theme) =>
             {
-                App.ThemeManager?.Switch(theme);
-                _appSettings.DefaultTheme = theme.ToString();
+                App.ThemeManager?.Switch(theme, paletteName);
+                _appSettings.DefaultTheme = theme;
                 await _appSettings.SaveAsync();
                 foreach (var item in Items!)
                 {

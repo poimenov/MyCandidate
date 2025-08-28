@@ -1,8 +1,11 @@
 using System;
+using System.IO;
 using Avalonia;
+using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
+using MyCandidate.Common;
 
 namespace MyCandidate.MVVM.Themes;
 
@@ -10,7 +13,7 @@ public class FluentThemeManager : IThemeManager
 {
     private static readonly Uri BaseUri = new("avares://MyCandidate.MVVM/Themes");
 
-    private static readonly FluentTheme Fluent = new()
+    private static readonly IStyle Default = new FluentTheme()
     {
     };
 
@@ -52,7 +55,7 @@ public class FluentThemeManager : IThemeManager
         {
             Source = new Uri("avares://MyCandidate.MVVM/Themes/GroupBoxClassic.axaml")
         }
-    };  
+    };
 
     private static readonly Styles DockableHeader = new()
     {
@@ -60,7 +63,7 @@ public class FluentThemeManager : IThemeManager
         {
             Source = new Uri("avares://MyCandidate.MVVM/Themes/DockableHeader.axaml")
         }
-    };       
+    };
 
     private static readonly Styles Hyperlink = new()
     {
@@ -68,14 +71,36 @@ public class FluentThemeManager : IThemeManager
         {
             Source = new Uri("avares://MyCandidate.MVVM/Themes/Hyperlink.axaml")
         }
-    };      
+    };
 
     private static readonly MergeResourceInclude ResourceTheme = new(BaseUri)
     {
         Source = new Uri("avares://MyCandidate.MVVM/Themes/Themes.axaml")
     };
 
-    public void Switch(ThemeName themeName)
+    private static IStyle LoadThemeFromFile(string? paletteName)
+    {
+        if (string.IsNullOrWhiteSpace(paletteName))
+            return Default;
+
+        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes", $"{paletteName}.axaml");
+        if (!File.Exists(filePath))
+            return Default;
+
+        try
+        {
+            string xamlContent = File.ReadAllText(filePath);
+            var retVal = AvaloniaRuntimeXamlLoader.Parse<IStyle>(xamlContent);
+            return retVal ?? Default;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading theme: {ex.Message}");
+            return Default;
+        }
+    }
+
+    public void Switch(ThemeName themeName, string? paletteName)
     {
         if (Application.Current is null)
         {
@@ -87,7 +112,7 @@ public class FluentThemeManager : IThemeManager
             case ThemeName.Light:
                 {
                     Application.Current.RequestedThemeVariant = ThemeVariant.Light;
-                    Application.Current.Styles[0] = Fluent;
+                    Application.Current.Styles[0] = LoadThemeFromFile(paletteName);
                     Application.Current.Styles[1] = DockFluent;
                     Application.Current.Styles[2] = DataGridFluent;
                     Application.Current.Styles[3] = FluentLight;
@@ -96,7 +121,7 @@ public class FluentThemeManager : IThemeManager
             case ThemeName.Dark:
                 {
                     Application.Current.RequestedThemeVariant = ThemeVariant.Dark;
-                    Application.Current.Styles[0] = Fluent;
+                    Application.Current.Styles[0] = LoadThemeFromFile(paletteName);
                     Application.Current.Styles[1] = DockFluent;
                     Application.Current.Styles[2] = DataGridFluent;
                     Application.Current.Styles[3] = FluentDark;
@@ -107,8 +132,8 @@ public class FluentThemeManager : IThemeManager
 
     public void Initialize(Application application)
     {
-        application.Resources.MergedDictionaries.Insert(0,ResourceTheme);
-        application.Styles.Insert(0, Fluent);
+        application.Resources.MergedDictionaries.Insert(0, ResourceTheme);
+        application.Styles.Insert(0, Default);
         application.Styles.Insert(1, DockFluent);
         application.Styles.Insert(2, DataGridFluent);
         application.Styles.Insert(3, FluentLight);
