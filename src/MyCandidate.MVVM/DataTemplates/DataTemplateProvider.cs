@@ -18,7 +18,7 @@ using ReactiveUI;
 namespace MyCandidate.MVVM.DataTemplates;
 
 public static class DataTemplateProvider
-{                
+{
     public static FuncDataTemplate<ResourceType> ResourceTypeName { get; }
         = new FuncDataTemplate<ResourceType>(
             (resourceType) => resourceType is not null, BuildResourceTypeName);
@@ -26,12 +26,12 @@ public static class DataTemplateProvider
     private static Control BuildResourceTypeName(ResourceType resourceType)
     {
         return new TextBlock
-                {
-                    Text = GetComboBoxItemText(resourceType?.Name ?? string.Empty),
-                    Margin = new Thickness(4, 0),
-                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
-                };
-    }            
+        {
+            Text = GetComboBoxItemText(resourceType?.Name ?? string.Empty),
+            Margin = new Thickness(4, 0),
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+        };
+    }
 
     public static FuncDataTemplate<ResourceType> ResourceTypeImage { get; }
         = new FuncDataTemplate<ResourceType>(
@@ -41,16 +41,16 @@ public static class DataTemplateProvider
     {
         return new Avalonia.Svg.Svg(new Uri(ResourceTypeNameToSvgPathConverter.BASE_PATH))
         {
-            Width = 24,
-            Height = 24,
-            Stretch = Stretch.Uniform,  
+            Width = 16,
+            Height = 16,
+            Stretch = Stretch.Uniform,
             [!Avalonia.Svg.Svg.PathProperty] = new Binding(nameof(resourceType.Name))
             {
                 Converter = new ResourceTypeNameToSvgPathConverter()
-            },          
-            [!ToolTip.TipProperty] = new Binding(nameof(resourceType.Name))            
-        };        
-    }               
+            },
+            [!ToolTip.TipProperty] = new Binding(nameof(resourceType.Name))
+        };
+    }
 
     public static FuncDataTemplate<ResourceModel> ResourceLink { get; }
             = new FuncDataTemplate<ResourceModel>(
@@ -74,20 +74,20 @@ public static class DataTemplateProvider
                 );
                 break;
             default:
-                return new TextBlock() 
-                    { 
-                        [!TextBlock.TextProperty] = content,
-                        [!ToolTip.TipProperty] = content 
-                    };
+                return new TextBlock()
+                {
+                    [!TextBlock.TextProperty] = content,
+                    [!ToolTip.TipProperty] = content
+                };
         }
 
         var retVal = new Button()
         {
             [!Button.ContentProperty] = content,
             Command = command,
-            [!ToolTip.TipProperty] = new Binding(nameof(resource.Value)) 
+            [!ToolTip.TipProperty] = new Binding(nameof(resource.Value))
         };
-        
+
         retVal.Classes.Add("link");
 
         return retVal;
@@ -116,7 +116,7 @@ public static class DataTemplateProvider
     private static string GetComboBoxItemText(string itemName)
     {
         string retVal = "Unknown Resource type";
-        switch(itemName)
+        switch (itemName)
         {
             case ResourceTypeNames.Path:
                 retVal = LocalizationService.Default["Target_Path"];
@@ -132,9 +132,9 @@ public static class DataTemplateProvider
                 break;
             case ResourceTypeNames.Skype:
                 retVal = LocalizationService.Default["Skype"];
-                break;                                                
+                break;
         }
 
         return retVal;
-    }    
+    }
 }
