@@ -56,5 +56,6 @@
     "ExportToXml": "Export to XML",
     "ExportToHtml": "Export to HTML",      
     
-    "BirthdateValidationMessage": "Minimum age must be {0} years"    
+    "BirthdateValidationMessage": "Minimum age must be {0} years", 
+    "ColorAccent": "Color Accent"   
 }

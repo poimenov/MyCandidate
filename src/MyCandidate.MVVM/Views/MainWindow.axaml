@@ -84,9 +84,14 @@
         <MenuItem Header="{ll:Localize Options}">
             <MenuItem Header="{ll:Localize Themes}" DataContext="{Binding MenuThemeViewModel}" ItemsSource="{Binding Items}">
                 <MenuItem.Icon>
-                    <Image Source="{SvgImage /Assets/svg/puppy-theme-daylight-touch-svgrepo-com.svg}"/>
+                    <Image Source="{SvgImage /Assets/svg/night-mode-svgrepo-com.svg}"/>
                 </MenuItem.Icon>              
             </MenuItem>
+            <MenuItem Header="{ll:Localize ColorAccent}" DataContext="{Binding MenuColorAccentViewModel}" ItemsSource="{Binding Items}">
+                <MenuItem.Icon>
+                    <Image Source="{SvgImage /Assets/svg/puppy-theme-daylight-touch-svgrepo-com.svg}"/>
+                </MenuItem.Icon>              
+            </MenuItem>                
             <MenuItem Header="{ll:Localize Languages}" DataContext="{Binding MenuLanguageViewModel}" ItemsSource="{Binding Items}">
                 <MenuItem.Icon>
                     <Image Source="{SvgImage /Assets/svg/language-svgrepo-com.svg}"/>

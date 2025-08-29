@@ -102,5 +102,6 @@
     "ExportToXml": "Экспорт в XML",
     "ExportToHtml": "Экспорт в HTML",
 
-    "BirthdateValidationMessage": "Минимальный возраст должен быть {0} лет"
+    "BirthdateValidationMessage": "Минимальный возраст должен быть {0} лет",
+    "ColorAccent": "Цветовой Акцент"   
 }

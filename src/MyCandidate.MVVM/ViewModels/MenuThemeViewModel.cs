@@ -12,8 +12,9 @@ public class MenuThemeViewModel : CheckMenuModel
     public ReadOnlyObservableCollection<MenuItem> Items { get; private set; }
     public ReactiveCommand<ThemeName, Task> ChangeThemeCmd { get; }
 
-    public MenuThemeViewModel(AppSettings appSettings) : base(appSettings)
+    public MenuThemeViewModel()
     {
+        var _appSettings = GetAppSettings();
         var defaultTheme = _appSettings.DefaultTheme;
         var paletteName = _appSettings.Palette;
         App.ThemeManager?.Switch(defaultTheme, paletteName);
@@ -21,9 +22,10 @@ public class MenuThemeViewModel : CheckMenuModel
         ChangeThemeCmd = ReactiveCommand.Create<ThemeName, Task>(
             async (theme) =>
             {
-                App.ThemeManager?.Switch(theme, paletteName);
-                _appSettings.DefaultTheme = theme;
-                await _appSettings.SaveAsync();
+                var appSettings = GetAppSettings();
+                App.ThemeManager?.Switch(theme, appSettings.Palette);
+                appSettings.DefaultTheme = theme;
+                await appSettings.SaveAsync();
                 foreach (var item in Items!)
                 {
                     if (item.CommandParameter != null

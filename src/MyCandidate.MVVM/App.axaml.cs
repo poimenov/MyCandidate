@@ -48,7 +48,7 @@ public partial class App : Application
             var configurationManager = new ConfigurationManager();
             configurationManager
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile(AppSettings.JSON_FILE_NAME, optional: true, reloadOnChange: false)
+                .AddJsonFile(AppSettings.JSON_FILE_NAME, optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
             var settings = new HostApplicationBuilderSettings

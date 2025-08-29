@@ -31,8 +31,9 @@ public class MainWindowViewModel : ViewModelBase
         LocalizationService.Default.AddExtraService(new AppLocalizationService());
         LocalizationService.Default.OnCultureChanged += CultureChanged;
         Title = LocalizationService.Default["progName"];
-        MenuThemeViewModel = new MenuThemeViewModel(_options.Value).DisposeWith(Disposables);
-        MenuLanguageViewModel = new MenuLanguageViewModel(_options.Value).DisposeWith(Disposables);
+        MenuThemeViewModel = new MenuThemeViewModel().DisposeWith(Disposables);
+        MenuColorAccentViewModel = new MenuColorAccentViewModel().DisposeWith(Disposables);
+        MenuLanguageViewModel = new MenuLanguageViewModel().DisposeWith(Disposables);
         RecentCandidatesViewModel = new MenuRecentViewModel(_provider, Models.TargetModelType.Candidate, 10).DisposeWith(Disposables);
         RecentVacanciesViewModel = new MenuRecentViewModel(_provider, Models.TargetModelType.Vacancy, 5).DisposeWith(Disposables);
 
@@ -235,6 +236,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public string Title { get; set; }
 
+    public MenuColorAccentViewModel MenuColorAccentViewModel { get; private set; }
     public MenuThemeViewModel MenuThemeViewModel { get; private set; }
     public MenuLanguageViewModel MenuLanguageViewModel { get; private set; }
     public MenuRecentViewModel RecentCandidatesViewModel { get; private set; }

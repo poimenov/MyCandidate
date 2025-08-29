@@ -5,7 +5,6 @@ using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.PropertyGrid.Services;
-using MyCandidate.Common;
 using PropertyModels.Localization;
 using ReactiveUI;
 
@@ -16,8 +15,9 @@ public class MenuLanguageViewModel : CheckMenuModel
     public ReadOnlyObservableCollection<MenuItem> Items { get; private set; }
     public ReactiveCommand<ICultureData, Task> ChangeLanguageCmd { get; }
 
-    public MenuLanguageViewModel(AppSettings appSettings) : base(appSettings)
+    public MenuLanguageViewModel()
     {
+        var _appSettings = GetAppSettings();
         var allCultures = LocalizationService.Default.GetCultures();
         var defaultCulture = allCultures.FirstOrDefault(x => x.Culture.Name == _appSettings.DefaultLanguage);
         if (defaultCulture == null)
@@ -31,8 +31,9 @@ public class MenuLanguageViewModel : CheckMenuModel
             async (lang) =>
             {
                 LocalizationService.Default.SelectCulture(lang.Culture.Name);
-                _appSettings.DefaultLanguage = lang.Culture.Name;
-                await _appSettings.SaveAsync();
+                var appSettings = GetAppSettings();
+                appSettings.DefaultLanguage = lang.Culture.Name;
+                await appSettings.SaveAsync();
                 foreach (var item in Items!)
                 {
                     if (item.CommandParameter != null
