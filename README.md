@@ -15,7 +15,7 @@ Test application for recruiting on Avalonia UI
 
 ### Prerequisites
 
-.Net 10.0 (SDK 10.0.101+)
+.Net 8.0
 
 ### Installation
 
